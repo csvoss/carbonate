@@ -3,6 +3,8 @@ from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
 from engine.serverRender import render as svg_render
+from engine.smilesToMolecule import moleculify as moleculify
+from engine.moleculeToSmiles import smiles as smilesify
 
 # Create your views here.
 
@@ -10,6 +12,28 @@ from engine.serverRender import render as svg_render
 def index(request):
     context = {}
     return render(request, 'api/index.html', context)
+
+
+## url(r'^molecule/'+SMILESREGEX+'/$', views.molecule, name='molecule'),
+def molecule(request, smiles):
+    smiles = smiles.replace('/#','#')
+    return HttpResponse(smiles)
+
+
+## url(r'^molecule/'+SMILESREGEX+'/render/$', views.molecule_render, name='molecule_render'),
+def molecule_render(request, smiles):
+    hydrogens = request.GET.get('hydrogens', False)
+    smiles = smiles.replace('/#','#')
+    return HttpResponse(svg_render(smiles, hydrogens))
+
+
+def test_smiles_to_molecule_and_back(request, smiles):
+    hydrogens = request.GET.get('hydrogens', False)
+    smiles = smiles.replace('/#','#')
+    molecule = moleculify(smiles)
+    smiles2 = smilesify(molecule)
+    return HttpResponse('<br />'.join([ smiles, svg_render(smiles, hydrogens), 
+                                        smiles2, svg_render(smiles2, hydrogens) ] ))
 
 
 ## url(r'^reagents.json/?$', views.reagents_json, name='reagents_json'),
@@ -43,25 +67,15 @@ def reaction(request, reaction):
 
 
 ## url(r'^reactions/'+REACTIONREGEX+'/react/'+SMILESREGEX+'/$', views.reaction_react, name='reaction_react'),
-def reaction_react(request, reaction, molecule):
+def reaction_react(request, reaction, smiles):
+    smiles = smiles.replace('/#','#')
     pass
 
 
 ## url(r'^reactions/'+REACTIONREGEX+'/react/'+SMILESREGEX+'/render/$', views.reaction_reactrender, name='reaction_react_render'),
-def reaction_reactrender(request, reaction, molecule):
+def reaction_reactrender(request, reaction, smiles):
+    smiles = smiles.replace('/#','#')
     pass
-
-
-## url(r'^molecule/'+SMILESREGEX+'/$', views.molecule, name='molecule'),
-def molecule(request, molecule):
-    molecule = molecule.replace('/#','#')
-    return HttpResponse(molecule)
-
-
-## url(r'^molecule/'+SMILESREGEX+'/render/$', views.molecule_render, name='molecule_render'),
-def molecule_render(request, molecule):
-    molecule = molecule.replace('/#','#')
-    return HttpResponse(svg_render(molecule))
 
 
 ## url(r'^randomMolecule/$', views.random_molecule, name='random_molecule'),

@@ -150,7 +150,7 @@ def fixStereo(mol, thisAtom, lastAtom):
             
 
 def probablyChiral(atom):
-    #A rather bootleg heuristic for determining whether an atom
+    #A rather bootleg heruistic for determining whether an atom
     #may need a chiral center.
     if len(atom.neighbors) <= 2:
         return False

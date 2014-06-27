@@ -1,42 +1,89 @@
+"""
+orgoStructure.py
+Contains class Molecule and class Atom.
+"""
+import copy
+from smilesToMolecule import *
+
 #Testing - replace "H" with "Br" to visualize all hydrogens
 hydrogen = "H"
 
-debugSmiles = False
-
 class AlleneError(Exception):
-    #Raised when we try to make an allene.  Tells higher functions that
-    #the reaction we just attempted should not be allowed.  (Even if it
-    #is technically chemically feasible.)
+    """
+    Raised when we try to make an allene.  Tells higher functions that
+    the reaction we just attempted should not be allowed.  (Even if it
+    is technically chemically feasible.)
+    """
     pass
 
 class Molecule:
-    
-    def __init__(self, firstAtom):
-        self.atoms = [firstAtom]
+    """
+    This class represents the structure of a molecule.
+        self.atoms :: [Atom].
+    """
 
+    def __init__(self, firstAtom):
+        """
+        firstAtom :: Atom.
+        """
+        self.atoms = [firstAtom]
     
-    def addAtom(self, newAtom, targetAtom, bondOrder):
+    def addAtom(self, newAtom, targetAtom, bondOrder=1):
+        """
+        For adding new atoms to the molecule.
+
+        newAtom :: Atom. The new atom to attach somewhere.
+        targetAtom :: Atom. Must be in this molecule. The place newAtom will attach.
+        bondOrder :: int. 1 for single, 2 for double, 3 for triple, 4 for quadruple.
+
+        Throws error if targetAtom is not in the molecule.
+        Throws error if bondOrder is invalid.
+        """
+        if bondOrder == 0:
+            return
+        if bondOrder not in [1,2,3,4]:
+            raise StandardError("Invalid bond order: %s" % str(bondOrder))
         if targetAtom not in self.atoms:
-            print "Error in addAtom: target atom not already in molecule."
-            raise StandardError
+            raise StandardError("Error in addAtom: target atom not already in molecule.")
         if newAtom in self.atoms:
-            print "Error in addAtom: new atom already in molecule.  Use addBond instead."
-            raise StandardError
+            print "WARNING: new atom already in molecule.  Using addBond instead."
+            return self.addBond(targetAtom, newAtom, bondOrder)
         self.atoms.append(newAtom)
         self.addBond(newAtom, targetAtom, bondOrder)
         
-    def addBond(self, atom1, atom2, bondOrder):
+    def addBond(self, atom1, atom2, bondOrder=1):
+        """
+        Creates a new bond between two atoms already in the molecule.
+        atom1 :: Atom.
+        atom2 :: Atom.
+        bondOrder :: int. 1, 2, 3, or 4.
+        """
+        if atom1 not in self.atoms:
+            raise StandardError("Error in addBond: atom1 not in molecule. %s" % atom1.element)
+        if atom2 not in self.atoms:
+            raise StandardError("Error in addBond: atom2 not in molecule. %s" % atom2.element)
         atom1.neighbors[atom2] = bondOrder
         atom2.neighbors[atom1] = bondOrder
 
-    def addMolecule(self, molecule, foreignTarget, selfTarget, bo):
+    def addMolecule(self, molecule, foreignTarget, selfTarget, bondOrder=1):
+        """
+        Welds two molecules together by the given atoms.
+        molecule :: Molecule.
+        foreignTarget :: Atom. The atom on the other molecule.
+        selfTarget :: Atom. An atom on this molecule.
+        bondOrder :: int. Bond order for the new bond between foreignTarget and selfTarget.
+        """
         #Preserves objects in added molecule (no deepcopy)
         for foreignAtom in molecule.atoms:
             if not (foreignAtom in self.atoms):
                 self.atoms.append(foreignAtom)
-        self.addBond(selfTarget, foreignTarget, bo)
+        self.addBond(selfTarget, foreignTarget, bondOrder)
         
     def removeAtom(self, target):
+        """
+        Remove an atom from this molecule. Destroys the atom.
+        target :: Atom.
+        """
         for atom in self.atoms:
             if target in atom.neighbors:
                 del(atom.neighbors[target])
@@ -44,7 +91,13 @@ class Molecule:
         del(target)
         
     def changeBond(self, atom1, atom2, newBondOrder):
-        #newBondOrder=0 breaks the bond.
+        """
+        Changes the bond order of a bond.
+        atom1 :: Atom.
+        atom2 :: Atom.
+        newBondOrder :: int. 0, 1, 2, 3, or 4.
+        Note that newBondOrder=0 breaks the bond.
+        """
         if newBondOrder == 0:
             del(atom1.neighbors[atom2])
             del(atom2.neighbors[atom1])
@@ -53,8 +106,10 @@ class Molecule:
             atom2.neighbors[atom1] = newBondOrder
 
     def addHydrogens(self):
-        #Adds a full complement of hydrogens to every atom.
-        #As a side-effect, also checks for over-valence.
+        """
+        Adds a full complement of hydrogens to every atom.
+        As a side-effect, also checks for over-valence.
+        """
         for atom in self.atoms:
             if atom.element == 'C':
                 maxval = 4
@@ -75,19 +130,98 @@ class Molecule:
                 self.addAtom(H, atom, 1)
 
     def countElement(self, element):
+        """
+        Counts the occurrences of `element` in this molecule's atoms.
+        element :: str. Case matters.
+        return :: int.
+        """
         out = 0
         for atom in self.atoms:
             if atom.element == element:
                 out += 1
         return out
 
+    def removeBond(self, atom1, atom2):
+        """
+        Remove the bond between atom1 and atom2 without removing either
+        from this molecule.
+        atom1 :: Atom.
+        atom2 :: Atom.
+        """
+        return self.changeBond(atom1, atom2, 0)
+
+    def withHydrogens(self):
+        """
+        Return a version of this molecule in which explicit hydrogens have 
+        been added to all molecules for which we can infer the number to add.
+        """
+        BOND_ORDERS = {
+            "B": 3,
+            "C": 4,
+            "N": 3,
+            "O": 2,
+            "P": 5,
+            "S": 2,
+            "F": 1,
+            "Cl": 1,
+            "Br": 1,
+            "I": 1,
+        }
+
+        out = copy.deepcopy(self)
+        for atom in out.atoms:
+            elem = atom.element
+            bond_order = atom.totalBondOrder()
+            charge = atom.charge
+            if elem in BOND_ORDERS:
+                ideal_bond_order = BOND_ORDERS[elem]
+                hydrogens_to_add = ideal_bond_order - bond_order + charge
+                for _ in xrange(hydrogens_to_add):
+                    new_hydrogen = Atom("H")
+                    out.addAtom(new_hydrogen, atom, 1)
+        return out
+
+
 
 class Atom:
+    """
+    This class represents the structure of a single atom. Not to be used alone;
+    only really useful as a part of a Molecule.
+        self.element :: str.
+        self.charge :: int.
+        self.neighbors :: {Atom, int}.  This atom's neighbors; the int represents bond order.
 
-##    def __str__(self):
-##        return self.element
+    Refer to moleculeToSmiles for these attributes' purpose; **ignore** them otherwise.
+        self.flag :: int.
+        self.rflag :: [(int, Atom)].
+        self.nRead :: int.
+        self.parentAtom :: 0 or Atom.
+        self.nonHNeighbors = [Atom].
+    """
+
+    def __str__(self):
+
+        ## Atoms are represented by the standard abbreviation of the chemical elements, in square brackets, such as [Au] for gold. Brackets can be omitted for the "organic subset" of B, C, N, O, P, S, F, Cl, Br, and I. All other elements must be enclosed in brackets. If the brackets are omitted, the proper number of implicit hydrogen atoms is assumed; for instance the SMILES for water is simply O.
+
+        ## An atom holding one or more electrical charges is enclosed in brackets, followed by the symbol H if it is bonded to one or more atoms of hydrogen, followed by the number of hydrogen atoms (as usual one is omitted example: NH4 for ammonium), then by the sign '+' for a positive charge or by '-' for a negative charge. The number of charges is specified after the sign (except if there is one only); however, it is also possible write the sign as many times as the ion has charges: instead of "Ti+4", one can also write "Ti++++" (Titanium IV, Ti4+). Thus, the hydroxide anion is represented by [OH-], the oxonium cation is [OH3+] and the cobalt III cation (Co3+) is either [Co+3] or [Co+++].
+
+        ## ALL MOLECULES SHOULD HAVE HYDROGENS EXPLICITLY ATTACHED AS ATOMS
+
+        ## We're ignoring isotopes.
+
+        if startAtom.charge < 0:
+            outp = "["+outp + str(startAtom.charge)+"]"
+        if startAtom.charge > 0:
+            outp = "["+outp + "+"+str(startAtom.charge)+"]"
+
+        return self.element
     
-    def __init__(self, element):
+    def __init__(self, element, charge=0):
+        """
+        Initialize. Charge, by default, is 0.
+        element :: str.  Should be the periodic table abbreviation.
+        charge :: int. Optional.
+        """
         self.element = element
         self.charge = 0
         self.neighbors = dict()
@@ -101,17 +235,24 @@ class Atom:
         self.parentAtom = 0 #atom right before this one
         self.nonHNeighbors = []
 
-
-
     def newChiralCenter(self, reference, clockwiseList):
-        #Set up this atom as a chiral center.
-        #reference is an Atom; clockwiseList is a list of 3 Atoms
+        """
+        Set up this atom as a chiral center.
+        reference :: Atom.
+        clockwiseList :: a list of 3 Atoms.
+        """
         self.chiralA = reference
         self.chiralB, self.chiralC, self.chiralD = clockwiseList
 
     def chiralCWlist(self, reference):
-        #Returns a list of the other 3 Atoms bonded to this Atom,
-        #in clockwise order when looking down reference.
+        """
+        Returns a list of the other 3 Atoms bonded to this Atom,
+        in **clockwise** order when looking down `reference`.
+        Note: Left-hand rule instead of right-hand rule.
+
+        reference :: Atom.
+        return :: a list of 3 Atoms.
+        """
         if reference == self.chiralA:
             return [self.chiralB, self.chiralC, self.chiralD]
         elif reference == self.chiralB:
@@ -121,20 +262,27 @@ class Atom:
         elif reference == self.chiralD:
             return [self.chiralA, self.chiralC, self.chiralB]
         else:
-            print "chiralCWlist: no such reference."
-            print reference.element
-            print reference
-            print self.chiralA, self.chiralB, self.chiralC, self.chiralD
-            raise StandardError
+            msg = "Error in chiralCWlist: no such reference atom: %s\n" % reference.element
+            msg += ", ".join[self.chiralA.element, self.chiralB.element,
+                             self.chiralC.element, self.chiralD.element]
+            raise StandardError(msg)
     
     def chiralRingList(self, inport, outport):
-        #Returns which substituent is up, followed by which one is down,
-        #in a ring context.
+        """
+        Returns which substituent is up, followed by which one is down,
+        in a ring context. Assume that the ring veers left (ccw).
+
+        inport :: Atom.
+        outport :: Atom.
+        return :: a tuple of 2 Atoms.
+
+        **DEPRECATED**. Please stick to using chiralCWlist.
+        """
         if inport == self.chiralA:
             if outport == self.chiralB:
                 return                  (self.chiralC, self.chiralD)
             if outport == self.chiralC:
-                return                  (self.chiralB, self.chiralD)
+                return                  (self.chiralD, self.chiralB)
             if outport == self.chiralD:
                 return                  (self.chiralB, self.chiralC)
         elif inport == self.chiralB:
@@ -143,36 +291,58 @@ class Atom:
             if outport == self.chiralC:
                 return                  (self.chiralA, self.chiralD)
             if outport == self.chiralD:
-                return                  (self.chiralA, self.chiralC)
+                return                  (self.chiralC, self.chiralA)
         elif inport == self.chiralC:
             if outport == self.chiralA:
-                return                  (self.chiralD, self.chiralB)
+                return                  (self.chiralB, self.chiralD)
             if outport == self.chiralB:
                 return                  (self.chiralD, self.chiralA)
             if outport == self.chiralD:
-                return                  (self.chiralB, self.chiralA)
+                return                  (self.chiralA, self.chiralB)
         elif inport == self.chiralD:
             if outport == self.chiralA:
                 return                  (self.chiralC, self.chiralB)
             if outport == self.chiralB:
-                return                  (self.chiralC, self.chiralA)
+                return                  (self.chiralA, self.chiralC)
             if outport == self.chiralC:
-                return                  (self.chiralA, self.chiralB)
+                return                  (self.chiralB, self.chiralA)
                 
-        raise StandardError
+        msg = "Error in chiralCWlist: no such inport and outport: %s, %s\n" %\
+              (inport.element, outport.element)
+        msg += ", ".join[self.chiralA.element, self.chiralB.element,
+                         self.chiralC.element, self.chiralD.element]
+        raise StandardError(msg)
         
     def newCTCenter(self, otherC, a, b):
-        #CTCenters (cis-trans centers) must come in pairs.  Both of the
-        #carbons across the double bond must have a CTCenter.  Atom a is
-        #directly clockwise from otherC.  Atom b is directly counterclockwise.
+        """
+        CTCenters (cis-trans centers) must come in pairs.  Both of the
+        carbons across the double bond must have a CTCenter -- so you must
+        execute this method once for each. Assuming that you're using the same
+        plane of reference for each CT-center, this makes Atom a to be
+        directly clockwise from otherC, and Atom b directly counterclockwise.
+
+        otherC :: Atom.
+        a :: Atom.
+        b :: Atom.
+
+        Raises AlleneError if newCTCenter has already been applied to this molecule.
+        """
         if hasattr(self, 'CTa'):
-            print "-----allene error-----"
+            ## That would make this carbon the center of an allene!
+            ## Keeping track of stereochem for allenes is Hard.
+            ## TODO: Make it so that we can in fact handle allenes?
             raise AlleneError
         self.CTotherC = otherC
         self.CTa = a
         self.CTb = b
+
+        if not (self.neighbors[otherC] == 2 and otherC.neighbors[self] == 2):
+            raise StandardError("Error in newCTCenter: cis-trans center without double bond")
     
     def eliminateChiral(self):
+        """
+        Destroys the chirality information. Don't worry, the atoms are still there.
+        """
         if hasattr(self, 'chiralA'):
             del(self.chiralA)
             del(self.chiralB)
@@ -180,19 +350,31 @@ class Atom:
             del(self.chiralD)
 
     def eliminateCT(self):
+        """
+        Destroys the cis-trans information. Don't worry, the atoms are still there.
+        """
         del(self.CTotherC)
         del(self.CTa)
         del(self.CTb)
 
     def totalBondOrder(self):
-        #Returns the total bond order, not including hydrogens
+        """
+        Counts neighbors and returns the total bond order of this atom,
+        not including implicit hydrogens.
+
+        return :: int.
+        """
         out = 0
         for neighbor in self.neighbors:
             out += self.neighbors[neighbor]
         return out
 
     def findAlkeneBond(self):
-        #Returns the carbon atom to which this one is double-bonded.
+        """
+        Returns the carbon atom to which this one is double-bonded, or None if no such.
+
+        return :: Atom or None.
+        """
         for neighbor in self.neighbors:
             if self.neighbors[neighbor] == 2 and neighbor.element == 'C':
                 return neighbor
@@ -201,241 +383,8 @@ class Atom:
 
 
 
-def smiles(molecule):
-
-    if isinstance(molecule, list):
-        return [smiles(molec) for molec in molecule]
-
-    
-    if len(molecule.atoms)==0: return ""
-    
-    ringsfound = 0
-    curAtom = molecule.atoms[0]
-    homeAtom = molecule.atoms[0]
-
-    #Create the dictionary nonHNeighbors for each atom.
-    for atom in molecule.atoms:
-        atom.nonHNeighbors = dict((a, b) for (a, b)in atom.neighbors.items() if a.element.lower() != "h")
-    
-
-    #Traverse the molecule once, to hunt down and flag rings.
-    #Each iteration: (...while we aren't back to the home atom, or if we are,
-                    #while the home atom still has neighbors to read)
-    while ((curAtom != homeAtom) or (homeAtom.nRead < len(homeAtom.nonHNeighbors))):
-    
-        #flag current atom as "read" (flag = 1)
-        curAtom.flag = 1
-        if debugSmiles:
-            print "Flagged "+str(curAtom)+" as read."
-        
-        #if there are neighbors left to read from this atom:
-        if (curAtom.nRead < len(curAtom.nonHNeighbors)):
-            
-            #if the next atom is the parent atom:
-            if list(curAtom.nonHNeighbors)[curAtom.nRead] == curAtom.parentAtom:
-                #don't do anything but incrementing nRead
-                curAtom.nRead += 1
-                if debugSmiles:
-                    print "Nope, not progressing to parent."
-                
-            #else,
-            else:
-                if list(curAtom.nonHNeighbors)[curAtom.nRead].nRead == 0:
-                #if the next atom has not been traversed already:
-                    curAtom.nRead += 1
-                    list(curAtom.nonHNeighbors)[curAtom.nRead - 1].parentAtom = curAtom
-                    curAtom = list(curAtom.nonHNeighbors)[curAtom.nRead - 1]
-                    #increment current atom's nRead counter
-                    #make the next atom the current atom:
-                    #make the old atom the next atom's parent
-                    if debugSmiles:
-                        print "Progressing..."
-
-                else:
-                #if the next atom has been traversed already:
-                    #it's a ring!
-                    ringsfound += 1
-                    curAtom.rflag += [(ringsfound, list(curAtom.nonHNeighbors)[curAtom.nRead])]
-                    list(curAtom.nonHNeighbors)[curAtom.nRead].rflag += [(ringsfound, curAtom)]
-                    curAtom.nRead += 1
-                    #increment ringsfound
-                    #set rflag on both atoms to ringsfound
-                    #increment current atom's nRead counter
-                    #make sure the atoms know who each other is
-                    if debugSmiles:
-                        print "Ring "+str(ringsfound)+" found! "+str(curAtom.rflag)+", "+str(list(curAtom.nonHNeighbors)[curAtom.nRead - 1])
-                
-        #if not:
-            #go backwards to parent atom:
-            #set curAtom to its parent atom
-        else:
-            if debugSmiles:
-                print "Regressing to "+str(curAtom.parentAtom)+" from "+str(curAtom)
-            curAtom = curAtom.parentAtom
-            
-            
-    #Traverse twice to generate the SMILES.
-            
-        
-    if debugSmiles:
-        for atom in molecule.atoms:
-            print ""
-            print atom.element
-            print atom
-            print atom.rflag
-            print atom.nonHNeighbors
-        
-    outp = subsmiles(molecule, molecule.atoms[0], 0)
-
-    #Reset all old flags.    
-    for atom in molecule.atoms:
-        atom.flag = 0
-        atom.rflag = []
-        atom.nRead = 0
-        atom.parentAtom = 0
-        atom.nonHNeighbors = []
-
-    return outp
-
-bondSymbols = ['0', '-', '=', '#', '4', '5', '6', '7', '8', '9']
-
-#Precondition: molecule has been flagged for ring positioning (some rflag values on atoms might != 0). This is done by smiles().
-#Creates and returns a SMILES string for unflagged (!atom.flag==2) atoms within a molecule, starting with the given atom.
-def subsmiles(molecule, startAtom, parentAtom):
-
-    if debugSmiles:
-        if parentAtom != 0:
-            print "\t\t\t [ Entering subsmiles with "+str((startAtom.element, startAtom, startAtom.rflag))+" from "+str((parentAtom.element, parentAtom, parentAtom.rflag))
-        else:
-            print "\t\t\t [ Entering subsmiles with "+str((startAtom.element, startAtom, startAtom.rflag))+"..."
-    
-    #Flag the current atom.
-    startAtom.flag = 2
-
-    outp = startAtom.element
-
-    if startAtom.charge < 0:
-        outp = "["+outp + str(startAtom.charge)+"]"
-    if startAtom.charge > 0:
-        outp = "["+outp + "+"+str(startAtom.charge)+"]"
-
-    #Check if the atom is a cis-trans center. Output correctly if so.
-    #Remember to worry about cis-trans centers that might be part of a ring system.
-    #Remember to worry about whether or not an atom has a parent atom.
-    #Adds ring labels.
-    if hasattr(startAtom, 'CTotherC'):
-        if debugSmiles:
-            print "\t\t\tSubsmiles case - CT"
-        #print (True, startAtom.element)
-        atomsToLink = [startAtom.CTotherC, startAtom.CTa, startAtom.CTb]
-        begin = ["", "/", "\\"]
-        if startAtom.CTotherC.flag == 2:
-            begin = ["", "\\", "/"]
-        if startAtom.CTa == parentAtom:
-            outp = begin[2] + outp
-        if startAtom.CTb == parentAtom:
-            outp = begin[1] + outp
-        for ind in range(3):
-            atom = atomsToLink[ind]
-            if (atom != None) and (atom != parentAtom):
-                if atom in [rf[1] for rf in startAtom.rflag]:
-                    outp += "(" + begin[ind] + bondSymbols[startAtom.nonHNeighbors[atom]] + str(startAtom.rflag[[rf[1] for rf in startAtom.rflag].index(atom)][0]) + ")"
-                elif atom.flag == 1:
-                    outp += "(" + begin[ind] + bondSymbols[startAtom.nonHNeighbors[atom]] + subsmiles(molecule, atom, startAtom) + ")"
-        if debugSmiles:
-            print "\t\t\t >>> " + outp + " ] "
-        return outp
-    
-   
-
-    ###Put a ring marker on the atom, if its ring partner is not flagged yet.
-    ##if (startAtom.rflag != 0) and (startAtom.rAtom.flag != 2):
-    ##    outp += str(startAtom.rflag)
-
-    #Check if the atom is a chiral center. If so:
-    if hasattr(startAtom, 'chiralA'):
-        if debugSmiles:
-            print "\t\t\tSubsmiles case -- chiral"
-        hasP = (parentAtom != 0)
-        hasH = (True in [a.element.lower()=="h" for a in list(startAtom.neighbors)]) or (None in [startAtom.chiralA, startAtom.chiralB, startAtom.chiralC, startAtom.chiralD])
-        #If the atom has a hydrogen:
-        #Add [ and @@H] to the current output. (e.g. [C@@H]
-        #If the atom does not have a hydrogen:
-        #Add [ and @@] to the current output. (e.g. [C@@]
-        #Then, add the remaining neighbors in the proper order.
-        #Implement this by smart rearrangement of toAdd.
-        #Be mindful of: whether or not there is a parent atom; whether or not there is a hydrogen.
-        if hasH:
-            outp = "[" + outp + "@@H]"
-            if hasP:
-                if debugSmiles:
-                    print "\t\t\t...hasH hasP"
-                #toAdd should have two elements
-                l = startAtom.chiralCWlist(parentAtom) #list of three atoms
-                x = l.index(None) #index of hydrogen atom in list
-                toAdd = [l[(x+1) %3], l[(x+2) %3]] #correct permutation
-                if None in toAdd:
-                    print "\t\t\tError: atom "+startAtom.element+" is chiral, but has two hydrogens."
-                    raise StandardError
-            else:
-                if debugSmiles:
-                    print "\t\t\t...hasH !hasP"
-                #toAdd should have three elements
-                toAdd = startAtom.chiralCWlist(None) #list of three atoms
-                if None in toAdd:
-                    print "\t\t\tError: atom "+startAtom.element+" is chiral, but has two hydrogens."
-                    raise StandardError
-        else:
-            outp = "[" + outp + "@@]"
-            if hasP:
-                if debugSmiles:
-                    print "\t\t\t...!hasH hasP"
-                #toAdd should have three elements
-                toAdd = startAtom.chiralCWlist(parentAtom)
-            else:
-                if debugSmiles:
-                    print "\t\t\t...!hasH !hasP"
-                #toAdd should have four elements
-                arbitraryRef = list(startAtom.neighbors)[0]
-                l = startAtom.chiralCWlist(arbitraryRef)
-                toAdd = [arbitraryRef] + l
-
-    
-    #Prepare to add new groups for all neighbor atoms which are not the parent atom and not the rAtom.
-    else:
-        if debugSmiles:
-            print "\t\t\tSubsmiles case -- normal"
-        toAdd = [atom for atom in list(startAtom.nonHNeighbors) if not (atom==parentAtom or atom==None)]
-
-#    if toAdd == None:
-#        toAdd = [atom for atom in list(startAtom.nonHNeighbors) if not (atom==parentAtom or atom==None)]
-
-    
-    #Recursion is your friend.
-    #Be sure to specify the base case (when zero non-parent non-ring atoms are available to bond to)
-    #In the base case, this loop won't even be entered.
-    if debugSmiles:
-        print "\t\t\t"+str([(atom.element, atom, atom.rflag) for atom in toAdd])
-    for atom in toAdd:
-        if (startAtom.rflag != []) and (atom in [rf[1] for rf in startAtom.rflag]) :
-            add = str(startAtom.rflag[[rf[1] for rf in startAtom.rflag].index(atom)][0])
-            if debugSmiles:
-                print "Flagged as a ring bond -- "+startAtom.element+" to "+atom.element
-        #elif atom.flag == 2:
-            #You *really* don't want to enter subsmiles to this atom
-            #pass
-        else:
-            if debugSmiles:
-                print "Entering subsmiles, since "+str(startAtom.rflag != [])+" and "+str((atom in [rf[1] for rf in startAtom.rflag]))
-            add = subsmiles(molecule, atom, startAtom)
-                
-        outp += "(" +bondSymbols[startAtom.nonHNeighbors[atom]] + add + ")"
-
-    if debugSmiles:
-        print "\t\t\t >>> " + outp + " ] "
-    return outp
-
-
+## Example usage
+"""
 c40 = Atom("C")
 c41 = Atom("C")
 mol4 = Molecule(c40)
@@ -446,3 +395,4 @@ mol4.addAtom(c42, c40, 1)
 mol4.addAtom(c43, c41, 1)
 c40.newCTCenter(c41, c42, None)
 c41.newCTCenter(c40, c43, None)
+"""

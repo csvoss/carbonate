@@ -1,6 +1,4 @@
 from orgoStructure import *
-from smilesToMolecule import *
-from moleculeToSmiles import *
 import copy
 import itertools
 import cPickle

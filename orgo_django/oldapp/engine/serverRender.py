@@ -7,7 +7,6 @@ http://openbabel.org/wiki/Python
 """
 
 import openbabel
-import pybel
 import re
 
 #Set up input and output formats

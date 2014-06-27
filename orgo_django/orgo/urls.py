@@ -10,4 +10,5 @@ urlpatterns = patterns('',
 
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api/', include('api.urls', namespace="api")),
+    url(r'^oldapp/', include('oldapp.urls', namespace="oldapp")),
 )
