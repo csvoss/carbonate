@@ -2,10 +2,10 @@ from django.conf.urls import patterns, url
 
 from api import views
 
-SMILESREGEX = '(?P<smiles>.*)'
-REACTIONREGEX = '(?P<reaction>.*)'
-REAGENTREGEX = '(?P<reagent>.*)'
-IDREGEX = '(?P<id>d+)'
+SMILESREGEX = r'(?P<smiles>.*)'
+REACTIONREGEX = r'(?P<reaction>.*)'
+REAGENTREGEX = r'(?P<reagent>.*)'
+IDREGEX = r'(?P<id>d+)'
 
 urlpatterns = patterns('',
     # ex: /api/
