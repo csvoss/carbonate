@@ -1,0 +1,6 @@
+*.pyc
+*.pyo
+orgo_django/orgo/OLD_folder_contents
+OLD/
+db.sqlite3
+.vagrant/*
