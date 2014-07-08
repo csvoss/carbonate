@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block jsimport %}
+<script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-1.9.0.js"> </script>
+<script type="text/javascript" src="http://felixsun.scripts.mit.edu/orgo/static/tufte-graph/raphael.js"></script>
+<script type="text/javascript" src="http://felixsun.scripts.mit.edu/orgo/static/tufte-graph/jquery.enumerable.js"></script>
+<script type="text/javascript" src="http://felixsun.scripts.mit.edu/orgo/static/tufte-graph/jquery.tufte-graph.js"></script>
+{% endblock %}
+
+{% block cssimport %}
+<title>Carbonate</title>
+<link rel="stylesheet" href="http://felixsun.scripts.mit.edu/orgo/static/tufte-graph/tufte-graph.css" type="text/css" media="screen" charset="utf-8" />
+<style>
+.tabbable {
+    background-color:#F6F6F6;
+}
+.nav-tabs .active a {
+    background-color:#F6F6F6!important;
+}
+#popup {
+    background-color:white;
+    position: absolute;
+    left: -9999px;
+    top: 100px;
+    padding: 30px;
+    border: solid;
+}
+div.whitebox {
+    background-color:white;
+    border-radius: 10px;
+    padding:20px;
+    padding-top:10px;
+    padding-bottom:10px;
+    left:-30px;
+    border: 1px solid #E0E0E0;
+}
+
+div.greybox {
+    background-color:transparent;
+    padding:20px;
+    padding-top:10px;
+    padding-bottom:10px;
+    left:-30px;
+}
+
+legend {
+    display: none;
+}
+
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function popup(){
+    $("#popup").css("left", "300px");
+}
+
+function closePopup(){
+    $("#popup").css("left", "-9999px");
+}
+
+$(document).ready(function(){
+    graphData = {{graphData|safe}};
+    if (graphData.length == 0){
+        $("#plottything").html("You have not completed any one-step problems yet.");
+    } else {
+        $("#plottything").tufteBar({
+            data: graphData,
+            axisLabel: function(index) {return this[1]},
+            barLabel: function(index) {
+                return Math.round(this[0]*100) + '&#37 ('+this[2]+'/'+this[3]+')'
+            },
+        });
+    }
+    
+});
+</script>
+{% endblock %}
+
+{% block menuitems %}
+<li class="headnavbar"><a href="/orgo/reactions/">Reactions</a></li>
+<li class="headnavbar"><a href="/orgo/logout/">Logout</a></li>
+<li class="headnavbar"><a href="#" onclick="popup()">Change Password</a></li>
+{% endblock %}
+
+{% block signin %}
+<p class="headnavbar navbar-text pull-right" style="color:#EEEEEE">
+Welcome, {{name}}!
+</p>
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+<div class="row">
+
+<div class="span4">
+    <div class="whitebox">
+        <h3>Help Others</h3>
+        <p>
+        Think you're good at organic chemistry?  <a href="/orgo/chat/volunteertohelp"> Other users need your help! </a>
+        Guide them through synthesis problems and make your way up the leaderboard!
+        </p>
+    </div>
+    <br />
+    <div class="whitebox">
+    <h3>Reaction Settings</h3>
+    <!--Settings checkboxes-->
+        <span style="color:red" >{{debug|safe}}</span>
+    <div style="position:relative; left:-178px">
+        <form action = "/orgo/renderProblem/" method="post" class="form-horizontal" id="settingsForm">
+        {% crispy ChooseReagentsForm ChooseReagentsForm.helper %}
+        </form>
+    </div></div>
+    
+    
+
+</div>
+<div class="span4">
+    <div class="greybox">
+    <h3> Synthesis Problems</h3>
+    <p> To generate the most interesting syntheses, we recommend checking all three reaction types in "Reaction Settings." </p>
+    <input type="submit" value="Tutorial" name="synthesis_tutorial" class="btn" form="settingsForm"/>
+    <input type="submit" value="Resume" name="synthesis_resume" class="btn" form="settingsForm"/>
+    <input type="submit" value="New" name="synthesis_new" class="btn btn-primary" form="settingsForm"/>
+
+    <h6> Load Saved </h6>
+    <!--Problem loader-->
+    <form action = "/orgo/loadSynthesisFromId/" method="post" class="form-horizontal">{% csrf_token %}
+        <input type="text" placeholder="enter problem ID" name="Id">
+        <input type="submit" value="Go" class="btn"/>
+    </form>
+    </div>
+
+    <div class="greybox">
+    <h3> One-step Problems</h3>
+        <input type="submit" value="Tutorial" name="namereagent_tutorial" class="btn" form="settingsForm"/>
+        <input type="submit" value="Resume" name="namereagent_resume" class="btn" form="settingsForm"/>
+        <input type="submit" value="New" name="namereagent_new" class="btn btn-primary" form="settingsForm"/>
+    </div>
+    <br />
+    <div class="greybox">
+    <h3>Your Accuracy</h3>
+    <p> One-step problems only </p>
+    <div id="plottything" class="graph" style="width:250px; height:300px">
+    </div>
+    </div>
+
+</div>
+
+
+<div class="span4">
+<div class="whitebox">
+    <h4> Grandmasters of Synthesis </h4>
+    <table class="table table-condensed">
+    <thead>
+        <tr>
+        <th> Rank </th>
+        <th> User </th>
+        <th> # Correct </th>
+        </tr>
+    </thead>
+    <tbody>
+        {{synthHighScore|safe}}
+    </tbody>
+    </table>
+
+    <h4> Most Helpful </h4>
+    <table class="table table-condensed">
+    <thead>
+        <tr>
+        <th> Rank </th>
+        <th> User </th>
+        <th> # Helped </th>
+        </tr>
+    </thead>
+    <tbody>
+        {{helpHighScore|safe}}
+    </tbody>
+    </table>
+
+</div>
+
+</div>
+</div>
+</div>
+
+
+
+
+
+
+
+<!--<div class="container">
+<div class="tabbable">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="#tab1" data-toggle="tab"><h3>Synthesis Problems</h3></a></li>
+        <li><a href="#tab2" data-toggle="tab"><h3>One-Step Problems</h3></a></li>
+        <li><a href="#tab3" data-toggle="tab"><h3>Help Others</h3></a></li>
+    </ul>
+<div class="tab-content">
+    <div class="tab-pane active" id="tab1">
+        <h4> Load Shared Problem </h4>
+        
+    </div>
+    
+    <div class="tab-pane" id="tab2">
+         
+        
+        <h3> How am I Doing?</h3>
+        
+    </div>
+    
+    <div class="tab-pane" id="tab3">
+        <p>
+        <a href="/orgo/chat/volunteertohelp"> Help others </a>
+        </p>
+    </div>
+
+</div>-->
+<div id="popup">
+    <h3> Change Password </h3>
+    <form action = "/orgo/api/changePW/" method="post" class="form-horizontal">{% csrf_token %}
+        {{changePW.as_p}}
+        <input type="submit" value="Change" class="btn"/>
+    </form>
+    <a href="#" onclick="closePopup()"> Cancel </a>
+</div>
+</div>
+{% endblock %}
+
+
+

@@ -1,0 +1,1386 @@
+{% extends "base.html" %}
+
+{% block jsimport %}
+<script src="/orgo/static/jquery-1.9.0.js"> </script>
+<script type="text/javascript" src="http://felixsun.scripts.mit.edu/orgo/static/tufte-graph/raphael.js"></script>
+<script type="text/javascript" src="http://felixsun.scripts.mit.edu/orgo/static/tufte-graph/jquery.enumerable.js"></script>
+<script type="text/javascript" src="http://felixsun.scripts.mit.edu/orgo/static/tufte-graph/jquery.tufte-graph.js"></script>
+<title>Carbonate - Reactions</title>
+{% endblock %}
+
+{% block cssimport %}
+<title>Carbonate - Reactions</title>
+<style>
+
+div.sample {
+    float:left;
+}
+
+div.sample.arrow {
+    margin-top:50px;
+}
+
+div.samples {
+    margin: 0 auto; 
+    text-align: center;
+}
+
+div.listedItem {
+    border-radius: 10px;
+    background-color: #E0E0E0;
+    padding: 20px;
+    margin-right:30px;
+}
+body { 
+    padding-top: 65px; 
+    position: relative;
+}
+
+div.spacer {
+    padding-top:65px;
+}
+
+
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+$("document").ready(function() {
+    $("div.listedItem").each(function(x,y) {
+        $("#putLinksHere").append(
+            "<li><a href=\"#" + x + "\"><i class=\"icon-chevron-right\"></i> " + ($("h2", $(y)).html()) + "</a></li>"
+        );
+    });
+});
+
+</script>
+{% endblock %}
+
+{% block menuitems %}
+<li class="active headnavbar"><a href="/orgo/reactions/">Reactions</a></li>
+{% endblock %}
+
+{% block signin %}
+<p class="navbar-text pull-right headnavbar" style="color:#EEEEEE">
+</p>
+{% endblock %}
+
+
+
+
+
+{% block content %}
+
+<!--Fancy header here.-->
+
+<!--Linkful sidebar, too.-->
+<div class="row-fluid">
+<div class="span3 bs-docs-sidebar" style="overflow:hidden;"  data-offset-top="200"> 
+    <ul class="well nav nav-list bs-docs-sidenav" id="putLinksHere" data-target=".bs-docs-sidebar" data-spy="affix">
+          <li class="nav-header">Reactions</li>
+    </ul>
+</div>
+
+      
+<div class="span9 container">
+<h1>Reactions</h1>
+
+<p>Supported reactions are currently limited to <b>Unit 1</b> and <b>Unit 2</b> of <b><a href="http://ocw.mit.edu/courses/chemistry/5-12-organic-chemistry-i-spring-2003/index.htm">MIT 5.12</a></b>.</p>
+
+
+
+<div id="reactions">
+<div class="spacer" id="0">
+<div class="listedItem">
+<h2>Hydrogenation</h2>
+<i><h4>H<sub>2</sub> cat. Pd/C in ethanol</h4></i>
+<p><b>Regiochemistry:</b> None</p>
+<p><b>Stereochemistry:</b> Syn addition</p>
+<p>Alkenes and alkynes are candidates for this reaction. Pd|C refers to palladium on carbon, a catalyst used in hydrogenation reactions. This reaction 
+adds hydrogens to the alkene or alkyne, converting it all the way to a single bond.</p>
+<p><i>Read more: <a href="http://en.wikipedia.org/wiki/Palladium_on_carbon">palladium on carbon</a>, <a href="http://en.wikipedia.org/wiki/Hydrogenation">hydrogenation</a></i></p>
+
+<br />
+<div class="samples row">
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="220" height="114.641" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="167.0" y1="40.0" x2="140.0" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="167.0" y1="44.2" x2="140.0" y2="44.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="167.0" y1="35.8" x2="140.0" y2="35.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="140.0" y1="40.0" x2="100.0" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="100.0" y1="40.0" x2="80.0" y2="74.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="80.0" y1="77.6" x2="53.0" y2="77.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="80.0" y1="71.6" x2="53.0" y2="71.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="174.000000" y="48.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="14.000000" y="82.641016" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="26.000000" y="86.321016" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >2</text>
+<text x="32.500000" y="82.641016" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+</div>
+<div class="sample arrow">H<sub>2</sub>, Pd|C, EtOH<br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="200" height="114.641" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0" />
+<line x1="153.5" y1="63.4" x2="140.0" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="140.0" y1="40.0" x2="100.0" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="100.0" y1="40.0" x2="80.0" y2="74.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="80.0" y1="74.6" x2="53.0" y2="74.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="156.000000" y="82.641016" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="180.000000" y="86.321016" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="14.000000" y="82.641016" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="26.000000" y="86.321016" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="32.500000" y="82.641016" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+
+</div>
+</div>
+</div>
+</div>
+
+
+
+<div class="spacer" id="1">
+<div class="listedItem">
+<h2>Hydrohalogenation</h2>
+<i><h4>HX in CH<sub>2</sub>Cl<sub>2</sub> (either 1 equiv. or excess)</h4></i>
+<p><b>Regiochemistry:</b> X added to more substituted carbon</p>
+<p><b>Stereochemistry:</b> None (neither syn nor anti)</p>
+<p>Alkenes and alkynes are candidates for this reaction. This reaction adds a halogen and a hydrogen to an alkene (or double that, in case of an alkyne), with the halogen added to the carbon specified by Markovnikov's rule. Since the reaction proceeds through a carbocation intermediate, there is no stereochemistry.</p>
+<p>Note that this reaction is most efficient when carried out in the dark -- allowing light will cause trace amounts of free-radical hydrohalogenation, which is anti-Markovnikov.</p>
+<p><u>Useful note:</u> It is possible to specify that you want to add only one equivalent of HX to the reactant. For alkynes, this results in addition only once.</p>
+<p><i>Read more: <a href="http://en.wikipedia.org/wiki/Hydrohalogenation">hydrohalogenation</a>, <a href="http://en.wikipedia.org/wiki/Carbocation">carbocation</a></i></p>
+
+<br />
+<div class="samples row">
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="155.872" height="173.914" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="63.5" y1="101.6" x2="47.6" y2="123.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="103.5" y1="101.6" x2="63.5" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="97.5" y1="94.4" x2="69.5" y2="94.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="63.5" y1="101.6" x2="51.2" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="51.2" y1="63.5" x2="83.5" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="83.5" y1="40.0" x2="115.9" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="115.9" y1="63.5" x2="103.5" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="14.000000" y="141.914351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="26.000000" y="145.594351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="32.500000" y="141.914351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+
+</div>
+<div class="sample arrow">HBr in CH<sub>2</sub>Cl<sub>2</sub><br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="168.902" height="181.335" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="76.5" y1="101.6" x2="51.9" y2="112.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="76.5" y1="101.6" x2="73.7" y2="128.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="116.5" y1="101.6" x2="76.5" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="76.5" y1="101.6" x2="64.2" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="64.2" y1="63.5" x2="96.5" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="96.5" y1="40.0" x2="128.9" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="128.9" y1="63.5" x2="116.5" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="14.000000" y="125.823136" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="26.000000" y="129.503136" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="32.500000" y="125.823136" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text x="54.360680" y="149.334547" fill="rgb(165,40,40)"  stroke="rgb(165,40,40)" stroke-width="1" font-size="16" >Br</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+
+</div>
+</div>
+</div>
+</div>
+
+
+<div class="spacer" id="2">
+<div class="listedItem">
+<h2>Halogenation</h2>
+<i><h4>X<sub>2</sub> in CH<sub>2</sub>Cl<sub>2</sub></h4></i>
+<p><b>Regiochemistry:</b> None</p>
+<p><b>Stereochemistry:</b> Anti addition</p>
+<p>Alkenes and alkynes are candidates for this reaction. This reaction adds two halogens (or double that, in case of an alkyne). Since the reaction proceeds through a halonium intermediate, the two halogens are added anti.</p>
+<p><u>Useful note:</u> It is possible to specify that you want to add only one equivalent of X<sub>2</sub> to the reactant. For alkynes, this results in addition only once.</p>
+<p><i>Read more: <a href="http://en.wikipedia.org/wiki/Halogenation">halogenation</a>, <a href="http://en.wikipedia.org/wiki/Halonium_ion">halonium</a></i></p>
+
+<br />
+<div class="samples row">
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="155.872" height="173.914" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="63.5" y1="101.6" x2="47.6" y2="123.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="103.5" y1="101.6" x2="63.5" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="97.5" y1="94.4" x2="69.5" y2="94.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="63.5" y1="101.6" x2="51.2" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="51.2" y1="63.5" x2="83.5" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="83.5" y1="40.0" x2="115.9" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="115.9" y1="63.5" x2="103.5" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="14.000000" y="141.914351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="26.000000" y="145.594351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="32.500000" y="141.914351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+</div>
+<div class="sample arrow">Br<sub>2</sub> in CH<sub>2</sub>Cl<sub>2</sub><br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="327.695" height="187.549" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<polygon points="222.973 98.1524 202.068 80.9127 208.013 75.5596 " stroke-width="1" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" />
+<polygon points="255.334 74.641 265.27 49.4315 272.198 53.4315 " stroke-width="1" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" />
+<line x1="255.3" y1="74.6" x2="241.8" y2="51.3" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="223.0" y1="98.2" x2="196.6" y2="103.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="110.1" y1="70.1" x2="109.8" y2="71.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="114.5" y1="70.3" x2="113.9" y2="73.1" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="118.8" y1="70.6" x2="117.9" y2="74.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="123.1" y1="70.9" x2="122.0" y2="76.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="127.4" y1="71.1" x2="126.0" y2="77.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="131.8" y1="71.4" x2="130.1" y2="79.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="93.7" y1="113.0" x2="92.1" y2="113.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="94.8" y1="117.2" x2="91.9" y2="117.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="95.9" y1="121.4" x2="91.7" y2="121.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="97.0" y1="125.6" x2="91.6" y2="126.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="98.1" y1="129.8" x2="91.4" y2="130.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="99.1" y1="134.0" x2="91.2" y2="134.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="92.4" y1="107.8" x2="117.0" y2="118.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="104.7" y1="69.7" x2="122.8" y2="49.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="223.0" y1="98.2" x2="255.3" y2="74.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="255.3" y1="74.6" x2="287.7" y2="98.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="287.7" y1="98.2" x2="275.3" y2="136.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="275.3" y1="136.2" x2="235.3" y2="136.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="235.3" y1="136.2" x2="223.0" y2="98.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="104.7" y1="69.7" x2="92.4" y2="107.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="92.4" y1="107.8" x2="52.4" y2="107.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="52.4" y1="107.8" x2="40.0" y2="69.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="40.0" y1="69.7" x2="72.4" y2="46.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="72.4" y1="46.2" x2="104.7" y2="69.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="190.207943" y="76.426633" fill="rgb(191,191,191)"  stroke="rgb(191,191,191)" stroke-width="1" font-size="16" >H</text>
+<text x="269.333847" y="48.000000" fill="rgb(165,40,40)"  stroke="rgb(165,40,40)" stroke-width="1" font-size="16" >Br</text>
+<text x="209.333847" y="48.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="221.333847" y="51.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="227.833847" y="48.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text x="165.847264" y="114.468894" fill="rgb(165,40,40)"  stroke="rgb(165,40,40)" stroke-width="1" font-size="16" >Br</text>
+<text x="137.847264" y="86.042261" fill="rgb(191,191,191)"  stroke="rgb(191,191,191)" stroke-width="1" font-size="16" >H</text>
+<text x="90.541818" y="155.548929" fill="rgb(165,40,40)"  stroke="rgb(165,40,40)" stroke-width="1" font-size="16" >Br</text>
+<text x="124.902498" y="132.037519" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="148.902498" y="135.717519" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="125.486584" y="48.000000" fill="rgb(165,40,40)"  stroke="rgb(165,40,40)" stroke-width="1" font-size="16" >Br</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+</div>
+</div>
+</div>
+</div>
+
+
+<div class="spacer" id="3">
+<div class="listedItem">
+<h2>Free-Radical Hydrohalogenation</h2>
+<i><h4>HBr cat. peroxide, with heat or light</h4></i>
+<p><b>Regiochemistry:</b> Br added to less substituted carbon</p>
+<p><b>Stereochemistry:</b> None (neither syn nor anti)</p>
+<p>Alkenes are candidates for this reaction. Free-radicals flip the regiochemistry of the usual hydrohalogenation reaction. Peroxide favors the formation of a free-radical bromine atom, which reacts with the alkene. The intermediate has a carbon radical which is most stable as the more substituted carbon. The result is anti-Markovnikov addition.</p>
+<p><i>Read more: <a href="http://en.wikipedia.org/wiki/Hydrohalogenation">hydrohalogenation</a>, <a href="http://en.wikipedia.org/wiki/Peroxide">peroxides</a></i></p>
+
+<br />
+<div class="samples row">
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="155.872" height="173.914" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="63.5" y1="101.6" x2="47.6" y2="123.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="103.5" y1="101.6" x2="63.5" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="97.5" y1="94.4" x2="69.5" y2="94.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="63.5" y1="101.6" x2="51.2" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="51.2" y1="63.5" x2="83.5" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="83.5" y1="40.0" x2="115.9" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="115.9" y1="63.5" x2="103.5" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="14.000000" y="141.914351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="26.000000" y="145.594351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="32.500000" y="141.914351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+</div>
+<div class="sample arrow">HBr, ROOR, light<br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="167.023" height="173.914" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="63.5" y1="101.6" x2="47.6" y2="123.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="103.5" y1="101.6" x2="119.4" y2="123.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="103.5" y1="101.6" x2="63.5" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="63.5" y1="101.6" x2="51.2" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="51.2" y1="63.5" x2="83.5" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="83.5" y1="40.0" x2="115.9" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="115.9" y1="63.5" x2="103.5" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="14.000000" y="141.914351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="26.000000" y="145.594351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="32.500000" y="141.914351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text x="121.022820" y="141.914351" fill="rgb(165,40,40)"  stroke="rgb(165,40,40)" stroke-width="1" font-size="16" >Br</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+
+</div>
+</div>
+</div>
+</div>
+
+
+<div class="spacer" id="4">
+<div class="listedItem">
+<h2>Epoxidation</h2>
+<i><h4>mCPBA or RCO<sub>3</sub>H, in CH<sub>2</sub>Cl<sub>2</sub></h4></i>
+<p><b>Regiochemistry:</b> None</p>
+<p><b>Stereochemistry:</b> Can be thought of as syn addition</p>
+<p>Alkenes are candidates for this reaction. mCPBA is a peroxycarboxylic acid, and catalyzes the conversion of double bonds to epoxides. Two stereochemical outcomes are possible, depending on which side of the alkene the oxygen adds to. The <i>cis</i> or <i>trans</i> orientation of the alkene is preserved.</p>
+<p><i>Read more: <a href="http://en.wikipedia.org/wiki/Epoxidation">epoxidation</a>, <a href="http://en.wikipedia.org/wiki/MCPBA">mCPBA</a></i></p>
+
+<br />
+<div class="samples row">
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="155.872" height="173.914" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="63.5" y1="101.6" x2="47.6" y2="123.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="103.5" y1="101.6" x2="63.5" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="97.5" y1="94.4" x2="69.5" y2="94.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="63.5" y1="101.6" x2="51.2" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="51.2" y1="63.5" x2="83.5" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="83.5" y1="40.0" x2="115.9" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="115.9" y1="63.5" x2="103.5" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="14.000000" y="141.914351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="26.000000" y="145.594351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="32.500000" y="141.914351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+
+</div>
+<div class="sample arrow">mCPBA in CH<sub>2</sub>Cl<sub>2</sub><br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="312.389" height="199.797" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<polygon points="74.641 79.8984 68.7426 53.4513 76.7223 52.8816 " stroke-width="1" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" />
+<polygon points="74.641 119.898 76.7223 146.915 68.7426 146.346 " stroke-width="1" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" />
+<line x1="209.7" y1="74.6" x2="211.3" y2="74.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="208.7" y1="70.4" x2="211.6" y2="70.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="207.8" y1="66.1" x2="211.9" y2="65.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="206.8" y1="61.9" x2="212.3" y2="61.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="205.9" y1="57.7" x2="212.6" y2="57.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="204.9" y1="53.5" x2="212.9" y2="52.9" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="211.3" y1="125.3" x2="209.7" y2="125.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="211.6" y1="129.6" x2="208.7" y2="129.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="211.9" y1="133.9" x2="207.8" y2="133.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="212.3" y1="138.3" x2="206.8" y2="137.9" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="212.6" y1="142.6" x2="205.9" y2="142.1" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="212.9" y1="146.9" x2="204.9" y2="146.3" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="74.6" y1="79.9" x2="74.6" y2="119.9" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="74.6" y1="119.9" x2="51.3" y2="106.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="51.3" y1="93.4" x2="74.6" y2="79.9" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="210.8" y1="79.9" x2="210.8" y2="119.9" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="210.8" y1="119.9" x2="187.5" y2="106.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="187.5" y1="93.4" x2="210.8" y2="79.9" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="112.7" y1="132.3" x2="74.6" y2="119.9" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="74.6" y1="79.9" x2="112.7" y2="67.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="112.7" y1="67.5" x2="136.2" y2="99.9" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="136.2" y1="99.9" x2="112.7" y2="132.3" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="248.9" y1="132.3" x2="210.8" y2="119.9" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="210.8" y1="79.9" x2="248.9" y2="67.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="248.9" y1="67.5" x2="272.4" y2="99.9" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="272.4" y1="99.9" x2="248.9" y2="132.3" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="65.792437" y="48.000000" fill="rgb(191,191,191)"  stroke="rgb(191,191,191)" stroke-width="1" font-size="16" >H</text>
+<text x="34.000000" y="107.898441" fill="rgb(255,12,12)"  stroke="rgb(255,12,12)" stroke-width="1" font-size="16" >O</text>
+<text x="45.792437" y="167.796882" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="57.792437" y="171.476882" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="64.292437" y="167.796882" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text x="201.987124" y="48.000000" fill="rgb(191,191,191)"  stroke="rgb(191,191,191)" stroke-width="1" font-size="16" >H</text>
+<text x="170.194687" y="107.898441" fill="rgb(255,12,12)"  stroke="rgb(255,12,12)" stroke-width="1" font-size="16" >O</text>
+<text x="181.987124" y="167.796882" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="193.987124" y="171.476882" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="200.487124" y="167.796882" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+</div>
+</div>
+</div>
+</div>
+
+
+<div class="spacer" id="5">
+<div class="listedItem">
+<h2>Tert-butoxide Elimination</h2>
+<i><h4>KOC(CH<sub>3</sub>)<sub>3</sub></h4></i>
+<p>Alkyl halides are candidates for this reaction. Removes a halide and its antiperiplanar hydrogen, creating a new double bond. This is an E2 reaction.</p>
+<p><u>Note:</u> Any other substitution and elimination reactions (covered in Unit 3 of 5.12) are not implemented.</p>
+<p><i>Read more: <a href="http://en.wikipedia.org/wiki/Tert-butoxide">tert-butoxide</a>, <a href="http://en.wikipedia.org/wiki/E2_elimination">E2 elimination reactions</a></i></p>
+
+<br />
+<div class="samples row">
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="160" height="114.641" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="113.5" y1="63.4" x2="100.0" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="100.0" y1="40.0" x2="60.0" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="60.0" y1="40.0" x2="46.5" y2="63.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="116.000000" y="82.641016" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="140.000000" y="86.321016" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="22.000000" y="82.641016" fill="rgb(165,40,40)"  stroke="rgb(165,40,40)" stroke-width="1" font-size="16" >Br</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+</div>
+<div class="sample arrow">Tert-butoxide in DMSO<br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="149.282" height="100" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="98.0" y1="53.5" x2="74.6" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="76.1" y1="42.6" x2="52.8" y2="56.1" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="73.1" y1="37.4" x2="49.8" y2="50.9" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="105.282032" y="68.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="129.282032" y="71.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="14.000000" y="68.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="26.000000" y="71.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >2</text>
+<text x="32.500000" y="68.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+</div>
+</div>
+</div>
+</div>
+
+
+<div class="spacer" id="6">
+<div class="listedItem">
+<h2>Hydration of Alkenes</h2>
+<i><h4>H<sub>2</sub>SO<sub>4</sub> in H<sub>2</sub>O; or H<sub>2</sub>SO<sub>4</sub> in ROH</h4></i>
+<p><b>Regiochemistry:</b> Oxygen is attached to the more substituted carbon</p>
+<p><b>Stereochemistry:</b> None (neither syn nor anti)</p>
+<p>Alkenes are candidates for this reaction. When H<sub>2</sub>O is present, the alkene is converted to an alcohol. Addition of an H<sup>+</sup> creates a carbocation intermediate, and then -OH is added to the most substituted carbon. When an alcohol, ROH, is added, an ether is produced instead. The reaction is neither syn nor anti addition, since it involves a carbocation intermediate, and follows Markovnikov's rule.</p>
+<p><i>Read more: <a href="http://en.wikipedia.org/wiki/Hydration_reaction">acid-catalyzed hydration</a></i></p>
+
+<br />
+<div class="samples row">
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="155.872" height="173.914" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="63.5" y1="101.6" x2="47.6" y2="123.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="103.5" y1="101.6" x2="63.5" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="97.5" y1="94.4" x2="69.5" y2="94.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="63.5" y1="101.6" x2="51.2" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="51.2" y1="63.5" x2="83.5" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="83.5" y1="40.0" x2="115.9" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="115.9" y1="63.5" x2="103.5" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="14.000000" y="141.914351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="26.000000" y="145.594351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="32.500000" y="141.914351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+</div>
+<div class="sample arrow">H<sub>2</sub>SO<sub>4</sub> in H<sub>2</sub>O<br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="168.902" height="181.335" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="76.5" y1="101.6" x2="51.9" y2="112.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="76.5" y1="101.6" x2="73.7" y2="128.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="116.5" y1="101.6" x2="76.5" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="76.5" y1="101.6" x2="64.2" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="64.2" y1="63.5" x2="96.5" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="96.5" y1="40.0" x2="128.9" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="128.9" y1="63.5" x2="116.5" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="22.000000" y="125.823136" fill="rgb(255,12,12)"  stroke="rgb(255,12,12)" stroke-width="1" font-size="16" >HO</text>
+<text x="46.360680" y="149.334547" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="58.360680" y="153.014547" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="64.860680" y="149.334547" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+
+</div>
+</div>
+<div class="samples row">
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="155.872" height="173.914" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="63.5" y1="101.6" x2="47.6" y2="123.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="103.5" y1="101.6" x2="63.5" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="97.5" y1="94.4" x2="69.5" y2="94.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="63.5" y1="101.6" x2="51.2" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="51.2" y1="63.5" x2="83.5" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="83.5" y1="40.0" x2="115.9" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="115.9" y1="63.5" x2="103.5" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="14.000000" y="141.914351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="26.000000" y="145.594351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="32.500000" y="141.914351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+</div>
+<div class="sample arrow">H<sub>2</sub>SO<sub>4</sub> in ethanol<br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="209.625" height="213.873" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="117.3" y1="101.6" x2="92.6" y2="112.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="79.4" y1="130.8" x2="76.5" y2="157.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="76.5" y1="157.6" x2="51.9" y2="168.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="117.3" y1="101.6" x2="114.4" y2="128.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="157.3" y1="101.6" x2="117.3" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="117.3" y1="101.6" x2="104.9" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="104.9" y1="63.5" x2="137.3" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="137.3" y1="40.0" x2="169.6" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="169.6" y1="63.5" x2="157.3" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="74.722957" y="125.823136" fill="rgb(255,12,12)"  stroke="rgb(255,12,12)" stroke-width="1" font-size="16" >O</text>
+<text x="14.000000" y="181.873478" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="26.000000" y="185.553478" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="32.500000" y="181.873478" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text x="87.083637" y="149.334547" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="99.083637" y="153.014547" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="105.583637" y="149.334547" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+</div>
+</div>
+</div>
+</div>
+
+
+<div class="spacer" id="7">
+<div class="listedItem">
+<h2>Hydration of Alkynes</h2>
+<i><h4>H<sub>2</sub>SO<sub>4</sub> in H<sub>2</sub>O, HgSO<sub>4</sub> accels; or H<sub>2</sub>SO<sub>4</sub> in ROH, HgSO<sub>4</sub> accels</h4></i>
+<p><b>Regiochemistry:</b> Oxygen is attached to the more substituted carbon</p>
+<p><b>Stereochemistry:</b> None (neither syn nor anti)</p>
+<p>Alkynes are candidates for this reaction. When H<sub>2</sub>O is present, one pi bond of the alkyne is broken, forming an enol. Addition of an H<sup>+</sup> creates a carbocation intermediate, and then OH is added to the most substituted carbon. This produces an enol, which will then tautomerize to form a carbonyl. When an alcohol, ROH, is added, an ether is produced instead. The reaction is neither syn nor anti addition, since it involves a carbocation intermediate, and follows Markovnikov's rule.</p>
+<p><i>Read more: <a href="http://en.wikipedia.org/wiki/Hydration_reaction">acid-catalyzed hydration</a></, <a href="http://www2.chemistry.msu.edu/faculty/reusch/VirtTxtJml/addyne1.htm">reactions of alkynes</a></i></p>
+
+<br />
+<div class="samples row">
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="200" height="80" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="120.0" y1="40.0" x2="80.0" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="120.0" y1="44.2" x2="80.0" y2="44.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="120.0" y1="35.8" x2="80.0" y2="35.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="80.0" y1="40.0" x2="53.0" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="120.0" y1="40.0" x2="147.0" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="14.000000" y="48.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="26.000000" y="51.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="32.500000" y="48.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text x="156.000000" y="48.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="180.000000" y="51.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+</div>
+<div class="sample arrow">H<sub>2</sub>SO<sub>4</sub> in H<sub>2</sub>O, HgSO<sub>4</sub> accels.<br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="183.923" height="140" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="109.3" y1="100.0" x2="74.6" y2="80.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="74.6" y1="80.0" x2="74.6" y2="53.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="76.1" y1="82.6" x2="52.8" y2="96.1" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="73.1" y1="77.4" x2="49.8" y2="90.9" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="109.3" y1="100.0" x2="132.7" y2="86.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="70.641016" y="48.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="94.641016" y="51.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="34.000000" y="108.000000" fill="rgb(255,12,12)"  stroke="rgb(255,12,12)" stroke-width="1" font-size="16" >O</text>
+<text x="139.923048" y="88.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="163.923048" y="91.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+</div>
+</div>
+</div>
+</div>
+
+
+<div class="spacer" id="8">
+<div class="listedItem">
+<h2>Halohydration</h2>
+<i><h4>X<sub>2</sub> in H<sub>2</sub>O, or X<sub>2</sub> in ROH</h4></i>
+<p><b>Regiochemistry:</b> Oxygen is attached to the more substituted carbon</p>
+<p><b>Stereochemistry:</b> Anti addition</p>
+<p>Alkenes are candidates for this reaction. The halogen attaches to the alkene first, followed by a hydroxyl (-OH) or ether (-OR) group, breaking a double bond. The reaction proceeds via a halonium intermediate, and is therefore an example of anti addition. When ROH is used instead of H<sub>2</sub>O, an ether is formed. Markovnikov's rule applies: the halogen is added to the less substituted carbon.</p>
+<p><i>Read more: <a href="http://www.mhhe.com/physsci/chemistry/carey/student/olc/ch06halohydration.html">halohydration</a>, <a href="http://en.wikipedia.org/wiki/Halonium_ion">halonium</a></i></p>
+<br />
+<div class="samples row">
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="155.872" height="173.914" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="63.5" y1="101.6" x2="47.6" y2="123.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="103.5" y1="101.6" x2="63.5" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="97.5" y1="94.4" x2="69.5" y2="94.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="63.5" y1="101.6" x2="51.2" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="51.2" y1="63.5" x2="83.5" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="83.5" y1="40.0" x2="115.9" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="115.9" y1="63.5" x2="103.5" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="14.000000" y="141.914351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="26.000000" y="145.594351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="32.500000" y="141.914351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+</div>
+<div class="sample arrow">Br<sub>2</sub> in H<sub>2</sub>O<br/><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="327.695" height="187.549" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<polygon points="222.973 98.1524 202.068 80.9127 208.013 75.5596 " stroke-width="1" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" />
+<polygon points="255.334 74.641 265.27 49.4315 272.198 53.4315 " stroke-width="1" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" />
+<line x1="255.3" y1="74.6" x2="241.8" y2="51.3" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="223.0" y1="98.2" x2="196.6" y2="103.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="110.1" y1="70.1" x2="109.8" y2="71.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="114.5" y1="70.3" x2="113.9" y2="73.1" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="118.8" y1="70.6" x2="117.9" y2="74.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="123.1" y1="70.9" x2="122.0" y2="76.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="127.4" y1="71.1" x2="126.0" y2="77.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="131.8" y1="71.4" x2="130.1" y2="79.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="93.7" y1="113.0" x2="92.1" y2="113.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="94.8" y1="117.2" x2="91.9" y2="117.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="95.9" y1="121.4" x2="91.7" y2="121.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="97.0" y1="125.6" x2="91.6" y2="126.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="98.1" y1="129.8" x2="91.4" y2="130.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="99.1" y1="134.0" x2="91.2" y2="134.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="92.4" y1="107.8" x2="117.0" y2="118.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="104.7" y1="69.7" x2="122.8" y2="49.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="223.0" y1="98.2" x2="255.3" y2="74.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="255.3" y1="74.6" x2="287.7" y2="98.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="287.7" y1="98.2" x2="275.3" y2="136.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="275.3" y1="136.2" x2="235.3" y2="136.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="235.3" y1="136.2" x2="223.0" y2="98.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="104.7" y1="69.7" x2="92.4" y2="107.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="92.4" y1="107.8" x2="52.4" y2="107.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="52.4" y1="107.8" x2="40.0" y2="69.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="40.0" y1="69.7" x2="72.4" y2="46.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="72.4" y1="46.2" x2="104.7" y2="69.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="190.207943" y="76.426633" fill="rgb(191,191,191)"  stroke="rgb(191,191,191)" stroke-width="1" font-size="16" >H</text>
+<text x="269.333847" y="48.000000" fill="rgb(255,12,12)"  stroke="rgb(255,12,12)" stroke-width="1" font-size="16" >OH</text>
+<text x="209.333847" y="48.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="221.333847" y="51.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="227.833847" y="48.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text x="165.847264" y="114.468894" fill="rgb(165,40,40)"  stroke="rgb(165,40,40)" stroke-width="1" font-size="16" >Br</text>
+<text x="137.847264" y="86.042261" fill="rgb(191,191,191)"  stroke="rgb(191,191,191)" stroke-width="1" font-size="16" >H</text>
+<text x="90.541818" y="155.548929" fill="rgb(255,12,12)"  stroke="rgb(255,12,12)" stroke-width="1" font-size="16" >OH</text>
+<text x="124.902498" y="132.037519" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="148.902498" y="135.717519" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="125.486584" y="48.000000" fill="rgb(165,40,40)"  stroke="rgb(165,40,40)" stroke-width="1" font-size="16" >Br</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+</div>
+</div>
+</div>
+</div>
+
+
+<div class="spacer" id="9">
+<div class="listedItem">
+<h2>Hydroboration-Oxidation</h2>
+<p><b>Regiochemistry:</b> -OH is attached to less substituted carbon</p>
+<p><b>Stereochemistry:</b> Syn addition</p>
+<h3>Hydroboration</h3>
+<i><h4>BH<sub>3</sub> in THF</h4></i>
+<p>Alkenes and alkynes are candidates for this reaction. Borane adds to one carbon of the alkene, transferring its hydrogen to the other carbon while breaking a pi bond. The reaction is anti-Markovnikov: the borane attaches to the less substituted carbon.</p>
+<h3>Oxidation</h3>
+<i><h4>NaOH and H<sub>2</sub>O<sub>2</sub></h4></i>
+<p>Alkenes and alkynes are candidates for this reaction. Peroxide attacks the boron atom, ultimately replacing -BH<sub>2</sub> with -OH. The final result is an anti-Markovnikov hydroxyl group. If the original reactant was an alkyne, it is possible that the resulting enol will tautomerize to form a carbonyl.</p>
+<p><i>Read more: <a href="http://en.wikipedia.org/wiki/Hydroboration%E2%80%93oxidation_reaction">hydroboration-oxidation</a>, <a href="http://en.wikipedia.org/wiki/Borane">borane</a>, <a href="http://en.wikipedia.org/wiki/THF">THF</a></i></p>
+<br />
+<div class="samples row">
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="155.872" height="173.914" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="63.5" y1="101.6" x2="47.6" y2="123.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="103.5" y1="101.6" x2="63.5" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="97.5" y1="94.4" x2="69.5" y2="94.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="63.5" y1="101.6" x2="51.2" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="51.2" y1="63.5" x2="83.5" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="83.5" y1="40.0" x2="115.9" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="115.9" y1="63.5" x2="103.5" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="14.000000" y="141.914351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="26.000000" y="145.594351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="32.500000" y="141.914351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+
+</div>
+<div class="sample arrow">BH<sub>3</sub> in THF<br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="327.695" height="187.549" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<polygon points="104.721 69.7258 131.767 71.3852 130.104 79.2104 " stroke-width="1" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" />
+<line x1="93.7" y1="113.0" x2="92.1" y2="113.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="94.8" y1="117.2" x2="91.9" y2="117.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="95.9" y1="121.4" x2="91.7" y2="121.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="97.0" y1="125.6" x2="91.6" y2="126.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="98.1" y1="129.8" x2="91.4" y2="130.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="99.1" y1="134.0" x2="91.2" y2="134.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="92.4" y1="107.8" x2="117.0" y2="118.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="104.7" y1="69.7" x2="122.8" y2="49.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="254.0" y1="70.1" x2="253.6" y2="71.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="258.3" y1="70.3" x2="257.7" y2="73.1" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="262.6" y1="70.6" x2="261.8" y2="74.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="267.0" y1="70.9" x2="265.8" y2="76.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="271.3" y1="71.1" x2="269.9" y2="77.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="275.6" y1="71.4" x2="274.0" y2="79.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<polygon points="236.207943 107.768054 242.987394 134.003127 235.031219 134.839354 " stroke-width="1.000000" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" />
+<line x1="236.2" y1="107.8" x2="260.9" y2="118.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="248.6" y1="69.7" x2="266.6" y2="49.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="104.7" y1="69.7" x2="92.4" y2="107.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="92.4" y1="107.8" x2="52.4" y2="107.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="52.4" y1="107.8" x2="40.0" y2="69.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="40.0" y1="69.7" x2="72.4" y2="46.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="72.4" y1="46.2" x2="104.7" y2="69.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="248.6" y1="69.7" x2="236.2" y2="107.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="236.2" y1="107.8" x2="196.2" y2="107.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="196.2" y1="107.8" x2="183.8" y2="69.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="183.8" y1="69.7" x2="216.2" y2="46.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="216.2" y1="46.2" x2="248.6" y2="69.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="137.847264" y="86.042261" fill="rgb(191,191,191)"  stroke="rgb(191,191,191)" stroke-width="1" font-size="16" >H</text>
+<text x="90.541818" y="155.548929" fill="rgb(191,191,191)"  stroke="rgb(191,191,191)" stroke-width="1" font-size="16" >H</text>
+<text x="124.902498" y="132.037519" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="148.902498" y="135.717519" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="127.486584" y="48.000000" fill="rgb(255,181,181)"  stroke="rgb(255,181,181)" stroke-width="1" font-size="16" >BH</text>
+<text x="151.486584" y="51.680000" fill="rgb(255,181,181)"  stroke="rgb(255,181,181)" stroke-width="1" font-size="13" >2</text>
+<text x="281.694527" y="86.042261" fill="rgb(191,191,191)"  stroke="rgb(191,191,191)" stroke-width="1" font-size="16" >H</text>
+<text x="234.389082" y="155.548929" fill="rgb(191,191,191)"  stroke="rgb(191,191,191)" stroke-width="1" font-size="16" >H</text>
+<text x="268.749762" y="132.037519" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="292.749762" y="135.717519" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="271.333847" y="48.000000" fill="rgb(255,181,181)"  stroke="rgb(255,181,181)" stroke-width="1" font-size="16" >BH</text>
+<text x="295.333847" y="51.680000" fill="rgb(255,181,181)"  stroke="rgb(255,181,181)" stroke-width="1" font-size="13" >2</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+</div>
+<div class="sample arrow">NaOH and H<sub>2</sub>O<sub>2</sub><br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="327.695" height="187.549" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<polygon points="104.721 69.7258 131.767 71.3852 130.104 79.2104 " stroke-width="1" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" />
+<line x1="93.7" y1="113.0" x2="92.1" y2="113.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="94.8" y1="117.2" x2="91.9" y2="117.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="95.9" y1="121.4" x2="91.7" y2="121.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="97.0" y1="125.6" x2="91.6" y2="126.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="98.1" y1="129.8" x2="91.4" y2="130.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="99.1" y1="134.0" x2="91.2" y2="134.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="92.4" y1="107.8" x2="117.0" y2="118.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="104.7" y1="69.7" x2="122.8" y2="49.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="254.0" y1="70.1" x2="253.6" y2="71.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="258.3" y1="70.3" x2="257.7" y2="73.1" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="262.6" y1="70.6" x2="261.8" y2="74.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="267.0" y1="70.9" x2="265.8" y2="76.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="271.3" y1="71.1" x2="269.9" y2="77.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="275.6" y1="71.4" x2="274.0" y2="79.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<polygon points="236.207943 107.768054 242.987394 134.003127 235.031219 134.839354 " stroke-width="1.000000" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" />
+<line x1="236.2" y1="107.8" x2="260.9" y2="118.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="248.6" y1="69.7" x2="266.6" y2="49.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="104.7" y1="69.7" x2="92.4" y2="107.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="92.4" y1="107.8" x2="52.4" y2="107.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="52.4" y1="107.8" x2="40.0" y2="69.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="40.0" y1="69.7" x2="72.4" y2="46.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="72.4" y1="46.2" x2="104.7" y2="69.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="248.6" y1="69.7" x2="236.2" y2="107.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="236.2" y1="107.8" x2="196.2" y2="107.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="196.2" y1="107.8" x2="183.8" y2="69.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="183.8" y1="69.7" x2="216.2" y2="46.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="216.2" y1="46.2" x2="248.6" y2="69.7" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="137.847264" y="86.042261" fill="rgb(191,191,191)"  stroke="rgb(191,191,191)" stroke-width="1" font-size="16" >H</text>
+<text x="90.541818" y="155.548929" fill="rgb(191,191,191)"  stroke="rgb(191,191,191)" stroke-width="1" font-size="16" >H</text>
+<text x="124.902498" y="132.037519" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="148.902498" y="135.717519" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="125.486584" y="48.000000" fill="rgb(255,12,12)"  stroke="rgb(255,12,12)" stroke-width="1" font-size="16" >OH</text>
+<text x="281.694527" y="86.042261" fill="rgb(191,191,191)"  stroke="rgb(191,191,191)" stroke-width="1" font-size="16" >H</text>
+<text x="234.389082" y="155.548929" fill="rgb(191,191,191)"  stroke="rgb(191,191,191)" stroke-width="1" font-size="16" >H</text>
+<text x="268.749762" y="132.037519" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="292.749762" y="135.717519" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="269.333847" y="48.000000" fill="rgb(255,12,12)"  stroke="rgb(255,12,12)" stroke-width="1" font-size="16" >OH</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+</div>
+</div>
+</div>
+</div>
+
+
+<div class="spacer" id="10">
+<div class="listedItem">
+<h2>Dihydroxylation</h2>
+<i><h4>cat. OsO<sub>4</sub>, NMO, acetone or H<sub>2</sub>O</h4></i>
+<p><b>Regiochemistry:</b> None</p>
+<p><b>Stereochemistry:</b> Syn addition</p>
+<p>Alkenes are candidates for this reaction. Catalytic amounts of OsO<sub>4</sub> in the presence of NMO yields syn addition of two hydroxyl groups to a double bond.</p>
+<p><i>Read more: <a href="http://en.wikipedia.org/wiki/Upjohn_dihydroxylation">dihydroxylation</a>, <a href="http://en.wikipedia.org/wiki/N-Methylmorpholine_N-oxide">NMO</a>, <a href="http://en.wikipedia.org/wiki/Osmium_tetroxide">OsO<sub>4</sub></a></i></p>
+<br />
+<div class="samples row">
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="155.872" height="173.914" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="63.5" y1="101.6" x2="47.6" y2="123.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="103.5" y1="101.6" x2="63.5" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="97.5" y1="94.4" x2="69.5" y2="94.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="63.5" y1="101.6" x2="51.2" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="51.2" y1="63.5" x2="83.5" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="83.5" y1="40.0" x2="115.9" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="115.9" y1="63.5" x2="103.5" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="14.000000" y="141.914351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="26.000000" y="145.594351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="32.500000" y="141.914351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+
+</div>
+<div class="sample arrow">cat. OsO<sub>4</sub>, NMO, in acetone<br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="327.695" height="176.195" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="218.2" y1="69.6" x2="219.6" y2="70.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="219.8" y1="65.6" x2="222.3" y2="67.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="221.4" y1="61.5" x2="225.0" y2="63.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="223.0" y1="57.5" x2="227.7" y2="60.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="224.6" y1="53.5" x2="230.4" y2="56.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="226.1" y1="49.4" x2="233.1" y2="53.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<polygon points="248.568623 98.152426 275.614626 99.811869 273.951332 107.637050 " stroke-width="1.000000" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" />
+<line x1="248.6" y1="98.2" x2="266.6" y2="78.1" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="216.2" y1="74.6" x2="202.7" y2="51.3" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<polygon points="72.360680 74.641016 82.296578 49.431535 89.224781 53.431535 " stroke-width="1.000000" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" />
+<line x1="110.1" y1="98.5" x2="109.8" y2="100.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="114.5" y1="98.7" x2="113.9" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="118.8" y1="99.0" x2="117.9" y2="103.1" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="123.1" y1="99.3" x2="122.0" y2="104.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="127.4" y1="99.5" x2="126.0" y2="106.1" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="131.8" y1="99.8" x2="130.1" y2="107.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="104.7" y1="98.2" x2="122.8" y2="78.1" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="72.4" y1="74.6" x2="58.9" y2="51.3" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="216.2" y1="74.6" x2="248.6" y2="98.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="248.6" y1="98.2" x2="236.2" y2="136.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="236.2" y1="136.2" x2="196.2" y2="136.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="196.2" y1="136.2" x2="183.8" y2="98.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="183.8" y1="98.2" x2="216.2" y2="74.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="72.4" y1="74.6" x2="104.7" y2="98.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="104.7" y1="98.2" x2="92.4" y2="136.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="92.4" y1="136.2" x2="52.4" y2="136.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="52.4" y1="136.2" x2="40.0" y2="98.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="40.0" y1="98.2" x2="72.4" y2="74.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="230.207943" y="48.000000" fill="rgb(191,191,191)"  stroke="rgb(191,191,191)" stroke-width="1" font-size="16" >H</text>
+<text x="281.694527" y="114.468894" fill="rgb(255,12,12)"  stroke="rgb(255,12,12)" stroke-width="1" font-size="16" >OH</text>
+<text x="271.333847" y="76.426633" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="295.333847" y="80.106633" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="178.207943" y="48.000000" fill="rgb(255,12,12)"  stroke="rgb(255,12,12)" stroke-width="1" font-size="16" >HO</text>
+<text x="86.360680" y="48.000000" fill="rgb(191,191,191)"  stroke="rgb(191,191,191)" stroke-width="1" font-size="16" >H</text>
+<text x="137.847264" y="114.468894" fill="rgb(255,12,12)"  stroke="rgb(255,12,12)" stroke-width="1" font-size="16" >OH</text>
+<text x="127.486584" y="76.426633" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="151.486584" y="80.106633" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="34.360680" y="48.000000" fill="rgb(255,12,12)"  stroke="rgb(255,12,12)" stroke-width="1" font-size="16" >HO</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+</div>
+</div>
+</div>
+</div>
+
+
+<div class="spacer" id="11">
+<div class="listedItem">
+<h2>Ozonolysis</h2>
+<i><h4>O<sub>3</sub> with Me<sub>2</sub>S or Zn, in CH<sub>2</sub>Cl<sub>2</sub></h4></i>
+<p><b>Regiochemistry:</b> None</p>
+<p><b>Stereochemistry:</b> None</p>
+<p>Alkenes are candidates for this reaction. After a complicated reaction mechanism involving all three of the oxygens of ozone, double bonds are split in two, yielding two new carbonyls.</p>
+<p><i>Read more: <a href="http://en.wikipedia.org/wiki/Ozonolysis">ozonolysis</a></i></p>
+<br />
+<div class="samples row">
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="155.872" height="173.914" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="63.5" y1="101.6" x2="47.6" y2="123.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="103.5" y1="101.6" x2="63.5" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="97.5" y1="94.4" x2="69.5" y2="94.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="63.5" y1="101.6" x2="51.2" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="51.2" y1="63.5" x2="83.5" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="83.5" y1="40.0" x2="115.9" y2="63.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="115.9" y1="63.5" x2="103.5" y2="101.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="14.000000" y="141.914351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="26.000000" y="145.594351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="32.500000" y="141.914351" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+</div>
+<div class="sample arrow">O<sub>3</sub> with Me<sub>2</sub>S, in CH<sub>2</sub>Cl<sub>2</sub><br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="253.205" height="160" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="180.1" y1="37.4" x2="203.4" y2="50.9" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="177.1" y1="42.6" x2="200.4" y2="56.1" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="178.6" y1="40.0" x2="143.9" y2="60.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="143.9" y1="60.0" x2="143.9" y2="100.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="143.9" y1="100.0" x2="109.3" y2="120.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="109.3" y1="120.0" x2="74.6" y2="100.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="71.6" y1="100.0" x2="71.6" y2="73.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="77.6" y1="100.0" x2="77.6" y2="73.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="74.6" y1="100.0" x2="51.3" y2="113.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="207.205081" y="68.000000" fill="rgb(255,12,12)"  stroke="rgb(255,12,12)" stroke-width="1" font-size="16" >O</text>
+<text x="68.641016" y="68.000000" fill="rgb(255,12,12)"  stroke="rgb(255,12,12)" stroke-width="1" font-size="16" >O</text>
+<text x="14.000000" y="128.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="26.000000" y="131.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="32.500000" y="128.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+</div>
+</div>
+</div>
+</div>
+
+
+<div class="spacer" id="12">
+<div class="listedItem">
+<h2>Lindlar Reduction</h2>
+<i><h4>H<sub>2</sub> cat. Lindlar</h4></i>
+<p><b>Regiochemistry:</b> None</p>
+<p><b>Stereochemistry:</b> <i>cis</i></p>
+<p>Alkynes are candidates for this reaction. Catalyzed by the Lindlar catalyst, hydrogen adds to triple bonds, resulting in <i>cis</i> double bonds.</p>
+<p>Compare to: Sodium-Ammonia Reduction</p>
+<p><i>Read more: <a href="http://en.wikipedia.org/wiki/Lindlar_catalyst">Lindlar catalyst</a>, <a href="http://www2.chemistry.msu.edu/faculty/reusch/VirtTxtJml/addyne1.htm">alkyne reductions</a></i></p>
+<br />
+<div class="samples row">
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="200" height="80" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="120.0" y1="40.0" x2="80.0" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="120.0" y1="44.2" x2="80.0" y2="44.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="120.0" y1="35.8" x2="80.0" y2="35.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="80.0" y1="40.0" x2="53.0" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="120.0" y1="40.0" x2="147.0" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="14.000000" y="48.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="26.000000" y="51.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="32.500000" y="48.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text x="156.000000" y="48.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="180.000000" y="51.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+
+</div>
+<div class="sample arrow">H<sub>2</sub> cat. Lindlar<br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="149.282" height="140" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="76.1" y1="42.6" x2="41.5" y2="62.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="73.1" y1="37.4" x2="38.5" y2="57.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="40.0" y1="60.0" x2="40.0" y2="87.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="74.6" y1="40.0" x2="98.0" y2="53.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="36.000000" y="108.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="60.000000" y="111.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="105.282032" y="68.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="129.282032" y="71.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+
+</div>
+</div>
+</div>
+</div>
+
+
+<div class="spacer" id="13">
+<div class="listedItem">
+<h2>Sodium-Ammonia Reduction</h2>
+<i><h4>Na, in NH<sub>3 (L)</sub></h4></i>
+<p><b>Regiochemistry:</b> None</p>
+<p><b>Stereochemistry:</b> <i>trans</i></p>
+<p>Alkynes are candidates for this reaction. Catalyzed by a solution of sodium in liquid ammonia, hydrogen adds to triple bonds, resulting in <i>trans</i> double bonds.</p>
+<p>Compare to: Lindlar Reduction</p>
+<p><i>Read more: <a href="http://www2.chemistry.msu.edu/faculty/reusch/VirtTxtJml/addyne1.htm">alkyne reductions</a></i></p>
+<br />
+<div class="samples row">
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="200" height="80" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="120.0" y1="40.0" x2="80.0" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="120.0" y1="44.2" x2="80.0" y2="44.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="120.0" y1="35.8" x2="80.0" y2="35.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="80.0" y1="40.0" x2="53.0" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="120.0" y1="40.0" x2="147.0" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="14.000000" y="48.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="26.000000" y="51.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="32.500000" y="48.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text x="156.000000" y="48.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="180.000000" y="51.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+
+</div>
+<div class="sample arrow">Na, in NH<sub>3 (L)</sub><br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="183.923" height="100" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="110.8" y1="42.6" x2="76.1" y2="62.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="107.8" y1="37.4" x2="73.1" y2="57.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="74.6" y1="60.0" x2="51.3" y2="46.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="109.3" y1="40.0" x2="132.7" y2="53.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="14.000000" y="48.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="26.000000" y="51.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="32.500000" y="48.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text x="139.923048" y="68.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="163.923048" y="71.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+</div>
+</div>
+</div>
+</div>
+
+
+<div class="spacer" id="14">
+<div class="listedItem">
+<h2>Forming an Acetylide</h2>
+<i><h4>NaNH<sub>2</sub> in NH<sub>3</sub></h4></i>
+<p><b>Regiochemistry:</b> </p>
+<p><b>Stereochemistry:</b> </p>
+<p>Alkynes which end in hydrogens are candidates for this reaction. The pKa of ammonia, NH<sub>3</sub>, is 34; the pKa of acetylene, HCCH, is 25. The amide ion, NH<sub>2</sub><sup>-</sup>, is highly basic and able to deprotonate acetylene and other molecules containing triple bonds with terminal hydrogens. Adding sodium amide in ammonia deprotonates acetylene, producing acetylide.</p>
+<p><i>Read more: <a href="http://en.wikipedia.org/wiki/Acetylide">acetylide</a></i></p>
+<br />
+<div class="samples row">
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="160" height="80" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="107.0" y1="40.0" x2="80.0" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="80.0" y1="40.0" x2="53.0" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="80.0" y1="44.2" x2="53.0" y2="44.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="80.0" y1="35.8" x2="53.0" y2="35.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="116.000000" y="48.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="140.000000" y="51.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="22.000000" y="48.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >HC</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+
+</div>
+<div class="sample arrow">NaNH<sub>2</sub> in NH<sub>3</sub><br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="160" height="80" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="107.0" y1="40.0" x2="80.0" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="80.0" y1="40.0" x2="53.0" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="80.0" y1="44.2" x2="53.0" y2="44.2" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="80.0" y1="35.8" x2="53.0" y2="35.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="116.000000" y="48.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="140.000000" y="51.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="43.900000" y="28.534000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >_</text>
+<text x="34.000000" y="48.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+
+</div>
+</div>
+</div>
+</div>
+
+
+<div class="spacer" id="15">
+<div class="listedItem">
+<h2>Acetylide Addition</h2>
+<i><h4>(no reagents needed)</h4></i>
+<p><b>Regiochemistry:</b> None</p>
+<p><b>Stereochemistry:</b> None</p>
+<p>Acetylides, once formed, can be used to form carbon-carbon bonds. The nucleophilic acetylide displaces a leaving group such as chloride or iodide in a substitution reaction, if the leaving group is attached to a primary alkyl group. A molecule of the form R-CH<sub>2</sub>-Br will suffice. </p>
+<p><i>Read more: <a href="http://en.wikipedia.org/wiki/Acetylide">acetylide</a></i></p>
+<br />
+<div class="samples row">
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="160" height="154.641" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="67.0" y1="114.6" x2="53.0" y2="114.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="67.0" y1="118.8" x2="53.0" y2="118.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="67.0" y1="110.4" x2="53.0" y2="110.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="113.5" y1="63.4" x2="100.0" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="100.0" y1="40.0" x2="60.0" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="60.0" y1="40.0" x2="46.5" y2="63.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="84.800000" y="100.529016" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >_</text>
+<text x="74.000000" y="122.641016" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text x="22.000000" y="122.641016" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >HC</text>
+<text x="116.000000" y="82.641016" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="140.000000" y="86.321016" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="22.000000" y="82.641016" fill="rgb(165,40,40)"  stroke="rgb(165,40,40)" stroke-width="1" font-size="16" >Br</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+
+</div>
+<div class="sample arrow"><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample">
+<!--SVG here-->
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="220" height="114.641" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="80.0" y1="74.6" x2="53.0" y2="74.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="80.0" y1="78.8" x2="53.0" y2="78.8" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="80.0" y1="70.4" x2="53.0" y2="70.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="80.0" y1="74.6" x2="120.0" y2="74.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="120.0" y1="74.6" x2="140.0" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="140.0" y1="40.0" x2="167.0" y2="40.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="22.000000" y="82.641016" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >HC</text>
+<text x="176.000000" y="48.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="200.000000" y="51.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+
+</div>
+</div>
+</div>
+</div>
+
+
+<div class="spacer" id="16">
+<div class="listedItem">
+<h2>Tautomerization</h2>
+<i><h4>(no reagents needed)</h4></i>
+<p>Not so much a reaction, as more of an automatic process. Hydroxyl groups attached to double bonds (<i>enols</i>) will tautomerize, resulting in a ketone or an aldehyde.</p>
+<p><i>Read more: <a href="http://en.wikipedia.org/wiki/Keto-enol_tautomerism">enol tautomerization</a>, <a href="http://en.wikipedia.org/wiki/Tautomer">tautomers</a></i></p>
+
+<br />
+<div class="samples row">
+<div class="sample">
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="183.923" height="180" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="109.3" y1="100.0" x2="109.3" y2="127.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="109.3" y1="100.0" x2="132.7" y2="86.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="107.8" y1="102.6" x2="73.1" y2="82.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="110.8" y1="97.4" x2="76.1" y2="77.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="74.6" y1="80.0" x2="74.6" y2="53.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="74.6" y1="80.0" x2="51.3" y2="93.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="103.282032" y="148.000000" fill="rgb(255,12,12)"  stroke="rgb(255,12,12)" stroke-width="1" font-size="16" >OH</text>
+<text x="139.923048" y="88.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="163.923048" y="91.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="70.641016" y="48.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="94.641016" y="51.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="14.000000" y="108.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="26.000000" y="111.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="32.500000" y="108.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+</div>
+<div class="sample arrow"><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample">
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="180" height="180" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="112.3" y1="100.0" x2="112.3" y2="127.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="106.3" y1="100.0" x2="106.3" y2="127.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="109.3" y1="100.0" x2="132.7" y2="86.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="109.3" y1="100.0" x2="74.6" y2="80.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="74.6" y1="80.0" x2="74.6" y2="53.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="74.6" y1="80.0" x2="51.3" y2="93.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="103.282032" y="148.000000" fill="rgb(255,12,12)"  stroke="rgb(255,12,12)" stroke-width="1" font-size="16" >O</text>
+<text x="139.923048" y="88.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="163.923048" y="91.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="70.641016" y="48.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="94.641016" y="51.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="14.000000" y="108.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="26.000000" y="111.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="32.500000" y="108.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+
+</div>
+</div>
+</div>
+</div>
+<div class="spacer"></div>
+
+</div>
+
+<!--
+<h1>Terminology</h1>
+<div id="terminology">
+<h4>Regiochemistry</h4>
+<h4>Stereochemistry</h4>
+<h4>Chiral</h4>
+<h4><i>cis</i> or <i>trans</i></h4>
+<h4>Syn addition</h4>
+<h4>Anti addition</h4>
+<h4>Markovnikov's Rule</h4>
+<h4>Zaitsev's Rule</h4>
+<h4>Alkene</h4>
+<h4>Alkyne</h4>
+<h4>Halogen</h4>
+<h4>Hydroxyl</h4>
+<h4>Carbonyl</h4>
+</div>
+-->
+
+</div>
+</div>
+{% endblock %}
+
+
+
+

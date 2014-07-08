@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block jsimport %}
+<script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-1.9.0.js"> </script>
+<script>
+/*setInterval(function() {
+    $.ajax({
+        type: "POST",
+        url: "/orgo/homeMoleculeChanger/",
+        data: {'random': 'blah'},
+        success: function(data) {
+            $("#molecule").html(data);
+        },
+    });
+}, 3000);*/
+</script>
+{% endblock %}
+
+
+{% block cssimport %}
+<title>Carbonate</title>
+<style type="text/css">
+    .flasks {
+        width: 100%;
+        background: url('http://felixsun.scripts.mit.edu/orgo/static/flasks.png') no-repeat;
+        height: 550px;
+    }
+    
+    input {
+        width: 100%;
+    }
+    
+    body {
+        padding-top: 41px;
+        padding-bottom: 0px;
+        background-color: #F6F6F6;
+    }
+    
+    .centerer {
+        margin: 0 auto; 
+        text-align: center;
+    }
+    
+    .mini-hero-unit {
+        border-radius: 10px;
+        padding: 20px;
+        background-color: #F6F6F6;
+        background: rgba(225, 225, 225, 0.90);
+        height: 350px;
+    }
+    
+    .transparent {
+        background-color: #FFFFFF;
+        background-color: rgba(255, 255, 255, 0.0);
+    }
+
+</style>
+{% endblock %}
+
+
+
+{% block menuitems %}
+<li class="headnavbar"><a href="/orgo/reactions/">Reactions</a></li>
+<li class="headnavbar"><a href="/orgo/namereagent/">Try it!</a></li>
+{% endblock %}
+
+{% block signin %}
+<form action="/orgo/api/login/" method="post" class="headnavbar navbar-form pull-right form-horizontal">{% csrf_token %}
+    {% for field in logInForm %}
+        {{field}}
+    {% endfor %}
+    <input type="submit" value="Sign in" class="btn"/>
+</form>
+{% endblock %}
+
+{% block content %}
+<div class="flasks">
+<div class="row-fluid" >
+    <div class="container" style="width:1000px">
+            <div class="span8">
+            <div class="control-group" style="margin-top: 25px"></div> <!--spacing.-->
+                <h2><i>Ace the organic chemistry exam.</i></h2>
+                <div class="control-group" style="margin-top: 25px"></div>
+                <div class="row">
+                <div class="span4 mini-hero-unit">
+                <h3>Practice</h3>
+                Quiz yourself on the reagents required to perform each reaction. Build up a solid mastery of that daunting dictionary of reactions needed to excel at synthesis problems.
+                
+                <div style="margin-top: 25px"></div>
+                <div class="centerer"><a class="btn btn-primary" href="/orgo/namereagent/"><i class="icon-pencil icon-white" style="color:white"></i> Try it!</a></div>
+                </div>
+                
+                <div class="span4 mini-hero-unit">
+                <h3>Synthesize</h3>
+                Challenge your chemical abilities with <b>randomly-generated synthesis problems</b>. Add reagents, and watch as the synthesis unfolds to produce your target molecule. Compete to become a grandmaster of the art of synthesis.
+                </div>
+                
+                <div class="span4 mini-hero-unit">
+                <h3>Share</h3>
+                Help others out. Use your understanding of organic chemistry to <b>help others</b> with their synthesis problems, and earn points. <b>Save</b> interesting synthesis problems you discover, to show to your friends. 
+                
+                
+                </div>
+                </div>
+                
+                <div class="row">
+                <div class="span8"></div>
+                <div class="span4">
+                <div class="control-group" style="margin-top: 30px"></div> <!--spacing.-->
+                
+                <!--old location of button-->
+                
+                
+                </div>
+                </div>
+                
+                
+                
+            </div>
+            <div class="span4">
+                <div class="control-group" style="margin-top: 15px"></div> <!--spacing.-->
+                <div>
+                    <form action="/orgo/api/resetPW/" method="post" class="form-horizontal">{% csrf_token %}
+                        {{resetPWForm.email}}
+                        <input type="submit" placeholder="Email address" value="Forgot password?" style="float:right" class="btn"/>
+                    </form>
+                </div>
+                <div style="margin-top: 44px"></div> <!--spacing.-->
+                <div class="transparent mini-hero-unit" style="margin-left: 50px">
+                    <h3>New User</h3>
+                    <form action="/orgo/api/signup/" method="post" class="form-horizontal" style="width:100%">{% csrf_token %}
+                        <div class="control-group" style="width:100%">{{signUpForm.username}}</div>
+                        <div class="control-group" style="width:100%">{{signUpForm.password1}}</div>
+                        <div class="control-group" style="width:100%">{{signUpForm.password2}}</div>
+                        <span><div class="control-group" style="width:100%">{{signUpForm.email}}</div></span>
+                        <div><small>{{debug|safe}}</small></div>
+                        <div class="centerer"><input type="submit" value="Sign Up" class="btn btn-primary btn-large"/></div>
+                    </form>
+                </div>
+            </div>
+    </div>
+</div>
+</div>
+
+<!--
+<div class="hero-unit">
+    <h1> Hello world </h1>
+
+    <div id="molecule">
+    {{molecule|safe}} 
+    </div>
+</div>-->
+
+
+<div class="centerer">
+
+
+
+
+<div class="row">
+<div class="span9">
+An <a href="http://6.470.scripts.mit.edu/2013/competition/winners">MIT 6.470</a> project by Felix Sun and Chelsea Voss. 2013.
+<br />
+For best results, use this website with the latest update of <a href="http://www.google.com/intl/en/chrome/browser/">Google Chrome</a>.
+<br />
+<br />
+Contact us: <a href="">carbonate@mit.edu</a>
+</div>
+<div class="span1"><a href="https://www.djangoproject.com/"><img src="http://felixsun.scripts.mit.edu/orgo/static/django.png" align="middle"></img></a></div>
+<div class="span1"><a href="http://openbabel.org/wiki/Main_Page"><img src="http://felixsun.scripts.mit.edu/orgo/static/babel.png" align="middle"></img></a></div>
+<div class="span1"><a href="http://jquery.com/"><img src="http://felixsun.scripts.mit.edu/orgo/static/jquery.png" align="middle"></img></a></div>
+
+</div>
+
+<br />
+<br />
+
+</div>
+
+
+
+
+
+
+{% endblock %}

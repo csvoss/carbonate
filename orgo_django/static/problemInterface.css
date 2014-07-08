@@ -1,0 +1,236 @@
+
+body {
+    overflow: hidden;
+}
+.container{
+    position: relative;
+}
+#offscreen {
+    background-color: #000000;
+}
+.ui-autocomplete {
+    max-height: 100px;
+    overflow-y: auto;
+    /* prevent horizontal scrollbar */
+    overflow-x: hidden; 
+}
+* html .ui-autocomplete {
+    height: 100px;
+}
+.fake-link {
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+}
+.arrowLabel {
+    background-color:#CCCCCC;
+    padding:3px;
+}
+.molecule {
+    width: 200px;
+    height: 200px; 
+    padding: 0px; 
+    float: left; 
+    margin-top:10px; 
+    margin-bottom:50px; 
+    margin-right:20px; 
+    margin-left:10px; 
+    border: 1px solid transparent;
+    border-radius: 10px;
+}
+#target {
+    width: 200px;
+    margin-top: 10px;
+    margin-right:auto;
+    margin-left:auto;
+    margin-bottom:10px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+}
+
+.molecule:hover {
+    background-color: white;
+    border: 1px solid #E0E0E0;
+}
+.molecule#startingMolecule:hover {
+    background-color: transparent;
+    border: 1px solid transparent;
+}
+.molecule#productMolecule:hover {
+    background-color: transparent;
+    border: 1px solid transparent;
+}
+
+#target:hover {
+    background-color: white;
+    border: 1px solid #E0E0E0;
+}
+#target:hover {
+    background-color: transparent;
+    border: 1px solid transparent;
+}
+
+.drophover {
+    background-color: #E0E0E0;
+    border: 1px solid #E0E0E0;
+}
+
+.bigMolecule {
+    width: 400px;
+    height: 400px;
+    position: absolute;
+    left: -9999px;
+    top: 100px;
+    z-index: 10;
+    background-color: #FFFFFF;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 20px;
+}
+
+ul {
+    list-style-type:none;
+}
+.reaction { 
+    width: 150px; 
+    height: 50px; 
+    padding: 5px; 
+    float: left; 
+    margin-top:85px; 
+    margin-bottom:75px; 
+    margin-right:10px; 
+    margin-left:10px; 
+    background-color:transparent;
+}
+#logo {
+    margin-top: 10px;
+    margin-left:10px;
+    float:left;
+}
+.reagent {
+    margin-left:20px;
+    width: 165px; 
+    height: 50px; 
+    height: 100%; 
+    padding: 5px; 
+    float:left; 
+    margin-top:5px; 
+    margin-bottom:5px; 
+    border: 1px solid transparent;
+    border-radius:10px;
+}
+
+.reagent:hover{
+    background-color:#FFFFFF;
+    border: 1px solid #E0E0E0;
+}
+
+#reagentTyper {
+    margin-left:auto;
+    margin-right:auto;
+    width: 200px;
+}
+#reagentTyperBox {
+    width: 200px;
+}
+#addReagent {
+    width: 200px;
+}
+#cleared{
+    clear:both;
+}
+
+
+#rightbar {height:550px; background-color:transparent; overflow:auto;}
+#leftbar  {height:550px; background-color:transparent; overflow:auto;}
+#chatbox {
+    position: fixed;
+    bottom: 0px;
+    margin-left: -9999px;  /*Invisible to start*/
+    height: 150px;
+    width: 600px;
+    background-color: #FFFFFF;
+    border-style: solid;
+    border-width: 1px;
+}
+
+.messageWindow {
+    height: 120px;
+    overflow: auto;
+}
+.box { 
+    width:135px; 
+    height:20px; 
+    padding:10px; 
+    margin-top: 10px;
+    margin-left:10px;
+    float:left;
+}
+
+._jsPlumb_connector {
+    z-index: 0;
+}
+
+#messageBox {
+    position: absolute;
+    top: 100px;
+    left: 0px;
+    right: 0px;
+    margin-left: auto;
+    margin-right: auto;
+    display: none;
+    padding: 10px;
+    width: 200px;
+    border: 1px solid black;
+    background-color: white;
+}
+
+.helperPopup {
+    border: 1px solid #E0E0E0;
+    padding: 10px;
+    position: absolute;
+    width: 300px;
+    background-color: white;
+    display: none;
+}
+
+#startingMoleculeH {
+    top: 200px;
+}
+
+#targetMoleculeH {
+    top: 100px;
+    left: 600px;
+}
+
+#inputH {
+    top: 250px;
+    left: 600px;
+}
+
+#reagentsH {
+    top: 330px;
+    left: 600px;
+}
+
+#reactedH {
+    top: 250px;
+    left: 250px;
+}
+
+#reacted1StepH {
+    top: 200px;
+    left: 250px;
+}
+
+#topbarH {
+    top: -20px;
+    left: 350px;
+}
+
+#doneH {
+    top: 250px;
+    left: 600px;
+}
+
+

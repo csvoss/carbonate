@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block jsimport %}
+<script>
+    var tutorial;
+</script>
+<script src="http://code.jquery.com/jquery-1.8.3.js"></script>
+<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+<script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-1.9.0.js"></script>
+<script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.js"></script>
+<script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.min.js"></script>
+<script src = "http://felixsun.scripts.mit.edu/orgo/static/problemInterface.js"> </script>
+{% endblock %}
+
+{% block cssimport %}
+<title>Carbonate - One-Step Problem</title>
+<link rel="stylesheet" type="text/css" href="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.min.css">
+<link rel="stylesheet" type="text/css" href="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.css">
+<title>Reagents Practice</title>
+<link rel="stylesheet" type="text/css" href = "http://felixsun.scripts.mit.edu/orgo/static/problemInterface.css"  />
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function(){
+    setup({{Autocomplete|safe}});
+    if ({{needsHelp}}){
+        tutorial = 1;
+        $(".wave1").css("display", "block");
+    } else {
+        tutorial = 0;
+    }
+});
+</script>
+{% endblock %}
+
+
+{% block menuitems %}
+
+<li class="headnavbar"><a href="/orgo/reactions/">Reactions</a></li>
+<li class="headnavbar"><a href="/orgo/namereagent/">New problem</a></li>
+<li class="headnavbar"><a href="#" onclick="showAnswer()" style="padding-left:20px"> Show answer </a></li>
+
+{% endblock %}
+
+
+
+
+{% block signin %}
+<span id="successbox" class="navbar-text pull-right">
+</span>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+<div id="messageBox">
+    <div id="messageArea">
+    </div>
+    
+    <a href="#" onclick="$('#messageBox').css('display','none');"> Close </a>
+</div>
+
+<div class="row">
+<div id = "leftbar" class="span9">
+
+
+
+    <div id = "startingMolecule" class = "molecule">
+    {{ReactantMolecule|safe}}
+    </div>
+
+
+    <div id="reactionsHere" class="reaction">
+    </div>
+
+    <div id="productMolecule" class="molecule">
+    </div>
+
+
+    <div id = "bigMolecule" class="bigMolecule">
+    </div>
+
+</div>
+
+<div id="rightbar" class="span3">
+
+    <h2>Target:</h2>
+    <div id = "target">
+    {{TargetMolecule|safe}}
+    </div>
+
+
+    <div class="ui-widget" id="reagentTyper">
+    <button type="button" onclick="updateReagents()" id = "addReagent">Add Reagent</button>
+    <input id = "reagentTyperBox" />
+    </div>
+
+
+    <ul id="reagentsHere">
+    </ul>
+
+
+</div>
+</div> <!--End row-->
+
+<div class="helperPopup wave1" id="startingMoleculeH">
+<p>
+This is your starting molecule.  Click on it to get a better view, if you would like.
+</p>
+</div>
+
+<div class="helperPopup wave1" id="inputH">
+<p>
+Type reagents into this box to add them to your reaction.  <b> Go ahead and try "H2 PdC EtOH".</b>  Make sure you have
+all the reagents you need for a reaction, including catalysts and solvents when necessary.  If you picked 
+the easy autocomplete mode, the autocomplete will help you with this.
+</p>
+</div>
+
+<div class="helperPopup wave1" id="targetMoleculeH">
+<p>
+Your goal is to find the combination of reagents that transforms the starting molecule into this,
+the target molecule.
+</p>
+</div>
+
+<div class="helperPopup wave2" id="reagentsH">
+<p>
+Here are the reagents you just entered.  Drag them onto a molecule to do a reaction.
+</p>
+</div>
+
+<div class="helperPopup wave3" id="reacted1StepH">
+<p>
+And here is your product!  If that was incorrect, simply drag a different set of reagents onto the starting
+molecule to try again.
+</p>
+</div>
+
+<div class="helperPopup wave3" id="topbarH">
+<p>
+Stuck?  Click "Show answer".
+</p>
+</div>
+
+<div class="helperPopup wave3" id="doneH">
+<p>
+Check out the <a href="http://felixsun.scripts.mit.edu/orgo/reactions/">reaction catalog</a> to see which reactions are available and to learn more about their chemistry. </p>
+<p>
+That's it for the tutorial!  Happy syntheses!
+</p>
+<p>
+<a href="#" onclick="closeTutorial()"> Close tutorial </a>
+</p>
+</div>
+
+</div>
+
+{% endblock %}
+

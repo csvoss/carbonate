@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block jsimport %}
+<script>
+    var onSuccess;
+</script>
+<script src="http://code.jquery.com/jquery-1.8.3.js"></script>
+<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+<script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-1.9.0.js"></script>
+<script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.js"></script>
+<script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.min.js"></script>
+<script type='text/javascript' src='http://felixsun.scripts.mit.edu/orgo/static/jquery.jsPlumb-1.3.16-all-min.js'></script>
+<script src = "http://felixsun.scripts.mit.edu/orgo/static/synthesisProblemInterface.js"> </script>
+{% endblock %}
+
+
+{% block cssimport %}
+<title>Carbonate - Help Others</title>
+<link rel="stylesheet" type="text/css" href="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.min.css">
+<link rel="stylesheet" type="text/css" href="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.css">
+<title>Help Others Do Orgo</title>
+<link rel="stylesheet" type="text/css" href = "http://felixsun.scripts.mit.edu/orgo/static/problemInterface.css"  />
+{% endblock %}
+
+{% block scripts %}
+<!--A dump for text that the js needs to load.-->
+<script id="dump" language="text">
+
+    <h2>Helper Lounge</h2>
+    <p>
+    Look for users who need help below.  To help someone, click on their username.
+    </p>
+    <div id="queue">
+    </div>
+
+    <div id="debug">
+    </div>
+</script>
+
+<script>
+var state = "Waiting";
+var pk = 0;
+var timeoutId = 0;
+var REFRESH = 1500;
+$(document).ready(function(){
+    getQueue();
+    $("#submit").click(submitLine);
+    $("#input").keydown(function(e){
+        //If the user presses the enter key (#13) while on the input box,
+        //automatically submit line.
+        if (e.keyCode == 13) {
+            submitLine();
+        }
+    });
+});
+
+function submitLine(){
+    if (state == "Waiting"){
+        return;
+    }
+    //Submit a new message to the server.
+    $.ajax({
+        type: "POST",
+        url: "/orgo/chat/helperchatpoll/",
+        data: {'PK': pk,
+               'message': $('#input').val()},
+        success: update
+    });
+    //Reset the text input.
+    $('#input').val("");
+};
+
+function getQueue() {
+    $.ajax({
+        type: "GET",
+        url: "/orgo/chat/helperpoll/",
+        success: function(data) {
+            out = ""
+            //Data contains a list of waiting users.
+            nameArray = data.split(" ")
+            if (data.length == 0) {
+                //No users - display a message saying so.
+                out = "No one is looking for help right now.  Maybe someone will ask in a little while.";
+            }
+            for (i=0; i<nameArray.length; i++) {
+                out += '<a href="#" onclick="connectHelpee(this.id)" id="'+nameArray[i]+'">'+nameArray[i]+'</a> <br / >'
+            }
+            $("#queue").html(out);
+        }
+    });
+    timeoutId = setTimeout(getQueue, REFRESH);
+}
+
+function connectHelpee(userId) {
+    $.ajax({
+        type: "POST",
+        url: "/orgo/chat/helperpoll/",
+        data: {'username': userId},
+        success: function(data) {
+            $("#debug").html(data);
+            jsonObject = $.parseJSON(data);
+            state = "Chatting";
+            pk = jsonObject.chatPK;
+            $("#helperChatbox").html("You are now helping "+jsonObject.helpee+". <br / >");
+            $("#chatbox").css("margin-left", "100px");
+            $("#target").html(jsonObject.target);
+            allSetup();
+            drawAllTheThings(data);
+            clearTimeout(timeoutId);
+            getChat();
+        }
+    });
+}
+
+function getChat() {
+    //Gets chat messages from the server.
+    $.ajax({
+        type: "POST",
+        url: "/orgo/chat/helperchatpoll/",
+        data: {'PK': pk},
+        success: update
+    });
+    setTimeout(getChat, REFRESH);
+}
+
+function update(data) {
+    jsonObject = $.parseJSON(data);
+    if (!jsonObject['open']) {
+        $("#debug").html(data);
+        $("#helperChatbox").html("Session dropped.  Did the other user log out?");
+        state = "Waiting";
+        $("#leftbar").html($("#dump").html());
+        setTimeout(getQueue(), REFRESH);
+        return;
+    }
+    drawAllTheThings(data);
+    for (i=0; i<jsonObject['length']; i++) {
+        $("#helperChatbox").append(jsonObject[i] + "<br / >");
+    }
+    //Scroll to bottom.
+    if (jsonObject['length'] != 0) {
+        $("#helperChatbox").scrollTop($("#helperChatbox").prop("scrollHeight")-$("#helperChatbox").height());
+    }
+}
+
+function onSuccess() {
+    $("#successbox").html("<div style=\"color:#00FF00\">SUCCESS!</div>");
+    $("#messageArea").html("<h2 style='color:green'>Thank you!</h2> <br / > <a href='/orgo/chat/volunteertohelp/'> Help more people  </a><br / ><a href='/orgo/'> Back to home </a>");
+    $("#messageBox").css('display', "block");
+}
+
+</script>
+{% endblock %}
+
+
+{% block menuitems %}
+<li class="headnavbar"><a href="/orgo/reactions/">Reactions</a></li>
+<li class="headnavbar"><a href="/orgo/renderSynthesis/">New synthesis</a></li>
+<li class="headnavbar"><a href="/orgo/namereagent/">New one-step problem</a></li>
+<li class="headnavbar"><a href="/orgo/logout/">Logout</a></li>
+{% endblock %}
+
+
+
+{% block content %}
+<div class="container">
+
+<div id="messageBox">
+    <div id="messageArea">
+    </div>
+    
+    <a href="#" onclick="$('#messageBox').css('display','none');"> Close </a>
+</div>
+
+<div id="bigMolecule" class="bigMolecule">
+</div>
+
+
+<div class="row">
+    <div id="leftbar" class="span9">
+        <h2>Helper Lounge</h2>
+        <p>
+        Look for users who need help below.  To help someone, click on their username.
+        </p>
+        <div id="queue">
+        </div>
+
+        <div id="debug">
+        </div>
+    </div>
+
+    <div id="rightbar" class="span3">
+        <h2>Target:</h2>
+        <div id = "target">
+        </div>
+    </div>
+
+</div>
+<div id="chatbox">
+    <div id="helperChatbox" class="messageWindow">
+    </div>
+
+    <input type="text" name="input" id="input"></input>
+    <button id="submit"  style="margin-bottom:13px;">Submit</button>
+</div>
+</div>
+
+{% endblock %}

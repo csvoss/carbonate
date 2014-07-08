@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block jsimport %}
+<script>
+    var tutorial;
+    var onSuccess;
+</script>
+<script src="http://code.jquery.com/jquery-1.8.3.js"></script>
+<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+<script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-1.9.0.js"></script>
+<script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.js"></script>
+<script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.min.js"></script>
+<script type='text/javascript' src='http://felixsun.scripts.mit.edu/orgo/static/jquery.jsPlumb-1.3.16-all-min.js'></script>
+<script src = "http://felixsun.scripts.mit.edu/orgo/static/synthesisProblemInterface.js"> </script>
+{% endblock %}
+
+{% block cssimport %}
+<title>Carbonate - Synthesis Problem</title>
+<link rel="stylesheet" type="text/css" href="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.min.css">
+<link rel="stylesheet" type="text/css" href="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.css">
+<title>Synthesis Practice</title>
+<link rel="stylesheet" type="text/css" href = "http://felixsun.scripts.mit.edu/orgo/static/problemInterface.css"  />
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function(){
+    allSetup();
+    clientSetup({{Autocomplete|safe}});
+    redrawProblem();
+    
+    if ({{needsHelp}}){
+        tutorial = 1; //Tracks the progress of the help dialogs.
+        $(".wave1").css("display", "block");
+    } else {
+        tutorial = 0;
+    }
+    
+    onSuccess = function(){
+        $("#successbox").html("<div style=\"color:#00FF00\" class=\"headnavbar\">SUCCESS!</div>");
+        //$("#messageArea").html("<h2 style='color:green'>Congrats!</h2> <br /> <a href='/orgo/renderSynthesis/'> Do another </a><br /><a href='/orgo/'> Back to home </a>");
+        $("#reagentsHere").html("<div style=\"border-radius: 10px; padding:20px; background-color: #181818; margin-top:50px; font-color:#00FF00\"><h3 style='color:#999999'>Congrats!</h3> <br /> <a href='/orgo/renderSynthesis/'> Do another </a><br /><a href='/orgo/'> Back to home </a></div>");
+        //$("#messageBox").css('display', "block");
+    }
+});
+</script>
+{% endblock %}
+
+{% block menuitems %}
+<li class="headnavbar"><a href="/orgo/reactions/">Reactions</a></li>
+<li class="headnavbar"><a href="/orgo/renderSynthesis/">New synthesis</a></li>
+<li class="headnavbar"><a href="#" onclick="askForHelp()">Ask for help</a></li>
+<li class="headnavbar"><a href="#" onclick="solutionDisplay()">Display solution</a></li>
+<li class="headnavbar"><a href="#" onclick="saveProblem()">Save this problem</a></li>
+
+{% endblock %}
+
+{% block signin %}
+<span id="successbox" class="navbar-text pull-right">
+</span>
+{% endblock %}
+
+
+{% block content %}
+<div class="container">
+
+<div id="bigMolecule" class="bigMolecule">
+</div>
+
+<div id="messageBox">
+    <div id="messageArea">
+    </div>
+    
+    <a href="#" onclick="$('#messageBox').css('display','none');"> Close </a>
+</div>
+
+<div class="row">
+    <div id = "leftbar" class="span9">
+        <!--PUT FLOWCHART HERE-->
+    </div>
+
+
+    <div id="rightbar" class="span3">
+        <h2>Target:</h2>
+        <div id = "target">
+        {{TargetMolecule|safe}}
+        </div>
+
+        <div class="ui-widget" id="reagentTyper">
+        <button type="button" onclick="updateReagents()" id = "addReagent">Add Reagent</button>
+        <input id = "reagentTyperBox" />
+        </div>
+
+
+        <ul id="reagentsHere">
+        </ul>
+
+
+    </div>
+</div>
+
+
+
+<div id="chatbox">
+    <div id="helpbox" class="messageWindow">
+    </div>
+    <input type="text" name="input" id="input"></input>
+    <button id="submit" style="margin-bottom:13px;">Submit</button>
+    <div style="float:right">
+        <button id="close">End chat</button>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </div>
+</div>
+
+<div class="helperPopup wave1" id="startingMoleculeH">
+<p>
+Your starting molecule is here.  Usually, you will have one; occasionally, you will have two.
+</p>
+</div>
+
+<div class="helperPopup wave1" id="targetMoleculeH">
+<p>
+Over here are your target molecules.  Your goal is to find a series of reactions that produce these targets.
+If you would like a closer look at these (or any other) molecules, click on the image.
+</p>
+</div>
+
+<div class="helperPopup wave1" id="inputH">
+<p>
+Type reagents into this box to add them to your reaction.  <b> Go ahead and try "H2 PdC EtOH".</b>  Make sure you have
+all the reagents you need for a reaction, including catalysts and solvents when necessary.  If you picked 
+the easy autocomplete mode, the autocomplete will help you with this.
+</p>
+</div>
+
+<div class="helperPopup wave2" id="reagentsH">
+<p>
+Here are the reagents you just entered.  Drag them onto a molecule to do a reaction.
+</p>
+</div>
+
+<div class="helperPopup wave3" id="reactedH">
+<p>
+And here is your product!  You can drag reagents onto this product to continue your synthesis.
+</p>
+<p>
+To delete this product, drag it to the right side of the screen (around "Target Molecule").
+</p>
+<p>
+You can also drag a molecule onto another molecule to combine them, and set up for
+an addition reaction.
+</p>
+</div>
+
+<div class="helperPopup wave3" id="topbarH">
+<p>
+If you are stuck, other users of the site may be able to help you!  Click "Ask for help" to be
+connected to humans who can walk you through the problem.
+</p>
+<p>
+Still stuck?  "Display solution" shows an answer.
+</p>
+<p>
+If you would like a friend to see this problem, click "Save this problem" and send him/her the
+problem ID that pops up.
+</p>
+</div>
+
+<div id = "bottombar">
+</div>
+
+<div class="helperPopup wave3" id="doneH">
+<p>
+Check out the <a href="http://felixsun.scripts.mit.edu/orgo/reactions/">reaction catalog</a> to see which reactions are available and to learn more about their chemistry. </p>
+<p>
+That's it for the tutorial!  Happy syntheses!
+</p>
+<p>
+<a href="#" onclick="closeTutorial()"> Close tutorial </a>
+</p>
+</div>
+
+</div>
+
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
