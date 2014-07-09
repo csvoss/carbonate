@@ -98,14 +98,6 @@ Welcome, {{name}}!
 
 <div class="span4">
     <div class="whitebox">
-        <h3>Help Others</h3>
-        <p>
-        Think you're good at organic chemistry?  <a href="/orgo/chat/volunteertohelp"> Other users need your help! </a>
-        Guide them through synthesis problems and make your way up the leaderboard!
-        </p>
-    </div>
-    <br />
-    <div class="whitebox">
     <h3>Reaction Settings</h3>
     <!--Settings checkboxes-->
         <span style="color:red" >{{debug|safe}}</span>
@@ -167,20 +159,6 @@ Welcome, {{name}}!
     </tbody>
     </table>
 
-    <h4> Most Helpful </h4>
-    <table class="table table-condensed">
-    <thead>
-        <tr>
-        <th> Rank </th>
-        <th> User </th>
-        <th> # Helped </th>
-        </tr>
-    </thead>
-    <tbody>
-        {{helpHighScore|safe}}
-    </tbody>
-    </table>
-
 </div>
 
 </div>
@@ -191,35 +169,6 @@ Welcome, {{name}}!
 
 
 
-
-
-<!--<div class="container">
-<div class="tabbable">
-    <ul class="nav nav-tabs">
-        <li class="active"><a href="#tab1" data-toggle="tab"><h3>Synthesis Problems</h3></a></li>
-        <li><a href="#tab2" data-toggle="tab"><h3>One-Step Problems</h3></a></li>
-        <li><a href="#tab3" data-toggle="tab"><h3>Help Others</h3></a></li>
-    </ul>
-<div class="tab-content">
-    <div class="tab-pane active" id="tab1">
-        <h4> Load Shared Problem </h4>
-        
-    </div>
-    
-    <div class="tab-pane" id="tab2">
-         
-        
-        <h3> How am I Doing?</h3>
-        
-    </div>
-    
-    <div class="tab-pane" id="tab3">
-        <p>
-        <a href="/orgo/chat/volunteertohelp"> Help others </a>
-        </p>
-    </div>
-
-</div>-->
 <div id="popup">
     <h3> Change Password </h3>
     <form action = "/orgo/api/changePW/" method="post" class="form-horizontal">{% csrf_token %}

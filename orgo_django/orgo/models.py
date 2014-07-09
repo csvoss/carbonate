@@ -164,7 +164,6 @@ class SynthesisProblemModel(models.Model):
     target = models.ForeignKey(MoleculeBoxModel, null=True, related_name="spTarget")
     retain = models.BooleanField()  #If true, this molecule is never deleted.
     solverCredited = models.BooleanField(default=False)
-    helperCredited = models.BooleanField(default=False)
 
     
     #reactionSteps is a list of reactionsteps; the final one contains the target molecule.
@@ -307,54 +306,7 @@ class myAuthenticationForm(AuthenticationForm):
             widget = forms.PasswordInput(attrs={'placeholder': 'Password',
                                                 'class': 'span2'}))
 
-    
-###Can delete; this is me learning Django
-#class MoleculeForm(forms.Form):
-#    smiles = forms.CharField(max_length = 100)
-#class MoleculeModel(models.Model):
-#    smiles = models.CharField(max_length=100)    
-#    @classmethod
-    # def create(cls, s):
-        # x = cls(smiles = s)
-        # return x
-        
-class HelpWaitingList(models.Model):
-    #A container to manage waiting users who NEED help.
-    #For now, we will only have one instance of this, but eventually,
-    #each class will have one.
-    #Eventually, we will need additional fields (class, etc.)
-    users = models.ManyToManyField(User, null=True, through='WaitTimer')
-    @classmethod
-    def create(cls):
-        return cls()
-        
-class WaitTimer(models.Model):
-    helpWaitingList = models.ForeignKey(HelpWaitingList)
-    user = models.ForeignKey(User)
-    lastCheck = models.DateTimeField(auto_now=True)  #auto_now automatically changes this field to now whenever the object is saved.
-    
-class ChatPair(models.Model):
-    #A chat between two people, with asymmetric naming.
-    helpee = models.ForeignKey(User, related_name='helpee')
-    helpeeLastCheck = models.DateTimeField(null=True)
-    helper = models.ForeignKey(User, related_name='helper')
-    helperLastCheck = models.DateTimeField(null=True)    #Can't do auto_now, because there are two users to track.
-    initTime = models.DateTimeField()
-    chatRecord = models.ManyToManyField("ChatLine")
-    @classmethod
-    def create(cls, helpee, helper):
-        return cls(helpee=helpee, helper=helper, initTime=timezone.now(), helpeeLastCheck=timezone.now(), helperLastCheck=timezone.now())
-    
-class ChatLine(models.Model):
-    originator = models.ForeignKey(User)
-    content = models.TextField()
-    helpeeSeen = models.BooleanField(default=False)
-    helperSeen = models.BooleanField(default=False)
-    postTime = models.DateTimeField()
-    @classmethod
-    def create(cls, originator, content):
-        return cls(originator=originator, content=content, postTime=timezone.now())
-        
+
 class ReagentType(models.Model):
     #A little class that saves a string describing each reagent type.
     name = models.CharField(max_length=100)

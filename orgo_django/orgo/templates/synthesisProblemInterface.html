@@ -29,7 +29,7 @@ $(document).ready(function(){
     clientSetup({{Autocomplete|safe}});
     redrawProblem();
     
-    if ({{needsHelp}}){
+    if ({{tutorialProgress}}){
         tutorial = 1; //Tracks the progress of the help dialogs.
         $(".wave1").css("display", "block");
     } else {
@@ -49,7 +49,6 @@ $(document).ready(function(){
 {% block menuitems %}
 <li class="headnavbar"><a href="/orgo/reactions/">Reactions</a></li>
 <li class="headnavbar"><a href="/orgo/renderSynthesis/">New synthesis</a></li>
-<li class="headnavbar"><a href="#" onclick="askForHelp()">Ask for help</a></li>
 <li class="headnavbar"><a href="#" onclick="solutionDisplay()">Display solution</a></li>
 <li class="headnavbar"><a href="#" onclick="saveProblem()">Save this problem</a></li>
 
@@ -99,18 +98,6 @@ $(document).ready(function(){
     </div>
 </div>
 
-
-
-<div id="chatbox">
-    <div id="helpbox" class="messageWindow">
-    </div>
-    <input type="text" name="input" id="input"></input>
-    <button id="submit" style="margin-bottom:13px;">Submit</button>
-    <div style="float:right">
-        <button id="close">End chat</button>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    </div>
-</div>
 
 <div class="helperPopup wave1" id="startingMoleculeH">
 <p>
