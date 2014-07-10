@@ -630,7 +630,11 @@ function askForHelp() {
         type: "GET",
         url: "/orgo/chat/askforhelp/",
         success: function(data) {
-            $("#helpbox").html(data+" people waiting for help, including you");
+            if(data==1){
+              $("#helpbox").html("1 person waiting for help, including you");
+            }else{
+              $("#helpbox").html(data+" people waiting for help, including you");
+            }
         }
     });
     setTimeout(keepPolling, REFRESH);
@@ -649,7 +653,11 @@ function keepPolling() {
                 pk = dataObject.chatPK;
                 getChat();
             } else {
-                $("#helpbox").html(dataObject.queueSize+" people waiting for help, including you");
+                if(data==1){
+                  $("#helpbox").html("1 person waiting for help, including you");
+                }else{  
+                  $("#helpbox").html(dataObject.queueSize+" people waiting for help, including you");
+                }
                 setTimeout(keepPolling, REFRESH);
             }
 
