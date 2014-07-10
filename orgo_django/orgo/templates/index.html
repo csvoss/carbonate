@@ -43,7 +43,7 @@
     
     .mini-hero-unit {
         border-radius: 10px;
-        padding: 20px;
+        padding: 10px;
         background-color: #F6F6F6;
         background: rgba(225, 225, 225, 0.90);
         height: 350px;
@@ -61,7 +61,7 @@
 
 {% block menuitems %}
 <li class="headnavbar"><a href="/orgo/reactions/">Reactions</a></li>
-<li class="headnavbar"><a href="/orgo/namereagent/">Try it!</a></li>
+<!--<li class="headnavbar"><a href="/orgo/namereagent/">Try it!</a></li>-->
 {% endblock %}
 
 {% block signin %}
@@ -84,7 +84,11 @@
                 <div class="row">
                 <div class="span4 mini-hero-unit">
                 <h3>Practice</h3>
-                Quiz yourself on the reagents required to perform each reaction. Build up a solid mastery of that daunting dictionary of reactions needed to excel at synthesis problems.
+                    <ul>
+                        <li>Quiz yourself on the reagents required to perform each reaction.</li>
+                        <li>Build up a solid mastery of that daunting dictionary of reactions needed to excel at synthesis problems.</li>
+                    </ul>
+                 
                 
                 <div style="margin-top: 25px"></div>
                 <div class="centerer"><a class="btn btn-primary" href="/orgo/namereagent/"><i class="icon-pencil icon-white" style="color:white"></i> Try it!</a></div>
@@ -92,12 +96,22 @@
                 
                 <div class="span4 mini-hero-unit">
                 <h3>Synthesize</h3>
-                Challenge your chemical abilities with <b>randomly-generated synthesis problems</b>. Add reagents, and watch as the synthesis unfolds to produce your target molecule. Compete to become a grandmaster of the art of synthesis.
+                    <ul>
+                        <li>Challenge your chemical abilities with <b>randomly-generated synthesis problems</b>.</li>
+                        <li>Add reagents, and watch as the synthesis unfolds to produce your target molecule.</li>
+                        <li>Compete to become a grandmaster of the art of synthesis.</li>
+                    </ul>
+                  
                 </div>
                 
                 <div class="span4 mini-hero-unit">
                 <h3>Share</h3>
-                Help others out. Use your understanding of organic chemistry to <b>help others</b> with their synthesis problems, and earn points. <b>Save</b> interesting synthesis problems you discover, to show to your friends. 
+                    <ul>
+                        <li>Help others out.</li>
+                        <li>Use your understanding of organic chemistry to <b>help others</b> with their synthesis problems, and earn points.</li>
+                        <li><b>Save</b> interesting synthesis problems you discover, to show to your friends.</li>
+                    </ul>
+                   
                 
                 
                 </div>
