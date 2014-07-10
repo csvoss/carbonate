@@ -209,22 +209,30 @@ def renderOldNameReagent(request):
     
 
 def renderNameReagent(request, tutorial=False):
+    
     try:
         profile = request.user.profile
+        
     except:
+        
         #Anonymous user.
         problem = generateNameReagentProblem(AlkeneAlkyneMode)
         step = models.ReactionStepModel.create(problem)
         step.save()
         request.session['problem'] = step
         autocomplete = reactionAutocomplete
+        
         if 'tutorial' in request.session:
+            
             tutorial = False
         else:
+            
             tutorial = True
             request.session['tutorial'] = True
+            
     else:
         #Sometimes, the user doesn't even have a previous problem, so deleting doesn't always work.
+        
         try:
             temp1 = profile.currentNameReagentProblem.productBox
             temp2 = profile.currentNameReagentProblem.reactantBox
@@ -245,11 +253,13 @@ def renderNameReagent(request, tutorial=False):
         step.save()
         profile.currentNameReagentProblem = step
         profile.save()
-    return render(request, 'problemInterface.html', {"ReactantMolecule": step.reactantBox.svg,
-                                                     "TargetMolecule": step.productBox.svg, 
-                                                     "Name": request.user.username,
-                                                     "Autocomplete": autocomplete,
-                                                     "tutorialProgress": int(tutorial),})
+#    raise StandardError("hi")
+    return HttpResponse("blah")
+#    return render(request, 'problemInterface.html', {"ReactantMolecule": step.reactantBox.svg,
+#                                                     "TargetMolecule": step.productBox.svg, 
+#                                                     "Name": request.user.username,
+#                                                     "Autocomplete": autocomplete,
+#                                                     "tutorialProgress": int(tutorial),})
         
         
 def checkboxUpdate(request, profile): 
