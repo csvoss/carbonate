@@ -49,7 +49,8 @@ def parserSingle(lexed):
 
     first = lexed.pop(0)
     assert isAtom(first)
-    molecule = 
+    molecule = None
+    ## TODO: finish this method
 
     c40 = Atom("C")
     c41 = Atom("C")
