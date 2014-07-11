@@ -29,5 +29,6 @@ def render(smiles, hydrogens=False):
     
     #Make the svg background transparent: replace fill="rgb(255,255,255)" with fill-opacity="0"
     ans = re.sub("fill=\"white\"", "fill-opacity=\"0\"", ans)
-    
+    ans = re.sub("<svg ", "<svg \"0 0 widthOfContainer heightOfContainer\"", ans)
+
     return ans

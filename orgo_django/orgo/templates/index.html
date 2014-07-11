@@ -54,6 +54,13 @@
         background-color: rgba(255, 255, 255, 0.0);
     }
 
+
+    #forgotPass{
+      height:30px;
+      width:100px;
+      font-size:11px;/* How to center? */
+    }
+
 </style>
 {% endblock %}
 
@@ -135,8 +142,9 @@
                 <div class="control-group" style="margin-top: 15px"></div> <!--spacing.-->
                 <div>
                     <form action="/orgo/api/resetPW/" method="post" class="form-horizontal">{% csrf_token %}
+                        Forgot password?
                         {{resetPWForm.email}}
-                        <input type="submit" placeholder="Email address" value="Forgot password?" style="float:right" class="btn"/>
+                        <input id="forgotPass" type="submit" placeholder="Email address" value="Submit" style="float:right" class="btn"/>
                     </form>
                 </div>
                 <div style="margin-top: 44px"></div> <!--spacing.-->
