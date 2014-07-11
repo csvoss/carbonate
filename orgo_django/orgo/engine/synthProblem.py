@@ -407,7 +407,7 @@ def reactionStepHtml(reactionStep):
         if reactionStep.hasReagents[reagent]:
             html += REAGENTS[reagent][0] + ", "
             
-    return "<div class = \"reaction\" class = \"ui-widget-content\">"+(html[:-2])+"<img src=\"http://felixsun.scripts.mit.edu/orgo/static/arrow.png\"/></div>"
+    return "<div class = \"reaction\" class = \"ui-widget-content\">"+(html[:-2])+"<img src=\"/orgo/static/arrow.png\"/></div>"
 
                          
 def generateNameReagentProblem(mode="AlkeneAlkyne"):

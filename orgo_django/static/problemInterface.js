@@ -158,7 +158,7 @@ function updateBigMolecule(){
                 return
             }
             out=$(this).html().replace('height="200px"', 'height="400px"').replace('width="200px"', 'width="400px"');
-            image = "<img src=\"https://felixsun.scripts.mit.edu/orgo/static/x.png\" style=\"position:absolute;\"></img>";
+            image = "<img src=\"/orgo/static/x.png\" style=\"position:absolute;\"></img>";
             $(bigSelector).css('left', '400px');
             out = image + out;
             $(bigSelector).html(out);
