@@ -25,6 +25,7 @@ body {
 .arrowLabel {
     background-color:#CCCCCC;
     padding:3px;
+    border: 1px solid;
 }
 .molecule {
     width: 200px;
