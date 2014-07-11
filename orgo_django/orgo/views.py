@@ -380,7 +380,7 @@ def showNRAnswer(request):
         #Anonymous user
         problem = request.session['problem']
     out = problem.html
-    htmlOutput =  "<li class=\"reagent\" class = \"ui-state-default\" >"+out+"<img src=\"http://felixsun.scripts.mit.edu/orgo/static/arrow.png\"/></li>"
+    htmlOutput =  "<li class=\"reagent\" class = \"ui-state-default\" >"+out+"<img src=\"/orgo/static/arrow.png\"/></li>"
     #Mark this problem as done.
     problem.done = True
     problem.save()
@@ -419,9 +419,9 @@ def makeReagentHtml(request):
             if dict[reagent]:
                 html += REAGENTS[reagent][0] + ", "
         if html == "":
-            htmlOutput = "<li class=\"reagent\" class = \"ui-state-default\" reagentString = \""+reagentString+"\">[no valid reagents]<img src=\"http://felixsun.scripts.mit.edu/orgo/static/arrow.png\"/></li>"
+            htmlOutput = "<li class=\"reagent\" class = \"ui-state-default\" reagentString = \""+reagentString+"\">[no valid reagents]<img src=\"/orgo/static/arrow.png\"/></li>"
         else:
-            htmlOutput =  "<li class=\"reagent\" class = \"ui-state-default\" reagentString = \""+reagentString+"\">"+html[:-2]+"<img src=\"http://felixsun.scripts.mit.edu/orgo/static/arrow.png\"/></li>"
+            htmlOutput =  "<li class=\"reagent\" class = \"ui-state-default\" reagentString = \""+reagentString+"\">"+html[:-2]+"<img src=\"/orgo/static/arrow.png\"/></li>"
         return HttpResponse(htmlOutput)
     except:
         tb = traceback.format_exc()

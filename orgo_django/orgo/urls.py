@@ -55,6 +55,6 @@ urlpatterns = patterns('',
 
 if settings.DEBUG:
     urlpatterns += patterns('',
-        (r'^orgo/static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_ROOT}),
+        (r'^orgo/static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_ROOT}), (r'^orgo/bootstrap/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_ROOT}),
     )
 
