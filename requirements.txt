@@ -1,7 +1,6 @@
 sudo pip install
 ================
 django-forkit
-openbabel
 django-crispy-forms
 django-south
 
@@ -9,3 +8,4 @@ django-south
 sudo apt-get install
 ====================
 python-django-south
+python-openbabel
