@@ -2,6 +2,7 @@ from molecularStructure import *
 import string
 
 def moleculify(smiles):
+
     for i in 'cosn':
         if i in smiles:
             raise StandardError("Unsupported: %s" % i)
@@ -9,6 +10,7 @@ def moleculify(smiles):
     lexed = lexerMany(smiles)
     parsed = parserMany(lexed)
     return parsed
+
     ##return returnExampleMolecule().withHydrogens()
 
 def isAtom(token):
@@ -47,8 +49,7 @@ def parserSingle(lexed):
 
     first = lexed.pop(0)
     assert isAtom(first)
-    molecule = Molecule(first)
-    ## TODO: Finish this method
+    molecule = 
 
     c40 = Atom("C")
     c41 = Atom("C")
