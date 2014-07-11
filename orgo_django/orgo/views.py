@@ -352,7 +352,7 @@ def checkNameReagent(request):
                 accModel = models.AccuracyModel.create(catagory=thisCatagory)
                 accModel.save()
                 profile.accuracies.add(accModel)
-            if correct == True:
+            if correct :
                 accModel.correct += 1
                 accModel.total += 1
                 accModel.save()
@@ -362,7 +362,7 @@ def checkNameReagent(request):
                 accModel.total += 1
                 accModel.save()
         else:
-            if correct == True:
+            if correct :
                 problem.done = True
                 problem.save()
       except StandardError as e:
