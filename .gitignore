@@ -5,4 +5,4 @@ OLD/
 db.sqlite3
 .vagrant
 *.pickle
-
+orgo_django/orgo/settings_local.py

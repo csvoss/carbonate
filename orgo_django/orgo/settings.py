@@ -160,3 +160,4 @@ LOGGING = {
 }
 
 CRISPY_TEMPLATE_PACK='bootstrap'
+from settings_local import *
