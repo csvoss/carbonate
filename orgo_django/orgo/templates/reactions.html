@@ -2,43 +2,47 @@
 
 {% block jsimport %}
 <script src="/orgo/static/jquery-1.9.0.js"> </script>
-<script type="text/javascript" src="http://felixsun.scripts.mit.edu/orgo/static/tufte-graph/raphael.js"></script>
-<script type="text/javascript" src="http://felixsun.scripts.mit.edu/orgo/static/tufte-graph/jquery.enumerable.js"></script>
-<script type="text/javascript" src="http://felixsun.scripts.mit.edu/orgo/static/tufte-graph/jquery.tufte-graph.js"></script>
+<script type="text/javascript" src="/orgo/static/tufte-graph/raphael.js"></script>
+<script type="text/javascript" src="/orgo/static/tufte-graph/jquery.enumerable.js"></script>
+<script type="text/javascript" src="/orgo/static/tufte-graph/jquery.tufte-graph.js"></script>
 <title>Carbonate - Reactions</title>
 {% endblock %}
 
 {% block cssimport %}
 <title>Carbonate - Reactions</title>
 <style>
+    div.sample {
+        float:left;
+    }
 
-div.sample {
-    float:left;
-}
+    div.sample.arrow {
+        margin-top:50px;
+    }
 
-div.sample.arrow {
-    margin-top:50px;
-}
+    div.samples {
+        margin: 0 auto; 
+        text-align: center;
+    }
 
-div.samples {
-    margin: 0 auto; 
-    text-align: center;
-}
+    div.listedItem {
+        border-radius: 10px;
+        background-color: #E0E0E0;
+        padding: 20px;
+        margin-right:30px;
+    }
+    body { 
+        padding-top: 65px; 
+        position: relative;
+    }
+    #reactionWrapper{
+/*        background-color: red;*/
+        overflow-y: auto;
+        height:700px;
+    }
+    div.spacer {
+        padding-top:65px;
+    }
 
-div.listedItem {
-    border-radius: 10px;
-    background-color: #E0E0E0;
-    padding: 20px;
-    margin-right:30px;
-}
-body { 
-    padding-top: 65px; 
-    position: relative;
-}
-
-div.spacer {
-    padding-top:65px;
-}
 
 
 </style>
@@ -89,7 +93,7 @@ $("document").ready(function() {
 
 <p>Supported reactions are currently limited to <b>Unit 1</b> and <b>Unit 2</b> of <b><a href="http://ocw.mit.edu/courses/chemistry/5-12-organic-chemistry-i-spring-2003/index.htm">MIT 5.12</a></b>.</p>
 
-
+<div id = "reactionWrapper">
 
 <div id="reactions">
 <div class="spacer" id="0">
@@ -126,7 +130,7 @@ x="10.000000" y="20.000000" ></text>
 <title> - OBDepict</title>
 </svg>
 </div>
-<div class="sample arrow">H<sub>2</sub>, Pd|C, EtOH<br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">H<sub>2</sub>, Pd|C, EtOH<br /><img src="/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -189,7 +193,7 @@ x="10.000000" y="20.000000" ></text>
 </svg>
 
 </div>
-<div class="sample arrow">HBr in CH<sub>2</sub>Cl<sub>2</sub><br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">HBr in CH<sub>2</sub>Cl<sub>2</sub><br /><img src="/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -251,7 +255,7 @@ x="10.000000" y="20.000000" ></text>
 <title> - OBDepict</title>
 </svg>
 </div>
-<div class="sample arrow">Br<sub>2</sub> in CH<sub>2</sub>Cl<sub>2</sub><br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">Br<sub>2</sub> in CH<sub>2</sub>Cl<sub>2</sub><br /><img src="/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -339,7 +343,7 @@ x="10.000000" y="20.000000" ></text>
 <title> - OBDepict</title>
 </svg>
 </div>
-<div class="sample arrow">HBr, ROOR, light<br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">HBr, ROOR, light<br /><img src="/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -401,7 +405,7 @@ x="10.000000" y="20.000000" ></text>
 </svg>
 
 </div>
-<div class="sample arrow">mCPBA in CH<sub>2</sub>Cl<sub>2</sub><br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">mCPBA in CH<sub>2</sub>Cl<sub>2</sub><br /><img src="x/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -483,7 +487,7 @@ x="10.000000" y="20.000000" ></text>
 <title> - OBDepict</title>
 </svg>
 </div>
-<div class="sample arrow">Tert-butoxide in DMSO<br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">Tert-butoxide in DMSO<br /><img src="/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -540,7 +544,7 @@ x="10.000000" y="20.000000" ></text>
 <title> - OBDepict</title>
 </svg>
 </div>
-<div class="sample arrow">H<sub>2</sub>SO<sub>4</sub> in H<sub>2</sub>O<br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">H<sub>2</sub>SO<sub>4</sub> in H<sub>2</sub>O<br /><img src="/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -587,7 +591,7 @@ x="10.000000" y="20.000000" ></text>
 <title> - OBDepict</title>
 </svg>
 </div>
-<div class="sample arrow">H<sub>2</sub>SO<sub>4</sub> in ethanol<br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">H<sub>2</sub>SO<sub>4</sub> in ethanol<br /><img src="/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -652,7 +656,7 @@ x="10.000000" y="20.000000" ></text>
 <title> - OBDepict</title>
 </svg>
 </div>
-<div class="sample arrow">H<sub>2</sub>SO<sub>4</sub> in H<sub>2</sub>O, HgSO<sub>4</sub> accels.<br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">H<sub>2</sub>SO<sub>4</sub> in H<sub>2</sub>O, HgSO<sub>4</sub> accels.<br /><img src="/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -710,7 +714,7 @@ x="10.000000" y="20.000000" ></text>
 <title> - OBDepict</title>
 </svg>
 </div>
-<div class="sample arrow">Br<sub>2</sub> in H<sub>2</sub>O<br/><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">Br<sub>2</sub> in H<sub>2</sub>O<br/><img src="/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -802,7 +806,7 @@ x="10.000000" y="20.000000" ></text>
 </svg>
 
 </div>
-<div class="sample arrow">BH<sub>3</sub> in THF<br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">BH<sub>3</sub> in THF<br /><img src="/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -854,7 +858,7 @@ x="10.000000" y="20.000000" ></text>
 <title> - OBDepict</title>
 </svg>
 </div>
-<div class="sample arrow">NaOH and H<sub>2</sub>O<sub>2</sub><br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">NaOH and H<sub>2</sub>O<sub>2</sub><br /><img src="/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -941,7 +945,7 @@ x="10.000000" y="20.000000" ></text>
 </svg>
 
 </div>
-<div class="sample arrow">cat. OsO<sub>4</sub>, NMO, in acetone<br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">cat. OsO<sub>4</sub>, NMO, in acetone<br /><img src="/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -1027,7 +1031,7 @@ x="10.000000" y="20.000000" ></text>
 <title> - OBDepict</title>
 </svg>
 </div>
-<div class="sample arrow">O<sub>3</sub> with Me<sub>2</sub>S, in CH<sub>2</sub>Cl<sub>2</sub><br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">O<sub>3</sub> with Me<sub>2</sub>S, in CH<sub>2</sub>Cl<sub>2</sub><br /><img src="/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -1091,7 +1095,7 @@ x="10.000000" y="20.000000" ></text>
 </svg>
 
 </div>
-<div class="sample arrow">H<sub>2</sub> cat. Lindlar<br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">H<sub>2</sub> cat. Lindlar<br /><img src="/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -1150,7 +1154,7 @@ x="10.000000" y="20.000000" ></text>
 </svg>
 
 </div>
-<div class="sample arrow">Na, in NH<sub>3 (L)</sub><br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">Na, in NH<sub>3 (L)</sub><br /><img src="/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -1205,7 +1209,7 @@ x="10.000000" y="20.000000" ></text>
 </svg>
 
 </div>
-<div class="sample arrow">NaNH<sub>2</sub> in NH<sub>3</sub><br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">NaNH<sub>2</sub> in NH<sub>3</sub><br /><img src="/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -1265,7 +1269,7 @@ x="10.000000" y="20.000000" ></text>
 </svg>
 
 </div>
-<div class="sample arrow"><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow"><img src="/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -1325,7 +1329,7 @@ x="10.000000" y="20.000000" ></text>
 <title> - OBDepict</title>
 </svg>
 </div>
-<div class="sample arrow"><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow"><img src="/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <?xml version="1.0"?>
 <svg xmlns="http://www.w3.org/2000/svg"
@@ -1350,6 +1354,7 @@ x="10.000000" y="20.000000" ></text>
 <title> - OBDepict</title>
 </svg>
 
+</div>
 </div>
 </div>
 </div>

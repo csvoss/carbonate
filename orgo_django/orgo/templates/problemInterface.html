@@ -6,18 +6,18 @@
 </script>
 <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
 <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
-<script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-1.9.0.js"></script>
-<script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.js"></script>
-<script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.min.js"></script>
-<script src = "http://felixsun.scripts.mit.edu/orgo/static/problemInterface.js"> </script>
+<script src="/orgo/static/jquery-1.9.0.js"></script>
+<script src="/orgo/static/jquery-ui-1.10.0.custom.js"></script>
+<script src="/static/jquery-ui-1.10.0.custom.min.js"></script>
+<script src = "/orgo/static/problemInterface.js"> </script>
 {% endblock %}
 
 {% block cssimport %}
 <title>Carbonate - One-Step Problem</title>
-<link rel="stylesheet" type="text/css" href="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.min.css">
-<link rel="stylesheet" type="text/css" href="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.css">
+<link rel="stylesheet" type="text/css" href="/orgo/static/jquery-ui-1.10.0.custom.min.css">
+<link rel="stylesheet" type="text/css" href="/orgo/static/jquery-ui-1.10.0.custom.css">
 <title>Reagents Practice</title>
-<link rel="stylesheet" type="text/css" href = "http://felixsun.scripts.mit.edu/orgo/static/problemInterface.css"  />
+<link rel="stylesheet" type="text/css" href = "/orgo/static/problemInterface.css"  />
 {% endblock %}
 
 {% block scripts %}
@@ -42,8 +42,6 @@ $(document).ready(function(){
 <li class="headnavbar"><a href="#" onclick="showAnswer()" style="padding-left:20px"> Show answer </a></li>
 
 {% endblock %}
-
-
 
 
 {% block signin %}
@@ -92,8 +90,8 @@ $(document).ready(function(){
 
 
     <div class="ui-widget" id="reagentTyper">
-    <button type="button" onclick="updateReagents()" id = "addReagent">Add Reagent</button>
     <input id = "reagentTyperBox" />
+    <button type="button" onclick="updateReagents()" id = "addReagent">Add Reagent</button>
     </div>
 
 
@@ -146,7 +144,7 @@ Stuck?  Click "Show answer".
 
 <div class="helperPopup wave3" id="doneH">
 <p>
-Check out the <a href="http://felixsun.scripts.mit.edu/orgo/reactions/">reaction catalog</a> to see which reactions are available and to learn more about their chemistry. </p>
+Check out the <a href="/orgo/reactions/">reaction catalog</a> to see which reactions are available and to learn more about their chemistry. </p>
 <p>
 That's it for the tutorial!  Happy syntheses!
 </p>
