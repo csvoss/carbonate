@@ -59,8 +59,6 @@ def logIn(request):
             return loggedInHome(request)
     return home(request, debug = "<span style=\"color:FF0000\">Invalid login, sorry.</span>")
     
-
-
 def logOut(request):
     logout(request)
     return home(request)
@@ -87,7 +85,6 @@ Your friendly admins'''
         return render(request, 'successfulReset.html')
     return home(request, debug = "Unknown error in password reset")
     
-    
 def changePW(request):
     #Change the user's password.
     if request.method == 'POST':
@@ -100,12 +97,9 @@ def changePW(request):
         return loggedInHome(request, debug="Password changed successfully.")
         #old_password, new_password1, new_password2
 
-
 #@login_required
 #def returnToLoggedInHome(request):
 #    return loggedInHome(request)
-
-    
 
 ###Can delete; this is me learning Django
 def outpSmiles(request):
@@ -115,7 +109,6 @@ def outpSmiles(request):
             molecule = models.MoleculeModel.create(request.POST['smiles'])
             molecule.save()
             return renderSmiles(request, molecule)
-    
     
 @csrf_exempt
 def homeMoleculeChanger(request):
@@ -197,7 +190,6 @@ def renderOldNameReagent(request):
                                                      "Name": request.user.username,
                                                      "Autocomplete": autocomplete,
                                                      "tutorialProgress": 0,})
-    
 
 def renderNameReagent(request, tutorial=False):
     try:
