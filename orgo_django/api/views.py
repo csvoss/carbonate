@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
@@ -35,7 +34,11 @@ def test_smiles_to_molecule_and_back(request, smiles):
 #/api/renderSVG?molecule="SMILES"
 
 def reactions(request):
-    return HttpResponse("hi")
+    '''
+    Creates a JSON object with all the reactions in url format
+    Returns a HTTP Response with the JSON object.
+    '''
+    return HttpResponse("reactionsList")
 
 def reaction(request, id):
     return HttpResponse("hi")
