@@ -12,15 +12,6 @@ from engine.toSmiles import smilesify
 def index(request):
     context = {}
     return render(request, 'api/index.html', context)
-    
-
-## url(r'^molecule/'+SMILESREGEX+'/render/$', views.molecule_render, name='molecule_render'),
-def molecule_render(request, smiles):
-    hydrogens = request.GET.get('hydrogens', False)
-    smiles = smiles.replace('/#','#')
-    smiles = smiles.replace('~','#')
-    return HttpResponse(svg_render(smiles, hydrogens))
-
 
 ## This is so that I can test that toMolecule is working right.
 ## It's for testing only, and therefore temporary until
@@ -34,18 +25,40 @@ def test_smiles_to_molecule_and_back(request, smiles):
     return HttpResponse('<br />'.join([ smiles, svg_render(smiles, hydrogens), 
                                         smiles2, svg_render(smiles2, hydrogens) ] ))
 
+
+
+#/api/findReactions?reagents=[44,2]
+#
+#/api/findReagents?text="HBr"
+#
+#/api/react?reaction=123&molecules=["SM1","SM2"]
+#/api/renderSVG?molecule="SMILES"
+
 def reactions(request):
     return HttpResponse("hi")
 
 def reaction(request, id):
     return HttpResponse("hi")
 
+def find_reactions(request):
+    return HttpResponse(request.GET.get('reagents', None))
 
 def reagents(request):
     return HttpResponse("hi")
 
 def reagent(request, id):
     return HttpResponse("hi")
+
+def find_reagents(request):
+    return HttpResponse(request.GET.get('text', None))
+
+def react(request):
+    return HttpResponse(request.GET.get('reaction', None) + '\n' + request.GET.get('molecules', None))
+
+def render_SVG(request):
+    smiles = request.GET.get('molecule', None)
+    hydrogens = request.GET.get('hydrogens', False)
+    return HttpResponse(svg_render(smiles, hydrogens))
 
 def random_gen_smiles(request):
     return HttpResponse("hi")
