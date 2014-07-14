@@ -537,14 +537,11 @@ def getSynthesisData(request, synthesis=None):
         responseData["molecules"] = [(1, str(e)+traceback.format_exc())]
         responseData["arrows"] = []
         return HttpResponse(json.dumps(responseData))
-        
-        
 
 @csrf_exempt   
 def deleteMolecule(request):    
 
     #Iteratively delete molecule with id sent in request
-    
     
     try:
     
@@ -555,7 +552,6 @@ def deleteMolecule(request):
         markedAny = True
         molIdsToDelete = [molIdToDelete]    #for molecules
         arrIdsToDelete = []                 #for arrows
-        
         
         debuggingString = "You said to delete: "+str(molIdToDelete)+"\n"
         
@@ -576,15 +572,13 @@ def deleteMolecule(request):
                 else:
                     debuggingString += "Arrow "+str(arrowModel.id)+" with IDs "+str(arrowModel.pointFrom.id)+", "+str(arrowModel.pointTo.id)+" not deleted.\n"
             
-            
         debuggingString += "No more loop! \n"
         
         #Implement: Also iterate through arrows, checking for any steps with to-delete products that are NOT already in the list to delete
         for arrowModel in synthesis.arrows.all():
             if (arrowModel.pointTo.id in molIdsToDelete) and not (arrowModel.id in arrIdsToDelete):
                 arrIdsToDelete += [arrowModel.id]
-        
-        
+ 
         #Delete all arrow IDs you found
         for id1 in arrIdsToDelete:
             debuggingString += "Deleted arr: "+str(id1)+"\n"
@@ -615,9 +609,6 @@ def deleteMolecule(request):
         responseData["arrows"] = []
         return HttpResponse(json.dumps(responseData))
 
-
-    
-    
 def getSolutionData(request):
     solution = request.user.profile.currentSynthesisProblem.solution
     
@@ -681,7 +672,6 @@ def addMoleculeToMolecule(request):
             synthesis.arrows.add(arrow1)
             synthesis.arrows.add(arrow2)
             
-            
         #For saner debugging
         except StandardError as e:
             responseData = dict()
@@ -692,8 +682,6 @@ def addMoleculeToMolecule(request):
     
     return getSynthesisData(request)
 
-    
-    
 @csrf_exempt
 #data: {'reagents': ui.draggable.attr("reagentString"), 'moleculeOn': this.attr("id")}
 def addReagentToMolecule(request):
@@ -761,8 +749,6 @@ def renderProblem(request):
         return renderNameReagent(request, tutorial=True)
     else:
         return renderSynthesis(request)
-    
-    
     
 @csrf_exempt
 def renderFaq(request):
