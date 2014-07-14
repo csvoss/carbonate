@@ -25,8 +25,6 @@ def test_smiles_to_molecule_and_back(request, smiles):
     return HttpResponse('<br />'.join([ smiles, svg_render(smiles, hydrogens), 
                                         smiles2, svg_render(smiles2, hydrogens) ] ))
 
-
-
 #/api/findReactions?reagents=[44,2]
 #
 #/api/findReagents?text="HBr"
@@ -47,7 +45,8 @@ def reagents(request):
     return HttpResponse("hi")
 
 def reagent(request, id):
-    return HttpResponse("hi")
+    agent = Reagent.objects.get(id=id)
+    return HttpResponse(json(test_smiles_to_molecule_and_back(request,agent)))
 
 def find_reagents(request):
     return HttpResponse(request.GET.get('text', None))
@@ -62,4 +61,3 @@ def render_SVG(request):
 
 def random_gen_smiles(request):
     return HttpResponse("hi")
-
