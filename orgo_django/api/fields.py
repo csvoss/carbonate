@@ -4,16 +4,20 @@
 
 # http://www.djangosnippets.org/snippets/1491/
 
+"""
+fields.py
+"""
+
 # Django
 from django.db import models
 from django import forms
 
 class StringListField(models.Field):
-    u'''
+    """
     Save a list of strings in a CharField (or TextField) column.
 
     In the django model object the column is a list of strings.
-    '''
+    """
     __metaclass__=models.SubfieldBase
     SPLIT_CHAR=u'\v'
     def __init__(self, *args, **kwargs):
