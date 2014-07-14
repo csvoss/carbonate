@@ -11,27 +11,25 @@ urlpatterns = patterns(
     '',
     # ex: /api/
     url(r'^$', views.index, name='index'),
-    ## /api/molecule/CCCNC/render
-    url(r'^molecule/'+SMILESREGEX+r'/render/$', views.molecule_render, name='molecule_render'),
     ## /api/test/CCCCCC/test_smiles_to_molecule_and_back
     url(r'^test/'+SMILESREGEX+r'/$', views.test_smiles_to_molecule_and_back, name='test_smiles_to_molecule_and_back'),
     ## /api/reactions
     url(r'^reactions/$', views.reactions, name='reactions'),
-    ## /api/reaction/123
+    ## /api/reaction/123 
     url(r'^reaction/'+IDREGEX+r'/$', views.reaction, name='reaction'),
     ## /api/findReactions?reagents=[44,2]
-    
-    ## /api/reagents
+    url(r'^findReactions/$', views.find_reactions, name='find_reactions'),
+    ## /api/reagents 
     url(r'^reagents/$', views.reagents, name='reagents'),
     ## /api/reagent/123
     url(r'^reagent/'+IDREGEX+r'/$', views.reagent, name='reagent'),
     ## /api/findReagents?text="HBr"
-    
+    url(r'^findReagents/$', views.find_reagents, name='find_reagents'),
     ## /api/react?reaction=123&molecules=["SM1","SM2"]
-    
+    url(r'^react/$', views.react, name='react'),
     ## /api/renderSVG?molecule="SMILES"
-    
-    ## /api/randomGenSmiles/
+    url(r'^renderSVG/$', views.render_SVG, name='render_SVG'),
+    ## /api/randomGenSmiles/ 
     url(r'^randomGenSmiles/$', views.random_gen_smiles, name='random_gen_smiles'),
     
     
