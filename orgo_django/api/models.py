@@ -9,7 +9,7 @@ class Reagent(models.Model):
     id = models.AutoField(primary_key=True)
     # names = StringListField(help_text='All valid names for this reagent')
     name = models.CharField(max_length=100)
-    isSolvent = models.BooleanField(default=False)
+    is_solvent = models.BooleanField(default=False)
     diagram_name = models.CharField(max_length=50, blank=True, null=True, help_text="HTML-compatible, human-readable name of this reagent")
     smiles = models.CharField(max_length=100, blank=True, null=True, help_text="A SMILES string representation of the molecule")
     properties = models.ManyToManyField(Property, blank=True, null=True, help_text="Useful properties of reagent e.g. aprotic")

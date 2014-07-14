@@ -28,6 +28,13 @@ def test_smiles_to_molecule_and_back(request, smiles):
     return HttpResponse('<br />'.join([ smiles, svg_render(smiles, hydrogens), 
                                         smiles2, svg_render(smiles2, hydrogens) ] ))
 
+#/api/findReactions?reagents=[44,2]
+#
+#/api/findReagents?text="HBr"
+#
+#/api/react?reaction=123&molecules=["SM1","SM2"]
+#/api/renderSVG?molecule="SMILES"
+
 #List links to all reactions [as JSON]
 def reactions(request):
     '''
@@ -48,6 +55,9 @@ def reactions(request):
 
 #List basic info about a single reaction, id#123 in the database [as JSON]
 def reaction(request, id):
+    rxn = Reaction.objects.get(id=id)
+    attrs = []
+    attrs.append({"id":id,"name":rxn.name,"process_function":rxn.process_function,"reaction_site_function":rxn.reaction_site_function,"reagents":rxn.reagents,"solvent":rxn.solvent,"solvent_properties":solvent_properties})
     return HttpResponse("hi")
 
 #If the user entered in [list of reagents, by id], what reaction(s) do I get?
@@ -60,7 +70,10 @@ def reagents(request):
 
 #List basic info about a single reagent, id#123 in the database [as JSON]
 def reagent(request, id):
-    return HttpResponse("hi")
+    agent = Reagent.objects.get(id=id)
+    attrs = []
+    attrs.append({"id":id,"name":agent.name,"is_solvent":agent.is_solvent,"diagram_name",agent.diagram_name,"smiles":agent.smiles,"properties":agent.properties})
+    return HttpResponse(json.dumps(attrs))
 
 #If the user entered in [text], what reagent(s) do I get?
 def find_reagents(request):
@@ -81,9 +94,6 @@ def react(request):
     reaction = getAttr(api.engine.reactions, reactionName)
     products = reaction(reactants)
     return HttpResponse(smilesify(products))
-    
-    
-    return HttpResponse(request.GET.get('reaction', None) + '\n' + request.GET.get('reactants', None))
 
 #Render a molecule (convert SMILES to SVG)
 def render_SVG(request):
@@ -100,5 +110,3 @@ def random_gen_smiles(request):
 def random_gen_SVG(request):
     mol, _, _ = randomStart()
     return HttpResponse(svg_render(smilesify(mol)))
-    
-
