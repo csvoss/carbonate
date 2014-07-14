@@ -56,9 +56,9 @@ def react(request):
     return HttpResponse(request.GET.get('reaction', None) + '\n' + request.GET.get('molecules', None))
 
 def render_SVG(request):
-    smiles = request.GET.get('molecule', None)
+    smiles = request.GET.get('molecule', None) # change to error raise later
     hydrogens = request.GET.get('hydrogens', False)
-    return HttpResponse(svg_render(smiles, hydrogens))
+    return HttpResponse(svg_render(smiles, hydrogens)) # hydrogens default to false
 
 def random_gen_smiles(request):
     return HttpResponse("hi")
