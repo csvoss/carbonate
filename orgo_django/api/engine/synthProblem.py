@@ -13,49 +13,64 @@ except:
    import pickle
 
 
-#ReactionStep class
-    #Molecule box to point from
-    #Molecule box to point to
-    #List of added reagents
-    #List of added molecules other than molecule box
 class ReactionStep:
+    """
+    ReactionStep class. Represents an individual step of a synthesis problem,
+    as entered by a user.
+
+    Attributes:
+        parentMoleculeBox :: MoleculeBox. (to point from)
+        otherMoleculeBox :: MoleculeBox. (also to point from, if multiple molecules were combined)
+        productBox :: MoleculeBox. (to point to)
+        hasReagents :: {reagent (int) : bool} -- dictates whether or not this reaction uses each reagent
+    """
+
     def __init__(self, parentMoleculeBox):
+        """
+        Initialize this ReactionStep.
+        parentMoleculeBox :: MoleculeBox. (to point from)
+        """
         self.reactantBox = parentMoleculeBox
         self.otherMoleculeBox = MoleculeBox([])
         self.productBox = None
-        
-        #hasReagents is a dict that maps numbers (of reagents) to true/false
         self.hasReagents = parseReagentsString("")
     
-    #Add more reagents.
     def addReagent(self, reagentDict):
+        """
+        Add more reagents. Merge reagentDict with self.hasReagents,
+        using OR when two booleans differ.
+        reagentDict :: {reagent (int) : bool}
+        """
         for reagent in list(REAGENTS):
             if self.hasReagents[reagent] or reagentDict[reagent]:
                 self.hasReagents[reagent] = True
-                
-    #def addReagent(self, reagentBox): #reagentList is a list of reagent boxes
-    #    for reagent in list(REAGENTS):
-    #        if reagentBox.hasReagents[reagent]:
-    #            self.hasReagents[reagent] = True
-    #    return self.react()
           
     def addMolecule(self, moleculeBox):
+        """
+        moleculeBox :: MoleculeBox
+        Replace self.otherMoleculeBox with moleculeBox.
+        Note: this overwrites the previous value of otherMoleculeBox!
+        (TODO: Bad for scalability?...)
+        """
         self.otherMoleculeBox = moleculeBox
         
-    #Returns True or False depending on whether or not a reaction occurred.
-    #If True, it updates self.product to be a new MoleculeBox containing 
     def react(self, mode="generate"):
-        #mode can be "generate" or "check".  Generate returns true iff the reaction makes
-        #*new* products; check returns true iff the reaction specified is a valid combination
-        #of reagents.
-        
+        """
+        return :: True if a reaction occurred, False if no reaction.
+        If True, it updates self.product to be a new MoleculeBox containing the products.
+
+        mode :: str. -- either "generate" or "check".
+            Generate returns true iff the reaction makes *new* products.
+            Check returns true iff the reaction specified is a valid combination of reagents.
+        """
         #a helper function
         def hasReagent(acceptableReagents):
             return True in [self.hasReagents[x] for x in acceptableReagents]
             
         for reaction in REACTIONS:
-        #This loops through all of the reagents, checking if they are satisfied.
-            if (True in [not hasReagent(acceptableReagents) for acceptableReagents in reaction[0]]): #returns False if the list comprehension [hasReagent...] is either empty or all full of Trues
+            #This loops through all of the reagents, checking if they are satisfied.
+                #...returns False if the list comprehension [hasReagent...] is either empty or all full of Trues
+            if (True in [not hasReagent(acceptableReagents) for acceptableReagents in reaction[0]]):
                 continue
             else:
                 #react!
@@ -86,19 +101,13 @@ class ReactionStep:
                             return True
                     return False
                 else:
-                    print "Invalid mode in react."
-                    raise StandardError
-                        
-                
+                    raise StandardError("Invalid mode in synthProblem.react: "+mode)                
         return False
         
-        #Check if reagent requirements are satisfied
-        #Check if anything is produced by the reaction function
-        
-        
-        
-    #Returns a string of the reagents contained in this reaction step as proper HTML format.
     def stringList(self):
+        """
+        return :: str. A string of the reagents contained in this reaction step, in proper HTML.
+        """
         out = ''
         for reagent in list(self.hasReagents):
             if self.hasReagents[reagent]:
@@ -107,8 +116,13 @@ class ReactionStep:
     
     
     def checkStep(self, target):
-        #Takes in a molBox (target) and checks if its own products are identical to those in target.
-        #Regardless of identical-ness, returns its own products as well.
+        """
+        Used for checking if this step is the final, finishing step in a synthesis problem.
+        target :: MoleculeBox.
+        return :: (bool, MoleculeBox) -- two elements:
+                   1. True if products of this reaction step are equal to target, else False
+                   2. the products of this reaction step
+        """
         if self.react(mode="check"):
             return (boxEqualityChecker(self.productBox, target), self.productBox)
         else:
@@ -117,11 +131,16 @@ class ReactionStep:
         return (False, self.productBox)
 
 
-#Called by checkIfEqualsTarget in MoleculeBoxModel in models
-#Called by checkStep in ReactionStep in synthProblem
-#Returns a boolean.
-#first is a moleculebox and so is second
 def boxEqualityChecker(first, second):
+    """
+    first :: MoleculeBox
+    second :: MoleculeBox
+    Checks if two molecule boxes contain the same molecules.
+    return :: bool. True if equal.
+
+    Called by checkIfEqualsTarget in MoleculeBoxModel in models.
+    Called by checkStep in ReactionStep in synthProblem (above).
+    """
     assert isinstance(first, MoleculeBox)
     assert isinstance(second, MoleculeBox)
     #Does each product correspond to exactly one target?
@@ -141,26 +160,34 @@ def boxEqualityChecker(first, second):
     return True
     
 
-#MoleculeBox class
-#Represents a draggable box containing molecules (svg).
-    #List of molecules contained in it
 class MoleculeBox:
-    def __init__(self, moleculesList):
-        self.molecules = moleculesList
+    """
+    Represents a draggable box in the UI containing molecules.
+    Attributes:
+        self.molecules :: [Molecule].
+    """
+    def __init__(self, molecules_list):
+        """
+        Initialize this MoleculeBox.
+        molecules_list :: [Molecule].
+        """
+        self.molecules = molecules_list
 
-    #Returns a string of smiles of the molecules contained in this box, separated by spaces.
     def stringList(self):
+        """
+        return :: a string of SMILES of the molecules contained in this box, separated by '.'
+        """
         outp = ""
         for mol in self.molecules:
             outp += smilesify(mol) + "."
         return serverRender.render(outp)
  
  
-
-     
-#Enter a string, such as "H2 cat Pd|C"
-#Returns a dictionary, such as {"H2":True, "PDC":True, "ETOH":False, ...}
 def parseReagentsString(inpstring):
+    """
+    inpstring :: str. User-generated text, such as "H2 cat Pd|C"
+    return :: {reagent (int) : bool}. For example, {H2:True, PDC:True, ETOH:False, ...}
+    """
     string = inpstring.lower()
     outp = {}
     
@@ -234,24 +261,34 @@ def parseReagentsString(inpstring):
     return outp
     
 def makeStartingMaterial(mode, count=1):
-    #Make starting material, based on classes of reactions selected.
+    """
+    Generate random starting materials.
+    Used to be based on classes of reactions selected; currently is not.
+    mode :: [str].
+    count :: int. Number of starting molecules to make. Default 1.
+    return :: [MoleculeBox].
+    """
     molecules = []
-    if ('10A Alkenes: halide addition' in mode) or ('10B Alkenes: other' in mode) or ('11 Alkynes' in mode):
-        for i in xrange(count):
-            if random.random() < 0.4:
-                forceTerminalAlkyne = True
-            else:
-                forceTerminalAlkyne = False
-            molecules.append(randomGenerator.randomStart(endProb=0.3, maxBranchLength=10,
-            alkyneProb=0.1, alkeneProb=0.1,
-            BrProb=0.1, ClProb=0.1, OHProb=0.05, forceTerminalAlkyne = forceTerminalAlkyne)[0])
-        molecules = removeDuplicates(molecules)
-        if debug:
-            print "Starting material: " + str(smilesify(molecules))
-        return [MoleculeBox([molecule]) for molecule in molecules]
+    ## if ('10A Alkenes: halide addition' in mode) or ('10B Alkenes: other' in mode) or ('11 Alkynes' in mode):
+    for i in xrange(count):
+        if random.random() < 0.4:
+            forceTerminalAlkyne = True
+        else:
+            forceTerminalAlkyne = False
+        molecules.append(randomGenerator.randomStart(endProb=0.3, maxBranchLength=10,
+        alkyneProb=0.1, alkeneProb=0.1,
+        BrProb=0.1, ClProb=0.1, OHProb=0.05, forceTerminalAlkyne = forceTerminalAlkyne)[0])
+    molecules = removeDuplicates(molecules)
+    if debug:
+        print "Starting material: " + str(smilesify(molecules))
+    return [MoleculeBox([molecule]) for molecule in molecules]
     
     
 def randomSynthesisProblemMake(mode, steps = 20, maxLength = 30, count = 2):
+    """
+    Generate a synthesis problem.
+    TODO: finish docstrings in this file
+    """
     steps, fused = randomSynthesisProblemStart(mode, steps, maxLength, count)
     if fused:
         return steps
