@@ -3,8 +3,6 @@ from django.conf.urls import patterns, url
 from api import views
 
 SMILESREGEX = r'(?P<smiles>.*)'
-REACTIONREGEX = r'(?P<reaction>.*)'
-REAGENTREGEX = r'(?P<reagent>.*)'
 IDREGEX = r'(?P<id>.*)'
 
 urlpatterns = patterns(

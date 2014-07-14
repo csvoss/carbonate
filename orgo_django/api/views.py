@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
@@ -7,6 +6,8 @@ from engine.randomGenerator import randomStart
 from engine.toMolecule import moleculify
 from engine.toSmiles import smilesify
 
+from api.models import Property, Reagent, Reaction
+import json
 # Create your views here.
 
 ## url(r'^$', views.index, name='index'),
@@ -28,7 +29,21 @@ def test_smiles_to_molecule_and_back(request, smiles):
 
 #List links to all reactions [as JSON]
 def reactions(request):
-    return HttpResponse("hi")
+    '''
+    Creates a JSON object with all the reactions in url format
+    Returns a HTTP Response with the JSON object.
+    '''
+    reaction_list = Reaction.objects.all()
+    reactions = []
+    for reaction in reaction_list:
+        name = reaction.name
+        r_id = reaction.id
+        reactions.append({
+            "id": r_id,
+            "name": name,
+            "url":'reaction/'+r_id+'/',
+            })
+    return HttpResponse(json.dumps(reactions))
 
 #List basic info about a single reaction, id#123 in the database [as JSON]
 def reaction(request, id):
@@ -66,9 +81,9 @@ def react(request):
 
 #Render a molecule (convert SMILES to SVG)
 def render_SVG(request):
-    smiles = request.GET.get('molecule', None)
+    smiles = request.GET.get('molecule', None) # change to error raise later
     hydrogens = request.GET.get('hydrogens', False)
-    return HttpResponse(svg_render(smiles, hydrogens))
+    return HttpResponse(svg_render(smiles, hydrogens)) # hydrogens default to false
 
 #Return a randomly-generated molecule (output a SMILES)
 def random_gen_smiles(request):
