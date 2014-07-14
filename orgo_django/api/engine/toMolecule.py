@@ -1,7 +1,28 @@
+"""
+toMolecule.py
+
+This code contains the method moleculify(smiles), which converts a SMILES string to a Molecule object:
+http://en.wikipedia.org/wiki/SMILES
+
+This code is not yet complete. #TODO #YOLO
+
+Only ``moleculify`` is meant to be public-facing. The other methods in this file are private.
+
+This would allow us to take in SMILES strings as inputs, from students or professors, to specify their own molecules to use in problems. Hooray!
+
+"""
+
 from molecularStructure import *
 import string
 
 def moleculify(smiles):
+    """
+    smiles :: str or [str]. SMILES string(s) e.g. "CC(CN)CCC(O)O"
+    return :: Molecule or [Molecule].
+
+    Raises a StandardError if the SMILES string contains
+    as-yet-unsupported features (like delocalization).
+    """
 
     for i in 'cosn':
         if i in smiles:
@@ -14,17 +35,21 @@ def moleculify(smiles):
     ##return returnExampleMolecule().withHydrogens()
 
 def isAtom(token):
-    ## token :: str. e.g. Au, [Cu+2], [C@@H]
-    ## return :: bool.
-    ## TEMPORARY -- TODO
+    """
+    token :: str. e.g. Au, [Cu+2], [C@@H]
+    return :: bool.
+    TEMPORARY -- TODO
+    """
     if token in '-=#$/\\':
         return False
     return True
 
 def toAtom(token):
-    ## token :: str. e.g. Au, [Cu+2], [C@@H]
-    ## return :: Atom.
-    ## TEMPORARY -- TODO
+    """
+    token :: str. e.g. Au, [Cu+2], [C@@H]
+    return :: Atom.
+    TEMPORARY -- TODO
+    """
     if token[0] != '[':
         return Atom(token)
     else:
@@ -34,14 +59,19 @@ def toAtom(token):
             return Atom(token[1:2])
 
 def parserMany(lexedMany):
-    ## lexedMany :: [tokenized SMILES string]
-    ## return :: [Molecule].
+    """
+    lexedMany :: [tokenized SMILES string]
+    return :: [Molecule].
+    """
     return map(parserSingle, lexedMany)
 
 def parserSingle(lexed):
-    ## lexed :: tokenized SMILES string
-    ## return :: Molecule.
+    """
+    lexed :: tokenized SMILES string
+    return :: Molecule.
+    """
 
+    ## TODO
     raise StandardError(lexed)
 
     if len(lexed) == 0:
@@ -72,16 +102,32 @@ def parserSingle(lexed):
 
     return molecule.withHydrogens()
 
-def lexerMany(smiles):
+def lexerMany(smiles_list):
+    """
+    smiles_list :: [SMILES str].
+    return :: [[SMILES tokens (str)]].
+    """
     ## Many molecules: return a list
-    return map(lexerSingle, smiles.split('.'))
+    return map(lexerSingle, smiles_list.split('.'))
 
 def lexerSingle(smiles):
+    """
+    smiles :: SMILES str.
+    return :: [SMILES tokens (str)].
+    """
     output, _ = lexerWithPassback(smiles)
     assert _ == None
     return output
 
 def lexerWithPassback(smiles):
+    """
+    Passback: If you got to this SMILES string by taking off an open-paren,
+              this method will tokenize the stuff inside the paren, and return
+              both that list of tokens and a 'passback' -- i.e. the remainder
+              of the SMILES string.
+    smiles :: SMILES str.
+    return :: ( [SMILES tokens (str)], remaining )
+    """
     lexed = []
     while len(smiles) > 0:
         prev_smiles = smiles
@@ -135,9 +181,13 @@ def lexerWithPassback(smiles):
 
     return lexed, None
 
-#print lexer("N[C@H](C(=O)O)C")
 
 def returnExampleMolecule():
+    """
+    This method intended as a code example of how to create and return a molecule.
+    This is useful to reference while writing the parser.
+    return :: Molecule.
+    """
     c40 = Atom("C")
     c41 = Atom("C")
     mol4 = Molecule(c40)
@@ -157,6 +207,9 @@ def returnExampleMolecule():
     return mol4
 
 def returnExampleSmiles():
+    """
+    return :: [SMILES str].
+    """
     return [
         "C(/F)(\Cl)=C(/Br)\I",  ## cis/trans test
         "F\C=C(/Br)\I",     ## more cis/trans
