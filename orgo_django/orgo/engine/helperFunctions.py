@@ -8,7 +8,6 @@ randThing = 0
 
 debug = False
 
-
 #Returns a list of molecules.
 def antiAdd(molecule, target1, target2, add1, add2,
             addtarget1 = None, addtarget2 = None):
@@ -42,14 +41,12 @@ def duplicateInputs(molecule, target1, target2, add1, add2, addtarget1,
         Xaddtarget2 = None
     return (Xmolecule, Xtarget1, Xtarget2, Xadd1, Xadd2, Xaddtarget1, Xaddtarget2)
 
-
 #Returns a list of molecules.
 def synAdd(molecule, target1, target2, add1, add2,
            addtarget1 = None, addtarget2 = None, antiAdd = False):
     #Destroys the double bond and CTstereochemistry between target1 and target2.
     #Adds add1 and add2 to target1 and target2.  If add1 and/or add2 are molecules,
     #addtargets are needed to specify where the bond should originate from add.
-
 
     #Also does anti-addition, if antiAdd is set to true.
     (molecule, target1, target2, add1, add2, addtarget1, addtarget2) =\
@@ -169,10 +166,8 @@ def tripleAdd(molecule, target1, target2, add1, add2, cisOrTrans,
                 thisTarget.newCTCenter(otherTarget, otherAttached, CTthing)
             else:
                 thisTarget.newCTCenter(otherTarget, CTthing, otherAttached)
-
     return [molecule]
-
-    
+ 
 def allTripleAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget2 = None):
     #Adds two copies of add1 and two copies of add2 to target1 and target2, respectively.
     #Breaks a triple bond.  Introduces no new stereochemistry.
