@@ -171,20 +171,11 @@ def loggedInHome(request, debug = ""):
                                              'graphData': graphList,
                                              'changePW': PasswordChangeForm(request.user),
                                              'synthHighScore': synthHighScore})
-    
-###Can delete; this is me learning Django
-def renderSmiles(request, molecule):
-    return render(request, 'loggedin.html', {'item1': serverRender.render(str(molecule.smiles))})
-
-    
-
 
 ##Figure out how to generate all possible permutations of allowable reactions for this.    
 reagentAutocomplete=reagentAutocompleteMake()  #defined in synthProblem
 reactionAutocomplete=reactionAutocompleteMake()  #defined in synthProblem
-
-
-    
+ 
 @login_required    
 def renderOldNameReagent(request):
     profile = request.user.profile
@@ -209,24 +200,18 @@ def renderOldNameReagent(request):
     
 
 def renderNameReagent(request, tutorial=False):
-    
     try:
         profile = request.user.profile
-        
     except:
-        
         #Anonymous user.
         problem = generateNameReagentProblem(AlkeneAlkyneMode)
         step = models.ReactionStepModel.create(problem)
         step.save()
         request.session['problem'] = step
         autocomplete = reactionAutocomplete
-        
         if 'tutorial' in request.session:
-            
             tutorial = False
         else:
-            
             tutorial = True
             request.session['tutorial'] = True
             
@@ -242,7 +227,6 @@ def renderNameReagent(request, tutorial=False):
         except:
             pass
             
-           
         modes, autocomplete = checkboxUpdate(request, profile)
         if modes == []:
             #Error - at least one mode must be selected!
@@ -312,8 +296,6 @@ def checkboxUpdate(request, profile):
             return ([], None)
     return modes, autocomplete
 
-
-    
 @csrf_exempt
 def checkNameReagent(request):
     #Takes in a list of reagents that the user guessed.
@@ -352,7 +334,7 @@ def checkNameReagent(request):
                 accModel = models.AccuracyModel.create(catagory=thisCatagory)
                 accModel.save()
                 profile.accuracies.add(accModel)
-            if correct == True:
+            if correct :
                 accModel.correct += 1
                 accModel.total += 1
                 accModel.save()
@@ -362,7 +344,7 @@ def checkNameReagent(request):
                 accModel.total += 1
                 accModel.save()
         else:
-            if correct == True:
+            if correct :
                 problem.done = True
                 problem.save()
       except StandardError as e:
@@ -406,9 +388,7 @@ def showNRAnswer(request):
             # else:
                 # html += reactionStepHtml(stepList[0])
                 
-    
     # return html
-    
 @csrf_exempt
 def makeReagentHtml(request):
     try:
@@ -516,8 +496,6 @@ def renderSynthesis(request, tutorial = False):
                                                               "Name": request.user.username,
                                                               "Autocomplete": autocomplete,
                                                               "tutorialProgress": int(tutorial)})
-
-    
 
 def getSynthesisData(request, synthesis=None):
     #Should return a JSON string with the following attributes contained:

@@ -1,11 +1,16 @@
 """
-moleculeToSmiles.py
+toSmiles.py
 
 This code contains the function smilesify(molecule), which converts a Molecule object to a SMILES string:
 http://en.wikipedia.org/wiki/SMILES
 Once a Molecule has been converted to a SMILES string, we can render it as an SVG using renderSVG.py.
 
-DO NOT TOUCH THIS CODE -- IT IS MAGIC
+PROCEED CAUTIOUSLY -- THIS CODE IS FINICKY
+
+Does not yet support:
+- charge :( :( 
+- radicals :( :( 
+- isotopes
 """
 from molecularStructure import *
 
@@ -42,8 +47,8 @@ def smilesify(molecule):
     if len(molecule.atoms)==0: return ""
     
     ringsfound = 0
-    curAtom = molecule.atoms[0]
-    homeAtom = molecule.atoms[0]
+    cur_atom = molecule.atoms[0]
+    home_atom = molecule.atoms[0]
 
     #Create the dictionary nonHNeighbors for each atom.
     for atom in molecule.atoms:
@@ -53,30 +58,30 @@ def smilesify(molecule):
     #Traverse the molecule once, to hunt down and flag rings.
     #Each iteration: (...while we aren't back to the home atom, or if we are,
                     #while the home atom still has neighbors to read)
-    while ((curAtom != homeAtom) or (homeAtom.nRead < len(homeAtom.nonHNeighbors))):
+    while ((cur_atom != home_atom) or (home_atom.nRead < len(home_atom.nonHNeighbors))):
     
         #flag current atom as "read" (flag = 1)
-        curAtom.flag = 1
+        cur_atom.flag = 1
         if debugSmiles:
-            print "Flagged "+str(curAtom)+" as read."
+            print "Flagged "+str(cur_atom)+" as read."
         
         #if there are neighbors left to read from this atom:
-        if (curAtom.nRead < len(curAtom.nonHNeighbors)):
+        if (cur_atom.nRead < len(cur_atom.nonHNeighbors)):
             
             #if the next atom is the parent atom:
-            if list(curAtom.nonHNeighbors)[curAtom.nRead] == curAtom.parentAtom:
+            if list(cur_atom.nonHNeighbors)[cur_atom.nRead] == cur_atom.parentAtom:
                 #don't do anything but incrementing nRead
-                curAtom.nRead += 1
+                cur_atom.nRead += 1
                 if debugSmiles:
                     print "Nope, not progressing to parent."
                 
             #else,
             else:
-                if list(curAtom.nonHNeighbors)[curAtom.nRead].nRead == 0:
+                if list(cur_atom.nonHNeighbors)[cur_atom.nRead].nRead == 0:
                 #if the next atom has not been traversed already:
-                    curAtom.nRead += 1
-                    list(curAtom.nonHNeighbors)[curAtom.nRead - 1].parentAtom = curAtom
-                    curAtom = list(curAtom.nonHNeighbors)[curAtom.nRead - 1]
+                    cur_atom.nRead += 1
+                    list(cur_atom.nonHNeighbors)[cur_atom.nRead - 1].parentAtom = cur_atom
+                    cur_atom = list(cur_atom.nonHNeighbors)[cur_atom.nRead - 1]
                     #increment current atom's nRead counter
                     #make the next atom the current atom:
                     #make the old atom the next atom's parent
@@ -87,23 +92,23 @@ def smilesify(molecule):
                 #if the next atom has been traversed already:
                     #it's a ring!
                     ringsfound += 1
-                    curAtom.rflag += [(ringsfound, list(curAtom.nonHNeighbors)[curAtom.nRead])]
-                    list(curAtom.nonHNeighbors)[curAtom.nRead].rflag += [(ringsfound, curAtom)]
-                    curAtom.nRead += 1
+                    cur_atom.rflag += [(ringsfound, list(cur_atom.nonHNeighbors)[cur_atom.nRead])]
+                    list(cur_atom.nonHNeighbors)[cur_atom.nRead].rflag += [(ringsfound, cur_atom)]
+                    cur_atom.nRead += 1
                     #increment ringsfound
                     #set rflag on both atoms to ringsfound
                     #increment current atom's nRead counter
                     #make sure the atoms know who each other is
                     if debugSmiles:
-                        print "Ring "+str(ringsfound)+" found! "+str(curAtom.rflag)+", "+str(list(curAtom.nonHNeighbors)[curAtom.nRead - 1])
+                        print "Ring "+str(ringsfound)+" found! "+str(cur_atom.rflag)+", "+str(list(cur_atom.nonHNeighbors)[cur_atom.nRead - 1])
                 
         #if not:
             #go backwards to parent atom:
-            #set curAtom to its parent atom
+            #set cur_atom to its parent atom
         else:
             if debugSmiles:
-                print "Regressing to "+str(curAtom.parentAtom)+" from "+str(curAtom)
-            curAtom = curAtom.parentAtom
+                print "Regressing to "+str(cur_atom.parentAtom)+" from "+str(cur_atom)
+            cur_atom = cur_atom.parentAtom
             
             
     #Traverse twice to generate the SMILES.
