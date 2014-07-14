@@ -5,6 +5,8 @@ from engine.renderSVG import render as svg_render
 from engine.toMolecule import moleculify
 from engine.toSmiles import smilesify
 
+from api.models import Property, Reagent, Reaction
+import json
 # Create your views here.
 
 ## url(r'^$', views.index, name='index'),
@@ -38,7 +40,17 @@ def reactions(request):
     Creates a JSON object with all the reactions in url format
     Returns a HTTP Response with the JSON object.
     '''
-    return HttpResponse("reactionsList")
+    reaction_list = Reaction.objects.all()
+    reactions = []
+    for reaction in reaction_list:
+        name = reaction.name
+        r_id = reaction.id
+        reactions.append({
+            "id": r_id,
+            "name": name,
+            "url":'reaction/'+r_id+'/',
+            })
+    return HttpResponse(json.dumps(reactions))
 
 def reaction(request, id):
     return HttpResponse("hi")

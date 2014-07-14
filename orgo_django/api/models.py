@@ -1,5 +1,5 @@
 from django.db import models
-from fields import StringListField
+from api.fields import StringListField
 
 class Property(models.Model):
     id = models.AutoField(primary_key=True)
@@ -7,7 +7,8 @@ class Property(models.Model):
     
 class Reagent(models.Model):
     id = models.AutoField(primary_key=True)
-    names = StringListField(help_text='All valid names for this reagent')
+    # names = StringListField(help_text='All valid names for this reagent')
+    name = models.CharField(max_length=100)
     isSolvent = models.BooleanField(default=False)
     diagram_name = models.CharField(max_length=50, blank=True, null=True, help_text="HTML-compatible, human-readable name of this reagent")
     smiles = models.CharField(max_length=100, blank=True, null=True,\
@@ -18,6 +19,7 @@ class Reagent(models.Model):
 
 class Reaction(models.Model):
     id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
     process_function = models.CharField(max_length=50, \
         help_text="Called at each valid place in reactant")
     reaction_site_function = models.CharField(max_length=50, \
