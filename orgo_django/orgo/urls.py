@@ -45,7 +45,6 @@ urlpatterns = patterns('',
     url(r'^orgo/api/saveProblem/$', 'orgo.views.saveProblem', name = 'saveProblem'),
     url(r'^orgo/loadSynthesisFromId/$', 'orgo.views.loadSynthesisFromId', name = 'loadSynthesisFromId'),
     
-
     # Uncomment the admin/doc line below to enable admin documentation:
     url(r'^orgo/admin/doc/', include('django.contrib.admindocs.urls')),
 
@@ -57,4 +56,3 @@ if settings.DEBUG:
     urlpatterns += patterns('',
         (r'^orgo/static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_ROOT}), (r'^orgo/bootstrap/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_ROOT}),
     )
-
