@@ -23,7 +23,9 @@ urlpatterns = patterns(
     url(r'^reagent/'+IDREGEX+r'/$', views.reagent, name='reagent'),
     ## /api/findReagents?text="HBr"
     url(r'^findReagents/$', views.find_reagents, name='find_reagents'),
-    ## /api/react?reaction=123&molecules=["SM1","SM2"]
+#    /api/checkIfEqual?mol1=ABC&mol2=DEF
+    url(r'^checkIfEqual/$', views.check_if_equal, name='check_if_equal'),
+    ## /api/react?reaction=123&reactants=["SM1","SM2"]
     url(r'^react/$', views.react, name='react'),
     ## /api/renderSVG?molecule="SMILES"
     url(r'^renderSVG/$', views.render_SVG, name='render_SVG'),

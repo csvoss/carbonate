@@ -19,8 +19,9 @@ class Reaction(models.Model):
     name = models.CharField(max_length=100)
     process_function = models.CharField(max_length=50, \
         help_text="Called at each valid place in reactant")
-    reaction_site_function = models.CharField(max_length=50, \
-        help_text="Finds valid locations in reactant. eg findDoubleBonds")
+#    V may want to get rid of
+#    reaction_site_function = models.CharField(max_length=50, \
+#        help_text="Finds valid locations in reactant. eg findDoubleBonds")
     reagents = models.ManyToManyField(Reagent, related_name='reactions', help_text="Reagents that trigger this reaction taking place")
     solvent = models.ForeignKey(Reagent, related_name='solventReactions', blank=True, null=True, help_text="Solvents that are compatible with this reaction")
     solvent_properties = models.ManyToManyField(Property, blank=True, null=True)
