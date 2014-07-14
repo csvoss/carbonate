@@ -54,6 +54,9 @@ def reactions(request):
 
 #List basic info about a single reaction, id#123 in the database [as JSON]
 def reaction(request, id):
+    rxn = Reaction.objects.get(id=id)
+    attrs = []
+    attrs.append({"id":id,"name":rxn.name,"process_function":rxn.process_function,"reaction_site_function":rxn.reaction_site_function,"reagents":rxn.reagents,"solvent":rxn.solvent,"solvent_properties":solvent_properties})
     return HttpResponse("hi")
 
 #If the user entered in [list of reagents, by id], what reaction(s) do I get?
