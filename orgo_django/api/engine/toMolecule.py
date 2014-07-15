@@ -28,7 +28,8 @@ def moleculify(smiles):
         if i in smiles:
             raise StandardError("Unsupported: %s" % i)
 
-    if type(smiles) == str:
+    if isinstance(smiles, basestring):
+        smiles = str(smiles)
         lexed = lexerSingle(smiles)
         parsed = parserSingle(lexed)
     if type(smiles) == list:
