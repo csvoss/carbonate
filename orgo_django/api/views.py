@@ -49,7 +49,7 @@ def reactions(request):
         reactions.append({
             "id": r_id,
             "name": name,
-            "url":'reaction/'+r_id+'/',
+            "url":'reaction/'+str(r_id)+'/',
             })
     return HttpResponse(json.dumps(reactions))
 
@@ -94,7 +94,10 @@ def reagents(request):
       reagents.append({
         "id":reagent.id,
         "name":reagent.name,
-        "url":'reagent/'+reagent.id+'/',
+        "is_solvent":reagent.is_solvent,
+        "diagram_name":reagent.diagram_name,
+
+        # "url":'reagent/'+reagent.id+'/',
         })
     return HttpResponse(json.dumps(reagents))
 
