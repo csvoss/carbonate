@@ -231,6 +231,9 @@ def hydrogenate(molecules):
 
     
 
+    
+def hydrobrominate(molecules):
+    return hydrohalogenate(molecules, 'Br')
 
 """Hydrohalogenation
 HX in CH2Cl2

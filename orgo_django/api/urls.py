@@ -23,7 +23,7 @@ urlpatterns = patterns(
     url(r'^reagent/'+IDREGEX+r'/$', views.reagent, name='reagent'),
     ## /api/findReagents?text="HBr"
     url(r'^findReagents/$', views.find_reagents, name='find_reagents'),
-#    /api/checkIfEqual?mol1=ABC&mol2=DEF
+    ##/api/checkIfEqual?mol1=ABC&mol2=DEF
     url(r'^checkIfEqual/$', views.check_if_equal, name='check_if_equal'),
     ## /api/react?reaction=123&reactants=["SM1","SM2"]
     url(r'^react/$', views.react, name='react'),
@@ -33,6 +33,8 @@ urlpatterns = patterns(
     url(r'^randomGenSmiles/$', views.random_gen_smiles, name='random_gen_smiles'),
     #/api/findReactions?text="HBr, CH2Cl2"
 #    unsure how to differentiate this from the one above
+#    -- that's okay, we can skip it -- it's optional
+#       ... either that, or we rename it "findReactionsFromText" or something like that
 #    url(r'^findReactions/$', views.find_reactions, name='find_reactions'),
     #/api/randomGenSVG
     url(r'^randomGenSVG/$', views.random_gen_SVG, name='random_gen_SVG'),

@@ -72,7 +72,7 @@ def parserSingle(lexed):
     """
 
     ## TODO
-    raise StandardError(lexed)
+    #raise StandardError(lexed)
 
     if len(lexed) == 0:
         return None

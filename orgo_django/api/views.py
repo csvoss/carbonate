@@ -29,11 +29,11 @@ def test_smiles_to_molecule_and_back(request, smiles):
                                         smiles2, svg_render(smiles2, hydrogens) ] ))
 
 #/api/findReactions?reagents=[44,2]
-#
+
 #/api/findReagents?text="HBr"
-#
+
 #/api/react?reaction=123&molecules=["SM1","SM2"]
-#/api/renderSVG?molecule="SMILES"
+
 
 #List links to all reactions [as JSON]
 def reactions(request):
@@ -76,7 +76,14 @@ def reagents(request):
 def reagent(request, id):
     agent = Reagent.objects.get(id=id)
     attrs = []
-    attrs.append({"id":id,"name":agent.name,"is_solvent":agent.is_solvent,"diagram_name",agent.diagram_name,"smiles":agent.smiles,"properties":agent.properties})
+    attrs.append({
+        "id": id,
+        "name": agent.name,
+        "is_solvent": agent.is_solvent,
+        "diagram_name": agent.diagram_name,
+        "smiles": agent.smiles,
+        "properties": agent.properties,
+    })
     return HttpResponse(json.dumps(attrs))
 
 #If the user entered in [text], what reagent(s) do I get?
@@ -94,8 +101,9 @@ def react(request):
 #    pseudocode/almost code but it wouldn't actually work
     reactionID = request.GET.get('reaction', None)
     reactants = moleculify(request.GET.get('reactants', None))
-    reactionName = Reaction.objects.get(id = reactionID)
-    reaction = getAttr(api.engine.reactions, reactionName)
+    function_name = Reaction.objects.get(id = reactionID).process_function
+    #raise StandardError(function_name)
+    reaction = getattr(api.engine.reactions, function_name)
     products = reaction(reactants)
     return HttpResponse(smilesify(products))
 
