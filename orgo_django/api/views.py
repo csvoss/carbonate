@@ -99,7 +99,7 @@ def reagents(request):
 
 #List basic info about a single reagent, id#123 in the database [as JSON]
 def reagent(request, id):
-    reagent = Rereagent.objects.get(id=id)
+    reagent = Reagent.objects.get(id=id)
     attrs = []
     attrs.append({
         "id": id,
