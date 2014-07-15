@@ -28,8 +28,12 @@ def moleculify(smiles):
         if i in smiles:
             raise StandardError("Unsupported: %s" % i)
 
-    lexed = lexerMany(smiles)
-    parsed = parserMany(lexed)
+    if type(smiles) == str:
+        lexed = lexerSingle(smiles)
+        parsed = parserSingle(lexed)
+    if type(smiles) == list:
+        lexed = lexerMany(smiles)
+        parsed = parserMany(lexed)
     return parsed
 
     ##return returnExampleMolecule().withHydrogens()
