@@ -5,14 +5,20 @@ class Property(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
 
+    def __str__(self):
+    	return self.name
+
 class Reagent(models.Model):
     id = models.AutoField(primary_key=True)
     # names = StringListField(help_text='All valid names for this reagent')
     name = models.CharField(max_length=100)
     isSolvent = models.BooleanField(default=False)
     diagram_name = models.CharField(max_length=50, blank=True, null=True, help_text="HTML-compatible, human-readable name of this reagent")
-    smiles = models.CharField(max_length=100, blank=True, null=True, help_text="A SMILES string representation of the molecule")
+    smiles = models.CharField(max_length=100, blank=True, null=True, help_text="A SMILES string representation of the molecule (optional)")
     properties = models.ManyToManyField(Property, blank=True, null=True, help_text="Useful properties of reagent e.g. aprotic")
+
+    def __str__(self):
+    	return self.name
 
 class Reaction(models.Model):
     id = models.AutoField(primary_key=True)
@@ -24,3 +30,7 @@ class Reaction(models.Model):
     reagents = models.ManyToManyField(Reagent, related_name='reactions', help_text="Reagents that trigger this reaction taking place")
     solvent = models.ForeignKey(Reagent, related_name='solventReactions', blank=True, null=True, help_text="Solvents that are compatible with this reaction")
     solvent_properties = models.ManyToManyField(Property, blank=True, null=True)
+
+
+    def __str__(self):
+    	return self.name
