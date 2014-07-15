@@ -66,7 +66,11 @@ def find_reactions(request):
 
 #List links to all reagents
 def reagents(request):
-    return HttpResponse("hi")
+    reagent_list = Reagent.objects.all()
+    reagents = []
+    for reagent in reagent_list:
+      reactions.append({"id":reagent.id,"name":reagent.name,"url":'reagent/'+reagent.id+'/',})
+    return HttpResponse(json.dumps(reagents))
 
 #List basic info about a single reagent, id#123 in the database [as JSON]
 def reagent(request, id):
