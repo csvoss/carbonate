@@ -34,6 +34,8 @@ def moleculify(smiles):
     if type(smiles) == list:
         lexed = lexerMany(smiles)
         parsed = parserMany(lexed)
+    else:
+        raise StandardError("Invalid type of input to moleculify: input is %s, type is %s" % (repr(smiles), str(type(smiles))))
     return parsed
 
     ##return returnExampleMolecule().withHydrogens()
