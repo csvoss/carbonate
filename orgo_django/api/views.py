@@ -49,7 +49,6 @@ def reactions(request):
         reactions.append({
             "id": r_id,
             "name": name,
-            "url":'reaction/'+str(r_id)+'/',
             })
     return HttpResponse(json.dumps(reactions))
 
@@ -57,12 +56,13 @@ def reactions(request):
 def reaction(request, id):
     reaction = Reaction.objects.get(id=id)
     reaction_attrs = {
-        "id":id,
-        "name":reaction.name,
-        "process_function":reaction.process_function,
-        "reagents":[serialize(reagent) for reagent in reaction.reagents.all()],
-        #"solvent":reaction.solvent,        ## TODO
-        #"solvent_properties":reaction.solvent_properties.all(),        ## TODO
+        "id": reaction.id,
+        "name": reaction.name,
+        "process_function": reaction.process_function,
+        "reaction_site_function": reaction.reaction_site_function,
+        "reagents": reaction.reagents,
+        "solvent": reaction.solvent,
+        "solvent_properties": solvent_properties
         }
     return HttpResponse(json.dumps(reaction_attrs))
 
@@ -81,7 +81,6 @@ def find_reactions(request):
             reactions.append({
                 "id": r_id,
                 "name": name,
-                "url":'reaction/'+r_id+'/',
                 })
     return HttpResponse(json.dumps(reactions))
 
@@ -90,19 +89,17 @@ def reagents(request):
     reagent_list = Reagent.objects.all()
     reagents = []
     for reagent in reagent_list:
-      reagents.append(serialize(reagent))
-    return HttpResponse(json.dumps(reagents))
-
-def serialize(reagent):
-    return {
+      reagents.append({
         "id":reagent.id,
         "name":reagent.name,
-        "url":'reagent/'+str(reagent.id)+'/',
-        }
+        "is_solvent":reagent.is_solvent,
+        "diagram_name":reagent.diagram_name,
+        })
+    return HttpResponse(json.dumps(reagents))
 
 #List basic info about a single reagent, id#123 in the database [as JSON]
 def reagent(request, id):
-    reagent = Reagent.objects.get(id=id)
+    reagent = Rereagent.objects.get(id=id)
     attrs = []
     attrs.append({
         "id": id,
@@ -110,7 +107,7 @@ def reagent(request, id):
         "is_solvent": reagent.is_solvent,
         "diagram_name": reagent.diagram_name,
         "smiles": reagent.smiles,
-        #"properties": reagent.properties,      ## TODO
+        "properties": reagent.properties,
     })
     return HttpResponse(json.dumps(attrs))
 
