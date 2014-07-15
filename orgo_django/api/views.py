@@ -49,7 +49,6 @@ def reactions(request):
         reactions.append({
             "id": r_id,
             "name": name,
-            "url":'reaction/'+str(r_id)+'/',
             })
     return HttpResponse(json.dumps(reactions))
 
@@ -57,13 +56,13 @@ def reactions(request):
 def reaction(request, id):
     reaction = Reaction.objects.get(id=id)
     reaction_attrs = {
-        "id":id,
-        "name":reaction.name,
-        "process_function":reaction.process_function,
-        "reaction_site_function":reaction.reaction_site_function,
-        "reagents":reaction.reagents,
-        "solvent":reaction.solvent,
-        "solvent_properties":solvent_properties
+        "id": reaction.id,
+        "name": reaction.name,
+        "process_function": reaction.process_function,
+        "reaction_site_function": reaction.reaction_site_function,
+        "reagents": reaction.reagents,
+        "solvent": reaction.solvent,
+        "solvent_properties": solvent_properties
         }
     return HttpResponse(json.dumps(reaction_attrs))
 
@@ -82,7 +81,6 @@ def find_reactions(request):
             reactions.append({
                 "id": r_id,
                 "name": name,
-                "url":'reaction/'+r_id+'/',
                 })
     return HttpResponse(json.dumps(reactions))
 
@@ -96,8 +94,6 @@ def reagents(request):
         "name":reagent.name,
         "is_solvent":reagent.is_solvent,
         "diagram_name":reagent.diagram_name,
-
-        # "url":'reagent/'+reagent.id+'/',
         })
     return HttpResponse(json.dumps(reagents))
 
