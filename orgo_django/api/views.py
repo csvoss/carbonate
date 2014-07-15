@@ -5,6 +5,7 @@ from engine.renderSVG import render as svg_render
 from engine.randomGenerator import randomStart
 from engine.toMolecule import moleculify
 from engine.toSmiles import smilesify
+from engine.helperFunctions import moleculeCompare
 import api.engine.reactions
 
 from api.models import Property, Reagent, Reaction
@@ -92,9 +93,10 @@ def find_reagents(request):
 
 #Return true or false if two SMILES represent the same molecule or not.
 def check_if_equal (request):
-    mol1 = request.GET.get('mol1', None)
-    mol2 = request.GET.get('mol2', None)
-    return HttpResponse(mol1 == mol2)
+    mol1 = moleculify(request.GET.get('mol1', None))
+    mol2 = moleculify(request.GET.get('mol2', None))
+    isEqual = moleculeCompare(mol1, mol2)
+    return HttpResponse(isEqual)
 
 #React molecule(s) (by SMILES) with a particular reaction, and return the result (as SMILES)
 def react(request):
