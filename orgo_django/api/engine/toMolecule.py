@@ -18,7 +18,7 @@ import string
 def moleculify(smiles):
     """
     smiles :: str or [str]. SMILES string(s) e.g. "CC(CN)CCC(O)O"
-    return :: Molecule or [Molecule].
+    return :: Molecule or [Molecule]. Correspondingly.
 
     Raises a StandardError if the SMILES string contains
     as-yet-unsupported features (like delocalization).
@@ -32,7 +32,7 @@ def moleculify(smiles):
         smiles = str(smiles)
         lexed = lexerSingle(smiles)
         parsed = parserSingle(lexed)
-    if type(smiles) == list:
+    elif type(smiles) == list:
         lexed = lexerMany(smiles)
         parsed = parserMany(lexed)
     else:
