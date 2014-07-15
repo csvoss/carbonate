@@ -36,53 +36,50 @@ def test_smiles_to_molecule_and_back(request, smiles):
 #/api/react?reaction=123&molecules=["SM1","SM2"]
 
 
+def get_reaction_data(reaction):
+    '''Helper function that extracts data from a Reaction query object'''
+    data = {
+        "id": reaction.id,
+        "name": reaction.name,
+        "process_function": reaction.process_function,
+        "reagents": [r.id for r in reaction.reagents.all()],
+        "solvent": reaction.solvent,
+        "solvent_properties": [prop.name for prop in reaction.solvent_properties.all()]
+    }
+    return data
+
 #List links to all reactions [as JSON]
 def reactions(request):
     '''
-    Creates a JSON object with all the reactions in url format
-    Returns a HTTP Response with the JSON object.
+    Creates a JSON list with data objects for each reaction
     '''
-    reaction_list = Reaction.objects.all().select_related('name', 'id')
+    reaction_list = Reaction.objects.all().select_related('name', 'id', 'process_function', 'solvent').prefetch_related('reagents', 'solvent_properties')
     reactions = []
     for reaction in reaction_list:
-        name = reaction.name
-        r_id = reaction.id
-        reactions.append({
-            "id": r_id,
-            "name": name,
-            })
+        reactions.append(get_reaction_data(reaction))
     return HttpResponse(json.dumps(reactions))
 
 #List basic info about a single reaction, id#123 in the database [as JSON]
 def reaction(request, id):
+    '''Creates a JSON object with data for the reaction specified by id'''
     reaction = Reaction.objects.get(id=id)
-    reaction_attrs = {
-        "id": reaction.id,
-        "name": reaction.name,
-        "process_function": reaction.process_function,
-        "reaction_site_function": reaction.reaction_site_function,
-        "reagents": reaction.reagents,
-        "solvent": reaction.solvent,
-        "solvent_properties": solvent_properties
-        }
-    return HttpResponse(json.dumps(reaction_attrs))
+    reaction_data = get_reaction_data(reaction)
+    return HttpResponse(json.dumps(reaction_data))
 
 #If the user entered in [list of reagents, by id], what reaction(s) do I get?
 def find_reactions(request):
     if request.method == "GET":
-        reagent_id_list = request.GET.get('reagents', None)
-        reaction_list = Reaction.objects.all().prefetch_related('reagents__id')
+        # TODO: turn this list from string to an actual list
+        reagent_id_list = request.GET.get('reagents', None) 
+        reaction_list = Reaction.objects.all()
+        #Recursively filter for each reagent to get only reactions that have ALL the reagents
         for reagent_id in reagent_id_list:
             reaction_list = reaction_list.filter(reagents__id=reagent_id)
-        reaction_list = reaction_list.select_related('name','id')
+
+        reaction_list = reaction_listselect_related('name', 'id', 'process_function', 'solvent').prefetch_related('reagents', 'solvent_properties')
         reactions = []
         for reaction in reaction_list:
-            name = reaction.name
-            r_id = reaction.id
-            reactions.append({
-                "id": r_id,
-                "name": name,
-                })
+            reactions.append(get_reaction_data(reaction))
     return HttpResponse(json.dumps(reactions))
 
 #List links to all reagents

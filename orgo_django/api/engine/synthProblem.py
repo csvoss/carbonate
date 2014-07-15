@@ -182,7 +182,6 @@ class MoleculeBox:
             outp += smilesify(mol) + "."
         return serverRender.render(outp)
  
- 
 def parseReagentsString(inpstring):
     """
     inpstring :: str. User-generated text, such as "H2 cat Pd|C"
@@ -256,8 +255,6 @@ def parseReagentsString(inpstring):
         if (string.count(sub) != 0):
             if sum([string.count(big.lower()) for big in bigList]) >= sum([string.count(x.lower()) for x in REAGENTS[val][1]]):
                 outp[val] = False
-    
-       
     return outp
     
 def makeStartingMaterial(mode, count=1):
@@ -310,8 +307,7 @@ def randomSynthesisProblemMake(mode, steps = 20, maxLength = 30, count = 2):
             steps2.remove(step)
     return steps2
     
-    
-def randomSynthesisProblemStart(mode, steps = 20, maxLength = 30, count=2):
+def randomSynthesisProblemStart(mode, steps = 20, maxLength = 30, count = 2):
     fused = False
     #Mode controls the reagents that are legal, as well as the distribution of starting materials.
     legalRxns = []
