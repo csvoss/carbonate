@@ -31,11 +31,6 @@ urlpatterns = patterns(
     url(r'^renderSVG/$', views.render_SVG, name='render_SVG'),
     ## /api/randomGenSmiles/ 
     url(r'^randomGenSmiles/$', views.random_gen_smiles, name='random_gen_smiles'),
-    #/api/findReactions?text="HBr, CH2Cl2"
-#    unsure how to differentiate this from the one above
-#    -- that's okay, we can skip it -- it's optional
-#       ... either that, or we rename it "findReactionsFromText" or something like that
-#    url(r'^findReactions/$', views.find_reactions, name='find_reactions'),
     #/api/randomGenSVG
     url(r'^randomGenSVG/$', views.random_gen_SVG, name='random_gen_SVG'),
     
