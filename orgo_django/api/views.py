@@ -49,7 +49,7 @@ def reactions(request):
         reactions.append({
             "id": r_id,
             "name": name,
-            "url":'reaction/'+r_id+'/',
+            "url":'reaction/'+str(r_id)+'/',
             })
     return HttpResponse(json.dumps(reactions))
 
@@ -69,7 +69,7 @@ def reagents(request):
     reagent_list = Reagent.objects.all()
     reagents = []
     for reagent in reagent_list:
-      reactions.append({"id":reagent.id,"name":reagent.name,"url":'reagent/'+reagent.id+'/',})
+      reagents.append({"id":reagent.id,"name":reagent.name,"url":'reagent/'+str(reagent.id)+'/',})
     return HttpResponse(json.dumps(reagents))
 
 #List basic info about a single reagent, id#123 in the database [as JSON]
