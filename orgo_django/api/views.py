@@ -4,9 +4,8 @@ from django.core.urlresolvers import reverse
 from engine.renderSVG import render as svg_render
 from engine.randomGenerator import randomStart
 from engine.toMolecule import moleculify
-from engine.toSmiles import smilesify
+from engine.toSmiles import smilesify, to_canonical
 import api.engine.reactions
-
 from api.models import Property, Reagent, Reaction
 import json
 # Create your views here.
@@ -113,10 +112,12 @@ def find_reagents(request):
     return HttpResponse(request.GET.get('text', None))
 
 #what if the SMILES are different but represent the same molecule?
-def check_if_equal (request):
+def check_if_equal(request):
     '''Return true if two SMILES represent the same molecule'''
     mol1 = request.GET.get('mol1', None)
     mol2 = request.GET.get('mol2', None)
+    mol1 = to_canonical(mol1)
+    mol2 = to_canonical(mol2)
     return HttpResponse(mol1 == mol2)
 
 #React molecule(s) (by SMILES) with a particular reaction, and return the result (as SMILES)

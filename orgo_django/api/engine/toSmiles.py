@@ -1,9 +1,11 @@
 """
 toSmiles.py
 
-This code contains the function smilesify(molecule), which converts a Molecule object to a SMILES string:
+This code contains the function smilesify(molecule), which converts a Molecule object to a canonical SMILES string:
 http://en.wikipedia.org/wiki/SMILES
 Once a Molecule has been converted to a SMILES string, we can render it as an SVG using renderSVG.py.
+
+Also contains the function to_canonical(smiles), which converts a SMILES string to a canonical SMILES string.
 
 PROCEED CAUTIOUSLY -- THIS CODE IS FINICKY
 
@@ -14,7 +16,25 @@ Does not yet support:
 """
 from molecularStructure import *
 
+import openbabel
+import pybel
+
 debugSmiles = False
+
+
+def to_canonical(smiles):
+    """
+    Uses OpenBabel.
+    Converts a SMILES string to a canonical SMILES string.
+    smiles :: str.
+    return :: str.
+    """
+    obConversion = openbabel.OBConversion()
+    obConversion.SetInAndOutFormats("smi", "can")
+    outMol = openbabel.OBMol()
+    obConversion.ReadString(outMol, str(smiles))
+    ans = obConversion.WriteString(outMol)
+    return ans
 
 def assertMolecule(molecule):
     try:
@@ -132,7 +152,7 @@ def smilesify(molecule):
         atom.parentAtom = 0
         atom.nonHNeighbors = []
 
-    return outp
+    return to_canonical(outp)
 
 bondSymbols = ['0', '-', '=', '#', '$']
 
