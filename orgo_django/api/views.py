@@ -6,6 +6,7 @@ from engine.randomGenerator import randomStart
 from engine.toMolecule import moleculify
 from engine.toSmiles import smilesify, to_canonical
 import api.engine.reactions
+
 from api.models import Property, Reagent, Reaction
 import json
 # Create your views here.
@@ -46,16 +47,28 @@ def get_reaction_data(reaction):
     }
     return data
 
-#List links to all reactions [as JSON]
+def get_reagent_data(reagent):
+    '''Helper function that extracts data from a Reagent query object'''
+    data = {
+        "id": reagent.id,
+        "name": reagent.name, #TODO: Change if name becomes a StringListField
+        "is_solvent": reagent.is_solvent,
+        "diagram_name": reagent.diagram_name,
+        "smiles": reagent.smiles,
+        "properties": [prop.name for prop in reagent.properties.all()]
+    }
+    return data
+
+#List reaction data for ALL reactions
 def reactions(request):
     '''
-    Creates a JSON list with data objects for each reaction
+    Creates a JSON list with data objects for each and every reaction
     '''
     reaction_list = Reaction.objects.all().select_related('name', 'id', 'process_function', 'solvent').prefetch_related('reagents', 'solvent_properties')
-    reactions = []
+    reaction_data = []
     for reaction in reaction_list:
-        reactions.append(get_reaction_data(reaction))
-    return HttpResponse(json.dumps(reactions))
+        reaction_data.append(get_reaction_data(reaction))
+    return HttpResponse(json.dumps(reaction_data))
 
 #List basic info about a single reaction, id#123 in the database [as JSON]
 def reaction(request, id):
@@ -67,45 +80,44 @@ def reaction(request, id):
 #If the user entered in [list of reagents, by id], what reaction(s) do I get?
 def find_reactions(request):
     if request.method == "GET":
-        # TODO: turn this list from string to an actual list
-        reagent_id_list = request.GET.get('reagents', None) 
+        reagent_id_list = request.GET.get('reagents', None)
+        if isinstance(reagent_id_list, (str, unicode)):
+            #convert from str/unicode to an actual python list
+            reagent_id_list = json.loads(reagent_id_list)
+        elif isinstance(reagent_id_list, list):
+            #keep the list as is if it's already a list for some reason
+            pass
+        elif reagent_id_list == None:
+            #input is empty, show all reactions
+            return reactions(request)
+        else:
+            #invalid input?
+            msg = "Invalid Input. Provide reagents as a list of ids"
+            return HttpResponse(msg)
         reaction_list = Reaction.objects.all()
         #Recursively filter for each reagent to get only reactions that have ALL the reagents
         for reagent_id in reagent_id_list:
             reaction_list = reaction_list.filter(reagents__id=reagent_id)
 
-        reaction_list = reaction_listselect_related('name', 'id', 'process_function', 'solvent').prefetch_related('reagents', 'solvent_properties')
-        reactions = []
+        reaction_list = reaction_list.select_related('name', 'id', 'process_function', 'solvent').prefetch_related('reagents', 'solvent_properties')
+        reaction_data = []
         for reaction in reaction_list:
-            reactions.append(get_reaction_data(reaction))
-    return HttpResponse(json.dumps(reactions))
+            reaction_data.append(get_reaction_data(reaction))
+    return HttpResponse(json.dumps(reaction_data))
 
 #List links to all reagents
 def reagents(request):
     reagent_list = Reagent.objects.all()
-    reagents = []
+    reagent_data = []
     for reagent in reagent_list:
-      reagents.append({
-        "id":reagent.id,
-        "name":reagent.name,
-        "is_solvent":reagent.is_solvent,
-        "diagram_name":reagent.diagram_name,
-        })
-    return HttpResponse(json.dumps(reagents))
+      reagent_data.append(get_reagent_data(reagent))
+    return HttpResponse(json.dumps(reagent_data))
 
 #List basic info about a single reagent, id#123 in the database [as JSON]
 def reagent(request, id):
     reagent = Reagent.objects.get(id=id)
-    attrs = []
-    attrs.append({
-        "id": id,
-        "name": reagent.name,
-        "is_solvent": reagent.is_solvent,
-        "diagram_name": reagent.diagram_name,
-        "smiles": reagent.smiles,
-        "properties": reagent.properties,
-    })
-    return HttpResponse(json.dumps(attrs))
+    reagent_data = get_reagent_data(reagent)
+    return HttpResponse(json.dumps(reagent_data))
 
 #If the user entered in [text], what reagent(s) do I get?
 def find_reagents(request):
