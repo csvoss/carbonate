@@ -1,0 +1,85 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<!--
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script src="singleStep.js"></script>
+  <link rel="stylesheet" type="text/css" href="singleStep.css">
+-->
+
+</head>
+<body>
+
+    <style type="text/css">
+      
+        .answerArea {
+            border: 1px solid;
+            width: 500px;
+            height:500px;
+      }
+        .molDisplay {
+            border: 1px solid;
+            width: 200px;
+            height:200px;
+            float: left;
+      }
+        #groupThingy {
+            border: 1px solid;
+            height: 300px;
+        }
+
+        
+    
+    </style>
+
+    <div class = answerArea>
+        <div id = groupThingy>
+            What reagents do you need to add to the start molecule to get to the target molecule?<br>
+        
+<!--
+        <script>
+            var reactant = randomGenSmiles;
+            var reactionID = generateRandomReaction();
+            var reagents = getReactionFromID(reactionID).reagents;
+            var product = react(reactionID, reactant);
+            
+            
+            NUM_OPTIONS = 4
+            function randomGen(least, greatest){
+                return Math.floor((Math.random() * (greatest-least+1)) + least);
+            }
+            var options = []
+            for (i = 0, i < NUM_OPTIONS, i++){
+                options.append(randomGenReagents());
+            }
+            options[randomGen(0, 3)] = reagents
+            
+            
+            
+        </script>
+-->
+            <div class = molDisplay id = leftMol>
+                Start Molecule
+        <!--        
+                    renderSVG(reactant)
+
+        --> 
+            </div>
+            <div class = molDisplay>
+                Target Molecule
+        <!--        
+                    renderSVG(product)
+
+        -->
+            </div>
+        
+        </div>
+        <input type="radio" name="reagent" value="opt1">reagent1<br>
+        <input type="radio" name="reagent" value="opt2" checked>reagent2<br>
+        <input type="radio" name="reagent" value="opt3">reagent3<br>
+        <input type="radio" name="reagent" value="opt4">reagent4<br>
+    </div>
+    
+</body>
+    
+</html>
