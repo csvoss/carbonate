@@ -1,7 +1,7 @@
 # standard import to get access to models.Model
 from django.db import models
-import engine.molecularStructure as orgoStructure
-from engine.synthProblem import *
+import api.engine.molecularStructure as orgoStructure
+from api.engine.synthProblem import *
 import cPickle
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset
