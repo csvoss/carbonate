@@ -4,12 +4,7 @@ from django.core.urlresolvers import reverse
 from engine.renderSVG import render as svg_render
 from engine.randomGenerator import randomStart
 from engine.toMolecule import moleculify
-<<<<<<< HEAD
-from engine.toSmiles import smilesify
-from engine.helperFunctions import moleculeCompare
-=======
 from engine.toSmiles import smilesify, to_canonical
->>>>>>> 7f90a68c6f435c6b1eb8f3902f946152696f7a17
 import api.engine.reactions
 from api.models import Property, Reagent, Reaction
 import json
