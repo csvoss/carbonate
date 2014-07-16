@@ -464,8 +464,7 @@ def findAlkyne(molecule):
         for neighbor in atom.neighbors:
             if neighbor.element == 'C' and atom.neighbors[neighbor] == 3:
                 if atom == neighbor:
-                    print "OH NO WHAT JUST HAPPENED"
-                    raise StandardError
+                    raise StandardError("OH NO WHAT JUST HAPPENED")
                 return (atom, neighbor)
     return None
 
