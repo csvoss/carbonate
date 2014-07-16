@@ -12,13 +12,13 @@ from django.utils.html import escape
 import json
 import traceback
 import forkit
-import engine.renderSVG as serverRender
-import engine.reactions as reactions
-import engine.randomGenerator as randomGenerator
-import engine.molecularStructure as orgoStructure
-from engine.toSmiles import smilesify
+import api.engine.renderSVG as serverRender
+import api.engine.reactions as reactions
+import api.engine.randomGenerator as randomGenerator
+import api.engine.molecularStructure as orgoStructure
+from api.engine.toSmiles import smilesify
 import orgo.models as models
-from engine.synthProblem import *
+from api.engine.synthProblem import *
 TIMEOUT = 10 #seconds
 
 def home(request, debug = ""):
