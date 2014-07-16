@@ -14,7 +14,8 @@ def synthesis(request):
     return HttpResponse("hi")
 
 def single_step(request):
-    return HttpResponse("hi")
+    context = {}
+    return render(request, 'app/singleStep.html', context)
 
 def predict_products(request):
     return HttpResponse("hi")
