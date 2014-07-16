@@ -9,3 +9,12 @@ from django.core.urlresolvers import reverse
 def index(request):
     context = {}
     return render(request, 'app/index.html', context)
+
+def synthesis(request):
+    return HttpResponse("hi")
+
+def single_step(request):
+    return HttpResponse("hi")
+
+def predict_products(request):
+    return HttpResponse("hi")
