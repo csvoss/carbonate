@@ -37,12 +37,15 @@ def test_smiles_to_molecule_and_back(request, smiles):
 
 def get_reaction_data(reaction):
     '''Helper function that extracts data from a Reaction query object'''
+    solvent = reaction.solvent
+    if solvent is not None:
+        solvent = solvent.id
     data = {
         "id": reaction.id,
         "name": reaction.name,
         "process_function": reaction.process_function,
         "reagents": [r.id for r in reaction.reagents.all()],
-        "solvent": reaction.solvent.id,
+        "solvent": solvent,
         "solvent_properties": [prop.name for prop in reaction.solvent_properties.all()],
     }
     return data
@@ -58,6 +61,41 @@ def get_reagent_data(reagent):
         "properties": [prop.name for prop in reagent.properties.all()]
     }
     return data
+
+#allows the query input to be in several forms: [x,y], ["x,y"], x,y, etc.
+def parse_input(query):
+    '''
+    query: a string with the input
+    Helper function. Parses the string into a python list of strings
+    '''
+    if not isinstance(query, (str,unicode) ):
+        print "Check code. Should not be parsing non-strings"
+        return query
+    if query == '':
+        return  []
+    temp = query.strip('()[]{}').split(',')
+    parsed_query = [i.strip('"').strip("'") for i in temp]
+    return parsed_query
+
+    # try:
+    #     #convert from str/unicode to an actual python list (or string)
+    #     parsed_query = json.loads(query)
+    # except ValueError:
+    #     #input elements need quotes to convert into strings (eg [aprotic, halide])
+    #     #TODO: implement a way to convert the example into ["aprotic","halide"]
+    #     msg = "Make sure to use double quotes around string items in your list"
+    #     raise ValueError(msg)
+    # except TypeError:
+    #     msg = "Cannot parse input data (list). Provide input as valid list"
+    #     raise TypeError(msg)
+    # except Exception as e:
+    #     msg = "Unexpected error: " + type(e)
+    #     print msg #this print probably doesn't work
+    #     raise
+    # else:
+    #     return parsed_query
+
+
 
 #List reaction data for ALL reactions
 def reactions(request):
@@ -80,24 +118,11 @@ def reaction(request, id):
 #If the user entered in [list of reagents, by id], what reaction(s) do I get?
 def find_reactions(request):
     if request.method == "GET":
-        reagent_id_list = request.GET.get('reagents', None)
-        if isinstance(reagent_id_list, (str, unicode)):
-            #convert from str/unicode to an actual python list
-            reagent_id_list = json.loads(reagent_id_list)
-        elif isinstance(reagent_id_list, list):
-            #keep the list as is if it's already a list for some reason
-            pass
-        elif reagent_id_list == None:
-            #input is empty, show all reactions
-            return reactions(request)
-        else:
-            #invalid input?
-            msg = "Invalid Input. Provide reagents as a list of ids"
-            return HttpResponse(msg)
+        reagent_id_list = parse_input(request.GET.get('reagents', ''))
         reaction_list = Reaction.objects.all()
         #Recursively filter for each reagent to get only reactions that have ALL the reagents
         for reagent_id in reagent_id_list:
-            reaction_list = reaction_list.filter(reagents__id=reagent_id)
+            reaction_list = reaction_list.filter(reagents__id=int(reagent_id))
 
         reaction_list = reaction_list.select_related('name', 'id', 'process_function', 'solvent').prefetch_related('reagents', 'solvent_properties')
         reaction_data = []
@@ -121,7 +146,29 @@ def reagent(request, id):
 
 #If the user entered in [text], what reagent(s) do I get?
 def find_reagents(request):
-    return HttpResponse(request.GET.get('text', None))
+    # TODO: Unfinished, still editing
+    if request.method == "GET":
+        reagent_name = request.GET.get('name', '')
+        reagent_name = reagent_name.strip('"').strip("'")
+
+        reagent_props = parse_input(request.GET.get('properties',''))
+
+        reagent_list = Reagent.objects.all()
+
+        if reagent_name is not '':
+            reagent_list = reagent_list.filter(name=reagent_name) #TODO: Change once name is changed to StringListField
+        
+        #Recursively filter for each property to get only reagents that have ALL the properties
+        for prop_name in reagent_props:
+            #iexact for case-insensitive matches (eg Aprotic = aprotic = apROtiC)
+            reagent_list = reagent_list.filter(properties__name__iexact=prop_name)
+
+        reagent_list = reagent_list.select_related('name', 'id', 'diagram_name', 'smiles', 'is_solvent').prefetch_related('properties')
+        reagent_data = []
+        for reagent in reagent_list:
+            reagent_data.append(get_reagent_data(reagent))
+    return HttpResponse(json.dumps(reagent_data))
+
 
 #what if the SMILES are different but represent the same molecule?
 def check_if_equal(request):

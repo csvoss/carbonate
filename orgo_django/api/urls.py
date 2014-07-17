@@ -21,7 +21,7 @@ urlpatterns = patterns(
     url(r'^reagents/$', views.reagents, name='reagents'),
     ## /api/reagent/123
     url(r'^reagent/'+IDREGEX+r'/$', views.reagent, name='reagent'),
-    ## /api/findReagents?text="HBr"
+    ## /api/findReagents?name="HBr" OR ?properties=["aprotic"]
     url(r'^findReagents/$', views.find_reagents, name='find_reagents'),
     ##/api/checkIfEqual?mol1=ABC&mol2=DEF
     url(r'^checkIfEqual/$', views.check_if_equal, name='check_if_equal'),
