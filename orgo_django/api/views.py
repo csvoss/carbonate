@@ -46,7 +46,7 @@ def get_reaction_data(reaction):
         "process_function": reaction.process_function,
         "reagents": [r.id for r in reaction.reagents.all()],
         "solvent": solvent,
-        "solvent_properties": [prop.name for prop in reaction.solvent_properties.all()]
+        "solvent_properties": [prop.name for prop in reaction.solvent_properties.all()],
     }
     return data
 

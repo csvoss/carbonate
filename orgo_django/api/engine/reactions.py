@@ -148,34 +148,6 @@ def tautomerize(moleculeList):
             
             return [molecule]
 
-
-    #Returns a (centralcarbon, alkenecarbon, oxygen) in a tuple. 
-    def findPlace(molecule):
-        if molecule == None:
-            return None
-        for atom in molecule.atoms:
-            if not (atom.element == 'C'):
-                continue
-            isAlkene = False
-            alkeneCarbon = None
-            #check if is alkene
-            for neighbor in atom.neighbors:
-                if neighbor.element == 'C' and atom.neighbors[neighbor] == 2:
-                    isAlkene = True
-                    alkeneCarbon = neighbor
-            if not isAlkene:
-                continue
-            #Sanity check this later
-            for neighbor in atom.neighbors:
-                if neighbor.element == 'O' and atom.neighbors[neighbor] == 1 and len(list(neighbor.neighbors))==1:
-                    return (atom, alkeneCarbon, neighbor)
-        return None
-    
-    #if things are crashing, uncomment this line
-    #return moleculeList
-    
-    return reactWithoutRemoveDuplicates(moleculeList, findPlace, reactAtPlace)
-
      
 
     #Returns a (centralcarbon, alkenecarbon, oxygen) in a tuple. 
