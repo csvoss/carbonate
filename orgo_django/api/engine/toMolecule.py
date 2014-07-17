@@ -24,7 +24,7 @@ from rply import ParserGenerator, LexerGenerator
 
 lg = LexerGenerator()
 lg.ignore(r"\s+")
-lg.add('SYMBOL', r'[@#$%\*\(\)\[\]=\+-:/\\\.]')
+lg.add('SYMBOL', r'[@#$%\*\(\)\[\]=\+\-:/\\\.]')
 lg.add('ELEMENT_CHAR', r'[A-IK-PRSTXYZa-ik-pr-uy]')
 lg.add('DIGIT', r'[0-9]')
 lg.add('TERMINATOR', '[ \t\r\n]')

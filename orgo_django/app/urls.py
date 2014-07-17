@@ -1,6 +1,8 @@
 from django.conf.urls import patterns, url
 from app import views
 
+IDREGEX = r'(?P<id>.*)'
+
 urlpatterns = patterns(
     '',
     # ex: /api/
@@ -8,8 +10,9 @@ urlpatterns = patterns(
     
 #    app/synthesis
     url(r'^synthesis/$', views.synthesis, name='synthesis'),
-#    app/singleStep
-    url(r'^singleStep/$', views.single_step, name='single_step'),
+#    app/singleStep/1
+# V fix
+    url(r'^singleStep/'+IDREGEX+r'/$', views.single_step, name='single_step'),
 #    app/predictProducts
     url(r'^predictProducts/$', views.predict_products, name='predict_products'),
                        
