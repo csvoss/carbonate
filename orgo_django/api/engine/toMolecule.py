@@ -19,6 +19,7 @@ def moleculify(smiles):
     """
     smiles :: str or [str]. SMILES string(s) e.g. "CC(CN)CCC(O)O"
     return :: Molecule or [Molecule]. Correspondingly.
+              If smiles is empty, None.
 
     Raises a StandardError if the SMILES string contains
     as-yet-unsupported features (like delocalization).
@@ -30,18 +31,18 @@ def moleculify(smiles):
 
     if isinstance(smiles, basestring):
         smiles = str(smiles)
-        lexed = lexerSingle(smiles)
-        parsed = parserSingle(lexed)
+        tokens = lexerSingle(smiles)
+        parsed = parserSingle(tokens)
     elif type(smiles) == list:
-        lexed = lexerMany(smiles)
-        parsed = parserMany(lexed)
+        tokens = lexerMany(smiles)
+        parsed = parserMany(tokens)
     else:
         raise StandardError("Invalid type of input to moleculify: input is %s, type is %s" % (repr(smiles), str(type(smiles))))
     return parsed
 
     ##return returnExampleMolecule().withHydrogens()
 
-def isAtom(token):
+def isAtomString(token):
     """
     token :: str. e.g. Au, [Cu+2], [C@@H]
     return :: bool.
@@ -65,29 +66,43 @@ def toAtom(token):
         else:
             return Atom(token[1:2])
 
-def parserMany(lexedMany):
+def parserMany(tokensMany):
     """
-    lexedMany :: [tokenized SMILES string]
+    tokensMany :: [[SMILES token (str)]].
     return :: [Molecule].
     """
-    return map(parserSingle, lexedMany)
+    return map(parserSingle, tokensMany)
 
-def parserSingle(lexed):
+def parserSingle(tokens):
     """
-    lexed :: tokenized SMILES string
-    return :: Molecule.
+    tokens :: [SMILES token (str)].
+    return :: Molecule or [Molecule].
+              Will only return a list of Molecules if the SMILES is ill-formed
+              in such a way as to imply multiple molecules.
     """
 
-    ## TODO
-    #raise StandardError(lexed)
+    if len(tokens) == 0:
+        return None, None
 
-    if len(lexed) == 0:
-        return None
+    first = tokens[0]
 
-    first = lexed.pop(0)
-    assert isAtom(first)
-    molecule = None
-    ## TODO: finish this method
+    if isinstance(first, list):
+        ## This... isn't supposed to happen. But it can if the SMILES is weird.
+        ## If it does, we treat the initial branch as a *separate molecule*.
+        ## e.g. (CCCCC)N(C)Br --> CCCCC and CNBr
+        prev_mol, prev_atom = parserWithPassback(first)
+        output = [prev_mol]
+        molecule = parserSingle(tokens[1:]) ## Recursion!
+        if isinstance(molecule, list):
+            output += molecule
+        elif isinstance(molecule, Molecule):
+            output.append(molecule)
+        else:
+            raise StandardError("parserSingle returned unexpected type: %s, type %s" % (str(molecule), str(type(molecule))))
+        return output
+
+    assert isAtomString(first)
+    molecule, _ = parserWithPassback(tokens)
 
     c40 = Atom("C")
     c41 = Atom("C")
@@ -105,9 +120,43 @@ def parserSingle(lexed):
     c41.newCTCenter(c40, c43, cl2)
     mol4.addBond(c42,c43,1)
 
-    molecule = mol4
+    ## Comment this to actually test parserSingle
+    ## molecule = mol4
 
     return molecule.withHydrogens()
+
+def parserWithPassback(tokens):
+    ## TODO cis trans
+    ## TODO chirality
+    ## TODO bond types
+    ## TODO ring portals
+    """
+    tokens :: [SMILES token (str)].
+    return :: ( Molecule, Atom ).
+    """
+    first = tokens.pop(0)
+    assert isAtomString(first)
+    first_atom = toAtom(first)
+
+    molecule = Molecule(first_atom)
+
+    if len(tokens) > 0:
+        next = tokens[0]
+        while isinstance(next, list):
+            next_mol, next_atom = parserWithPassback(next)
+            ## attach next_mol to molecule via next_atom connecting to first_atom
+            molecule.addMolecule(next_mol, next_atom, first_atom, 1)
+            tokens = tokens[1:]
+            next = tokens[0]
+
+        if len(tokens) > 0:
+            rest_mol, rest_atom = parserWithPassback(tokens)
+            molecule.addMolecule(rest_mol, rest_atom, first_atom, 1)
+
+    connecting_atom = first_atom
+
+    return molecule, connecting_atom
+    ## TODO: finish this method
 
 def lexerMany(smiles_list):
     """
@@ -133,9 +182,9 @@ def lexerWithPassback(smiles):
               both that list of tokens and a 'passback' -- i.e. the remainder
               of the SMILES string.
     smiles :: SMILES str.
-    return :: ( [SMILES tokens (str)], remaining )
+    return :: ( [SMILES tokens (str)], remaining SMILES (str) ).
     """
-    lexed = []
+    tokens = []
     while len(smiles) > 0:
         prev_smiles = smiles
         first = smiles[0]
@@ -143,12 +192,12 @@ def lexerWithPassback(smiles):
             end = smiles.find(']')
             if end == -1:
                 raise StandardError("Invalid SMILES: no matching ] in %s" % smiles)
-            lexed.append(smiles[0:end+1])
+            tokens.append(smiles[0:end+1])
             smiles = smiles[end+1:]
         
         elif first == '(':
             subtree, remaining = lexerWithPassback(smiles[1:])
-            lexed.append(subtree)
+            tokens.append(subtree)
             smiles = remaining
         
         elif first in '%0123456789':
@@ -157,7 +206,7 @@ def lexerWithPassback(smiles):
             else:
                 num = smiles[0]
                 remaining = smiles[1:]
-            lexed.append(num)
+            tokens.append(num)
             smiles = remaining
             
         elif first.lower() in string.lowercase:
@@ -167,26 +216,26 @@ def lexerWithPassback(smiles):
             except IndexError:
                 second = '$' ##any non-lowercase char
             if second in string.lowercase:
-                lexed.append(first+second)
+                tokens.append(first+second)
                 smiles = smiles[2:]
             else:
-                lexed.append(first)
+                tokens.append(first)
                 smiles = smiles[1:]
         
         elif first in '-=#$/\\':
-            lexed.append(first)
+            tokens.append(first)
             smiles = smiles[1:]
 
         elif first == ')':
             smiles = smiles[1:]
-            return lexed, smiles
+            return tokens, smiles
 
         ## no infinite loop!
-        assert len(smiles) < len(prev_smiles), "Infinite loop in toMolecule.lexer: %s" % first
+        assert len(smiles) < len(prev_smiles), "Infinite loop in toMolecule.lexer, unrecognized char: %s" % repr(first)
 
     assert len(smiles) == 0, "Smiles not fully reduced in toMolecule.lexer"
 
-    return lexed, None
+    return tokens, None
 
 
 def returnExampleMolecule():
