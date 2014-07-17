@@ -4,8 +4,6 @@ import copy
 import itertools
 import cPickle
 
-randThing = 0
-
 debug = False
 
 
@@ -305,13 +303,13 @@ def moleculeCompare(a, b, checkChiral = True):
                 #hypothesized pairing follows the correct chirality.
                 aCW = []
                 bCW = []
-                for neighbor in a.chiralCWlist(aNeighborSet[randThing]):
+                for neighbor in a.chiralCWlist(aNeighborSet[0]):
                     if neighbor == None:
                         #Hydrogen.
                         aCW.append("H")
                     else:
                         aCW.append(neighbor.element)
-                for neighbor in b.chiralCWlist(b.neighbors.keys()[randThing]):
+                for neighbor in b.chiralCWlist(b.neighbors.keys()[0]):
                     if neighbor == None:
                         #Hydrogen.
                         bCW.append("H")
@@ -326,10 +324,10 @@ def moleculeCompare(a, b, checkChiral = True):
                         OKFlag = True
                         #The elements are correct, but is the actual mapping consistant?
                         for j in xrange(3):
-                            if a.chiralCWlist(aNeighborSet[randThing])[j] == None:
+                            if a.chiralCWlist(aNeighborSet[0])[j] == None:
                                 continue
-                            if temp[a.chiralCWlist(aNeighborSet[randThing])[j]] ==\
-                                b.chiralCWlist(b.neighbors.keys()[randThing])[(j+i)%3]:
+                            if temp[a.chiralCWlist(aNeighborSet[0])[j]] ==\
+                                b.chiralCWlist(b.neighbors.keys()[0])[(j+i)%3]:
                                 pass
                             else:
                                 OKFlag = False
