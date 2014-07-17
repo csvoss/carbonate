@@ -10,10 +10,100 @@ Only ``moleculify`` is meant to be public-facing. The other methods in this file
 
 This would allow us to take in SMILES strings as inputs, from students or professors, to specify their own molecules to use in problems. Hooray!
 
+https://github.com/alex/rply
+https://pypi.python.org/pypi/rply/0.5.1
+http://www.opensmiles.org/spec/open-smiles-2-grammar.html
+http://www.opensmiles.org/spec/open-smiles-4-output.html#4.4
 """
 
 from molecularStructure import *
 import string
+
+from rply import ParserGenerator, LexerGenerator
+##from rply.token import BaseBox
+
+
+
+lg = LexerGenerator()
+# Add takes a rule name, and a regular expression that defines the rule.
+lg.add("PLUS", r"\+")
+lg.add("MINUS", r"-")
+lg.add("NUMBER", r"\d+")
+
+lg.ignore(r"\s+")
+
+
+#     ATOMS
+# 3.1     atom ::= bracket_atom | aliphatic_organic | aromatic_organic | '*'
+#     ORGANIC SUBSET ATOMS
+# 3.1.5   aliphatic_organic ::= 'B' | 'C' | 'N' | 'O' | 'S' | 'P' | 'F' | 'Cl' | 'Br' | 'I'
+# 3.5     aromatic_organic ::= 'b' | 'c' | 'n' | 'o' | 's' | 'p'
+#     BRACKET ATOMS
+# 3.1.1   bracket_atom ::= '[' isotope? symbol chiral? hcount? charge? class? ']'
+# 3.1.1   symbol := element_symbols | aromatic_symbols | '*'
+# 3.1.4   isotope ::= NUMBER
+# 3.1.1   element_symbols ::= 'H'| 'He' |'Li'|'Be'| 'B' |'C' |'N' |'O' |'F' |'Ne' |'Na'|'Mg'| 'Al'|'Si'|'P' |'S' |'Cl'|'Ar' |'K' |'Ca'|'Sc'|'Ti'|'V' |'Cr'|'Mn'|'Fe'|'Co'|'Ni'|'Cu'|'Zn'|'Ga'|'Ge'|'As'|'Se'|'Br'|'Kr' |'Rb'|'Sr'|'Y' |'Zr'|'Nb'|'Mo'|'Tc'|'Ru'|'Rh'|'Pd'|'Ag'|'Cd'|'In'|'Sn'|'Sb'|'Te'|'I' |'Xe' |'Cs'|'Ba'| 'Hf'|'Ta'|'W' |'Re'|'Os'|'Ir'|'Pt'|'Au'|'Hg'|'Tl'|'Pb'|'Bi'|'Po'|'At'|'Rn' |'Fr'|'Ra'| 'Rf'|'Db'|'Sg'|'Bh'|'Hs'|'Mt'|'Ds'|'Rg' |'La'|'Ce'|'Pr'|'Nd'|'Pm'|'Sm'|'Eu'|'Gd'|'Tb'|'Dy'|'Ho'|'Er'|'Tm'|'Yb'|'Lu' |'Ac'|'Th'|'Pa'|'U' |'Np'|'Pu'|'Am'|'Cm'|'Bk'|'Cf'|'Es'|'Fm'|'Md'|'No'|'Lr'
+# 3.5     aromatic_symbols ::= 'c' | 'n' | 'o' | 'p' | 's' | 'se' | 'as'
+#     CHIRALITY
+# 3.9     chiral ::= '@' | '@@' | '@TH1' | '@TH2' | '@AL1' | '@AL2' | '@SP1' | '@SP2' | '@SP3' | '@TB1' | '@TB2' | '@TB3' | ... | '@TB29' | '@TB30' | '@OH1' | '@OH2' | '@OH3' | ... | '@OH29' | '@OH30'
+#     HYDROGENS
+# 3.1.2   hcount ::= 'H' | 'H' DIGIT
+#     CHARGE
+# 3.1.3   charge ::= '-' | '-' DIGIT | '+' | '+' DIGIT | '--' *deprecated* | '++' *deprecated*
+#     ATOM CLASS
+# 3.1.7   class ::= ':' NUMBER
+#     BONDS AND CHAINS
+# 3.2, 3.9.3  bond ::= '-' | '=' | '#' | '$' | ':' | '/' | '\'
+# 3.4     ringbond ::= bond? DIGIT | bond? '%' DIGIT DIGIT
+# 3.3     branched_atom ::= atom ringbond* branch*
+#     branch ::= '(' chain ')' | '(' bond chain ')' | '(' dot chain ')'
+#     chain ::= branched_atom | chain branched_atom | chain bond branched_atom | chain dot branched_atom
+# 3.7     dot ::= '.'
+#     SMILES STRINGS
+# 3.10    smiles ::= chain terminator
+#     terminator ::= SPACE TAB | LINEFEED | CARRIAGE_RETURN | END_OF_STRING
+
+# This is a list of the token names. precedence is an optional list of
+# tuples which specifies order of operation for avoiding ambiguity.
+# precedence must be one of "left", "right", "nonassoc".
+# cache_id is an optional string which specifies an ID to use for
+# caching. It should *always* be safe to use caching,
+# RPly will automatically detect when your grammar is
+# changed and refresh the cache for you.
+pg = ParserGenerator(["NUMBER", "PLUS", "MINUS"],
+        precedence=[("left", ['PLUS', 'MINUS'])], cache_id="myparser")
+
+@pg.production("main : expr")
+def main(p):
+    # p is a list, of each of the pieces on the right hand side of the
+    # grammar rule
+    return p[0]
+
+@pg.production("expr : expr PLUS expr")
+@pg.production("expr : expr MINUS expr")
+def expr_op(p):
+    lhs = p[0].getint()
+    rhs = p[2].getint()
+    if p[1].gettokentype() == "PLUS":
+        return BoxInt(lhs + rhs)
+    elif p[1].gettokentype() == "MINUS":
+        return BoxInt(lhs - rhs)
+    else:
+        raise AssertionError("This is impossible, abort the time machine!")
+
+@pg.production("expr : NUMBER")
+def expr_num(p):
+    return BoxInt(int(p[0].getstr()))
+
+lexer = lg.build()
+parser = pg.build()
+
+class BoxInt(BaseBox):
+    def __init__(self, value):
+        self.value = value
+
+    def getint(self):
+        return self.value
 
 def moleculify(smiles):
     """
