@@ -144,9 +144,8 @@ def reagent(request, id):
     reagent_data = get_reagent_data(reagent)
     return HttpResponse(json.dumps(reagent_data))
 
-#If the user entered in [text], what reagent(s) do I get?
+#If the user entered in name=input or properties=input, what reagent(s) do I get?
 def find_reagents(request):
-    # TODO: Unfinished, still editing
     if request.method == "GET":
         reagent_name = request.GET.get('name', '')
         reagent_name = reagent_name.strip('"').strip("'")
