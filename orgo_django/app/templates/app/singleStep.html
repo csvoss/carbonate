@@ -1,5 +1,6 @@
 <html>
 <head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 <meta charset="UTF-8">
 <!--
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
@@ -39,7 +40,7 @@
 <!--
         <script>
             var reactant = randomGenSmiles;
-            var reactionID = generateRandomReaction();
+            var reactionID = generateRandomReaction(reactant);
             var reagents = getReactionFromID(reactionID).reagents;
             var product = react(reactionID, reactant);
             
@@ -58,21 +59,20 @@
             
         </script>
 -->
-            <div class = molDisplay id = leftMol>
-                Start Molecule
-        <!--        
-                    renderSVG(reactant)
-
-        --> 
+            
+            <div class = "molDisplay" id = "leftMol">
+                <div>Start Molecule</div>
             </div>
-            <div class = molDisplay>
-                Target Molecule
-        <!--        
-                    renderSVG(product)
-
-        -->
+            <div class = "molDisplay" id = "rightMol">
+                <div>Target Molecule</div>
             </div>
-        
+            
+<!--  
+        for (i = 0, i < NUM_OPTIONS, i++){
+                $('#answerArea').append(<input type = "radio" name = "reagent" value = "" + options[i]> options[i]);
+            }
+
+-->
         </div>
         <input type="radio" name="reagent" value="opt1">reagent1<br>
         <input type="radio" name="reagent" value="opt2" checked>reagent2<br>
@@ -83,3 +83,17 @@
 </body>
     
 </html>
+<script>
+    function renderSVG(smiles, jqThing){
+        $.ajax({url:"/api/renderSVG", data: {"molecule": smiles}, success: function(data, st, x){
+//                        alert(data);
+            jqThing.append(data);
+        }})
+
+    }
+    var reactant = "{{reactantSmiles}}";
+    var product = "{{productSmiles}}";
+    renderSVG(reactant, $("#leftMol"));
+    renderSVG(product, $("#rightMol"));
+
+</script>

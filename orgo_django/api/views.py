@@ -193,6 +193,7 @@ def react(request):
 #Render a molecule (convert SMILES to SVG)
 def render_SVG(request):
     smiles = request.GET.get('molecule', None) # change to error raise later
+#    return HttpResponse(smiles)
     hydrogens = request.GET.get('hydrogens', False)
     return HttpResponse(svg_render(smiles, hydrogens)) # hydrogens default to false
 
