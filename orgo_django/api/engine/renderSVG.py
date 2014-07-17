@@ -19,6 +19,8 @@ def render(smiles, hydrogens=False):
 
     return :: str. In SVG format.
     """
+    smiles = re.sub("\#", "#")
+
     obConversion = openbabel.OBConversion()
     obConversion.SetInAndOutFormats("smi", "svg")
     outMol = openbabel.OBMol()
