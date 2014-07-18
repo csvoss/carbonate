@@ -3,7 +3,11 @@ from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
 
+from random import randrange
+
+from api.models import Reagent
 from app.models import SingleStepProblem
+NUM_OPTIONS = 4
 
 # Create your views here.
 
@@ -14,13 +18,29 @@ def index(request):
 
 def synthesis(request):
     return HttpResponse("hi")
+    # pseudocode:
+    # while predict_products(request)!=desiredProduct: (figure out how to desiredProduct)
+    #    add_request
+    #    get_new_request
 
 def single_step(request, id):
     context = {}
     problem = SingleStepProblem.objects.get(id=id)
     context["reactantSmiles"] = problem.reactantSmiles
     context["productSmiles"] = problem.productSmiles
+    context["correctAnswer"] = problem.correctAnswer
+    
+    context["NUM_OPTIONS"] = NUM_OPTIONS
+    numReagents = len(Reagent.objects.all())
+    options = []
+    for i in xrange(NUM_OPTIONS - 1):
+        reagent = Reagent.objects.get(id=randrange(numReagents) + 1)
+        options.append(reagent)
+    context["incorrectAnswers"] = options
+    context["incorrectAnswer"] = "wrong answer"
     return render(request, 'app/singleStep.html', context)
 
 def predict_products(request):
-    return HttpResponse("hi")
+    possibleReactions = findReactions(request)
+    products = react(request)
+    return True #### TODO: figure out what in the world is going on
