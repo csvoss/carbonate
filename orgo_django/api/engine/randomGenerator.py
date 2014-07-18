@@ -16,7 +16,7 @@ def randomStart(endProb=0.3, maxBranchLength=15,
         mol.addAtom(lastAtom, frontAtom, 3)
     while (random.random() < 1.0-endProb or len(mol.atoms) < 3) and len(mol.atoms) < maxBranchLength:
         switcher = random.random()
-        if switcher < .8:
+        if switcher < 0.8:
             newMol, thisAtom, nextAtom = randC(BrProb, ClProb, OHProb, BranchProb)
         elif switcher < 0.9:
             newMol, thisAtom, nextAtom = randRing(5, BrProb, ClProb, OHProb)
@@ -161,10 +161,7 @@ def probablyChiral(atom):
             carbonCount += 1
         if neighbor.element not in elementList:
             elementList.append(neighbor.element)
-    if carbonCount >= 2 or len(elementList) >= 3:
-        return True
-    else:
-        return False
+    return carbonCount >= 2 or len(elementList) >= 3
 
 if __name__ == '__main__':
     print smiles(randomStart()[0])
