@@ -267,10 +267,7 @@ def makeStartingMaterial(mode, count=1):
     molecules = []
     ## if ('10A Alkenes: halide addition' in mode) or ('10B Alkenes: other' in mode) or ('11 Alkynes' in mode):
     for i in xrange(count):
-        if random.random() < 0.4:
-            forceTerminalAlkyne = True
-        else:
-            forceTerminalAlkyne = False
+        forceTerminalAlkyne = random.random() < 0.4
         molecules.append(randomGenerator.randomStart(endProb=0.3, maxBranchLength=10,
         alkyneProb=0.1, alkeneProb=0.1,
         BrProb=0.1, ClProb=0.1, OHProb=0.05, forceTerminalAlkyne = forceTerminalAlkyne)[0])
