@@ -39,14 +39,15 @@ def star_it(name, classname):
     def star_full(p):
         xstar = p[0]
         x = p[1]
-        assert isinstance(xstar, list) and isinstance(x, classname)
+        assert_isinstance(xstar, list)
+        assert_isinstance(x, classname)
         return xstar.append(x)
     return star_empty, star_full
 
-def bondAt(bond, m1, a1, a2, m2):
+def bond_at(bond, m1, a1, a2, m2):
     BASIC_BONDS = {'-':1, '=':2, '#':3, '$':4}
     if bond == '.':
-        raise StandardError("bondAt called with '.' as bond")
+        raise StandardError("bond_at called with '.' as bond")
     elif bond in BASIC_BONDS.keys():
         ## connect them together
         m1.addMolecule(m2, a2, a1, BASIC_BONDS[bond])
@@ -56,6 +57,8 @@ def bondAt(bond, m1, a1, a2, m2):
         ## Idea: Implement / and \\ by adding them as relevant flags,
         ## then postprocessing molecules to convert them into cis/trans centers
 
+def assert_isinstance(i, t):
+    assert isinstance(i, t), "In parser: Object %s is of type %s; should be %s" % (repr(i), repr(type(i)), repr(t))
 
 
 ##### LEXER #####
@@ -77,15 +80,18 @@ pg = ParserGenerator(['SYMBOL', 'LETTER', 'DIGIT', 'TERMINATOR'], cache_id='molp
 
 # main :: [Molecule].
 @pg.production("main : smiles")
-def main(p):
+def main_production(p):
     return p[0]
 
 # smiles ::= terminator | chain terminator
 # smiles :: [Molecule].
 @pg.production("smiles : chain terminator")
-def smiles(p):
-    assert isinstance(p[0], Chain)
-    return p[0].get_molecules()
+def smiles_production(p):
+    chain = p[0]
+    assert_isinstance(chain, Chain)
+    ## TODO: Post-processing of ringbond list at chain.ring_data_list
+    ## TODO: Post-processing of aromaticity
+    return [chain.molecule] + chain.dotted_molecules
 @pg.production("smiles : terminator")
 def smiles_empty(p):
     return []
@@ -93,7 +99,7 @@ def smiles_empty(p):
 # terminator ::= SPACE TAB | LINEFEED | CARRIAGE_RETURN | END_OF_STRING
 # terminator :: None.
 @pg.production("terminator : TERMINATOR")
-def terminator(p):
+def terminator_production(p):
     return None
 
 ##### BONDS #####
@@ -106,57 +112,65 @@ class Chain(BaseBox):
         self.molecule = m
         self.first_atom = first
         self.last_atom = last
-        self.disconnected_molecules = [m]
+        self.dotted_molecules = []
+        self.ring_data_list = [] ## :: [(Atom, int ring_index, str bond_char)].
 
-    def get_molecule(self):
-        "return :: Molecule."
-        return self.molecule
+    def append_dotteds(self, molecules):
+        "molecule :: [Molecule]."
+        for molecule in molecules:
+            self.dotted_molecules.append(molecule)
 
-    def get_last_atom(self):
-        "return :: Atom."
-        return self.last_atom
-
-    def get_molecules(self):
-        "return :: [Molecule]."
-        return self.disconnected_molecules
-
-    def append_dotted(self, molecule):
-        "molecule :: Molecule."
-        self.disconnected_molecules.append(molecule)
+    def append_rings(self, ring_index, bond_char):
+        """ring_index :: int.
+        bond_char :: str."""
+        self.ring_data_list.append((self, ring_index, bond_char))
 
 # chain ::= branched_atom | chain branched_atom | chain bond branched_atom | chain dot branched_atom
 # chain :: Chain.
 @pg.production("chain : branched_atom")
-def chain(p):
+def chain_production(p):
     m, a = p[0].as_tuple()
-    assert isinstance(m, Molecule) and isinstance(a, Atom)
+    assert_isinstance(m, Molecule)
+    assert_isinstance(a, Atom)
     return Chain(m, a, a)
 @pg.production("chain : chain branched_atom")
 def chain_chain(p):
-    return chain_bond([p[0], '-', p[1])
+    return chain_bond([p[0], '-', p[1]])
+    ##TODO: UNLESS end of chain and atom of branched_atom are aromatic.
+    ##Then, we need to add a 1.5 bond there, instead.
+    ##And we must be able to tell bond_at that this is the case.
 @pg.production("chain : chain bond branched_atom")
 def chain_bond(p):
     bond = p[1]
-    assert isinstance(bond, str)
+    assert_isinstance(bond, str)
     chain = p[0]
-    m1, a1 = chain.get_molecule(), chain.get_last_atom()
+    m1, a1 = chain.molecule, chain.last_atom
     m2, a2 = p[2].as_tuple()
-    assert isinstance(m1, Molecule) and isinstance(a1, Atom)
-    assert isinstance(m2, Molecule) and isinstance(a2, Atom)
-    bondAt(bond, m1, a1, a2, m2)
+    assert_isinstance(m1, Molecule)
+    assert_isinstance(a1, Atom)
+    assert_isinstance(m2, Molecule)
+    assert_isinstance(a2, Atom)
+    bond_at(bond, m1, a1, a2, m2)
     chain.last_atom = a2
+    chain.append_dotteds(branched_atom.dotted_molecules)
+    chain.append_rings(branched_atom.ring_data_list)
     return chain
 @pg.production("chain : chain dot branched_atom")
 def chain_dot(p):
     chain = p[0]
-    m1, a1 = chain.get_molecule(), chain.get_last_atom()
+    m1, a1 = chain.molecule, chain.last_atom
     dot = p[1]
     m2, a2 = p[2].as_tuple()
     assert dot.getstr() == '.'
-    assert isinstance(m1, Molecule) and isinstance(a1, Atom)
-    assert isinstance(m2, Molecule) and isinstance(a2, Atom)
-    chain.append_dotted(m2)
+    assert_isinstance(m1, Molecule)
+    assert_isinstance(a1, Atom)
+    assert_isinstance(m2, Molecule)
+    assert_isinstance(a2, Atom)
+    chain.append_dotteds([m2])
+    chain.append_dotteds(branched_atom.dotted_molecules)
+    chain.append_rings(branched_atom.ring_data_list)
     return chain
+
 
 class BranchedAtom(BaseBox):
     def __init__(self, m, a):
@@ -164,16 +178,23 @@ class BranchedAtom(BaseBox):
         a :: Atom."""
         self.molecule = m
         self.atom = a
-        self.disconnected_molecules = []
-        self.
+        self.dotted_molecules = []
+        self.ring_data_list = [] ## :: [(Atom, int ring_index, str bond_char)].
 
     def as_tuple(self):
         "return :: (Molecule, Atom)."
         return (self.molecule, self.atom)
 
-    def append_dotted(self, molecule):
-        "molecule :: Molecule"
-        self.disconnected_molecules.append(molecule)
+    def append_dotteds(self, molecules):
+        "molecule :: [Molecule]"
+        for molecule in molecules:
+            self.dotted_molecules.append(molecule)
+
+    def append_rings(self, ring_index, bond_char):
+        """ring_index :: int.
+        bond_char :: str."""
+        self.ring_data_list.append((self, ring_index, bond_char))
+
 
 # branched_atom ::= atom ringbond* branch*
 # branched_atom :: BranchedAtom
@@ -182,11 +203,26 @@ def branched_atom(p):
     atom = p[0]
     ringbonds = p[1]
     branches = p[2]
-    assert isinstance(atom, Atom) and isinstance(ringbonds, list) and isinstance(branches, list)
+    assert_isinstance(atom, Atom)
+    assert_isinstance(ringbonds, list)
+    assert_isinstance(branches, list)
     output = BranchedAtom(Molecule(atom), atom)
-
-    for 
-
+    for branch in branches:
+        output.append_dotteds(branch.chain.dotted_molecules)
+        if branch.bond_or_dot == '.':
+            pass
+        else:
+            other_molecule = branch.chain.molecule
+            other_atom = branch.chain.first_atom
+            bond_at(
+                branch.bond_or_dot,
+                output.molecule,
+                output.atom,
+                other_atom,
+                other_molecule
+            )
+    for ringbond in ringbonds:
+        output.append_rings(ringbond.index, ringbond.bond)
     return output
 
 # ringbondstar :: [Ringbond]
@@ -202,7 +238,7 @@ class Branch(BaseBox):
 # branch ::= '(' chain ')' | '(' bond chain ')' | '(' dot chain ')'
 # branch :: Branch.
 @pg.production("branch : ( chain )")  ## TODO: Make ( and ) be lexable tokens in and of themselves -- as with all symbols, really
-def branch(p):
+def branch_production(p):
     assert p[0]=='(' and p[2]==')'
     chain = p[1]
     return Branch('-', chain)
@@ -211,25 +247,68 @@ def branch_bond(p):
     assert p[0]=='(' and p[3]==')'
     bond = p[1]
     chain = p[2]
-    assert isinstance(bond, str) and isinstance(chain, Chain)
+    assert_isinstance(bond, str)
+    assert_isinstance(chain, Chain)
     return Branch(bond, chain)
 @pg.production("branch : ( dot chain )")
 def branch_dot(p):
     assert p[0]=='(' and p[3]==')'
     dot = p[1]
     chain = p[2]
-    assert isinstance(dot, str) and isinstance(chain, Chain)
+    assert_isinstance(dot, str)
+    assert_isinstance(chain, Chain)
     return Branch(dot, chain)
-
 
 # bond ::= '-' | '=' | '#' | '$' | ':' | '/' | '\\'
 # bond :: str
+@pg.production("bond : -")
+@pg.production("bond : =")
+@pg.production("bond : #")
+@pg.production("bond : $")
+@pg.production("bond : :")
+@pg.production("bond : /")
+@pg.production("bond : \\")
+def bond_production(p):
+    assert_isinstance(p[0], str)
+    return p[0]
 
 # dot ::= '.'
 # dot :: str
+@pg.production("dot : .")
+def dot_production(p):
+    assert_isinstance(p[0], str)
+    return p[0]
+
+class Ringbond(BaseBox):
+    def __init__(self, index, bond):
+        assert_isinstance(index, int)
+        assert_isinstance(bond, str)
+        self.index = index
+        self.bond = bond
 
 # ringbond ::= bond? DIGIT | bond? '%' DIGIT DIGIT
 # ringbond :: Ringbond
+@pg.production("ringbond : DIGIT")
+def ringbond_prod_1(p):
+    ## Again with the TODO about aromatic bonds.
+    return ringbond_prod_2(['-'] + p)
+@pg.production("ringbond : bond DIGIT")
+def ringbond_prod_2(p):
+    bond = p[0]
+    index = int(p[1])
+    return Ringbond(index, bond)
+@pg.production("ringbond : % DIGIT DIGIT")
+def ringbond_prod_3(p):
+    ## A third time with the TODO about aromatic bonds.
+    return ringbond_prod_4(['-'] + p)
+@pg.production("ringbond : bond % DIGIT DIGIT")
+def ringbond_prod_4(p):
+    bond = p[0]
+    useless_percent = p[1]
+    index_1 = int(p[2])
+    index_2 = int(p[3])
+    index = 10*index_1 + index_2
+    return Ringbond(index, bond)
 
 ##### ATOMS #####
 
@@ -255,7 +334,7 @@ def branch_dot(p):
 
 ##### CHIRALITY #####
 
-# chiral ::= '@' | '@@' | '@TH1' | '@TH2' | '@AL1' | '@AL2' | '@SP1' | '@SP2' | '@SP3' | '@TB1' | '@TB2' | '@TB3' | … | '@TB20' | '@OH1' | '@OH2' | '@OH3' | … | '@OH30' | '@TB' DIGIT DIGIT | '@OH' DIGIT DIGIT
+# chiral ::= '@' | '@@' | '@TH1' | '@TH2' | '@AL1' | '@AL2' | '@SP1' | '@SP2' | '@SP3' | '@TB1' | '@TB2' | '@TB3' | ... | '@TB20' | '@OH1' | '@OH2' | '@OH3' | ... | '@OH30' | '@TB' DIGIT DIGIT | '@OH' DIGIT DIGIT
 
 ##### HYDROGENS #####
 
@@ -283,7 +362,7 @@ def branch_dot(p):
 
 
 
-
+################ ALL STUFF BELOW IS OLD #############################
 
 
 @pg.production("expr : expr PLUS expr")
