@@ -4,46 +4,287 @@ toMolecule.py
 This code contains the method moleculify(smiles), which converts a SMILES string to a Molecule object:
 http://en.wikipedia.org/wiki/SMILES
 
-This code is not yet complete. #TODO #YOLO
+This code is not yet complete.
 
 Only ``moleculify`` is meant to be public-facing. The other methods in this file are private.
 
 This would allow us to take in SMILES strings as inputs, from students or professors, to specify their own molecules to use in problems. Hooray!
 
-https://github.com/alex/rply
-https://pypi.python.org/pypi/rply/0.5.1
-http://www.opensmiles.org/spec/open-smiles-2-grammar.html
-http://www.opensmiles.org/spec/open-smiles-4-output.html#4.4
+Refer to:
+    https://github.com/alex/rply
+    https://pypi.python.org/pypi/rply/0.5.1
+    http://www.opensmiles.org/opensmiles.html
 """
 
 from molecularStructure import *
 import string
-
 from rply import ParserGenerator, LexerGenerator
-##from rply.token import BaseBox
+from rply.token import BaseBox
+
+
+##### HELPER FUNCTIONS #####
+
+def star_it(name, classname):
+    """
+    Create some productions representing <name>*.
+    The productions output a list of <classname> objects.
+    name :: str. example: "ringbond"
+    classname :: type. example: Ringbond
+    starname = name + "star"
+    """
+    @pg.production("%s : " % starname)
+    def star_empty(p):
+        return []
+    @pg.production("%s : %s %s" % (starname, starname, name))
+    def star_full(p):
+        xstar = p[0]
+        x = p[1]
+        assert isinstance(xstar, list) and isinstance(x, classname)
+        return xstar.append(x)
+    return star_empty, star_full
+
+def bondAt(bond, m1, a1, a2, m2):
+    BASIC_BONDS = {'-':1, '=':2, '#':3, '$':4}
+    if bond == '.':
+        raise StandardError("bondAt called with '.' as bond")
+    elif bond in BASIC_BONDS.keys():
+        ## connect them together
+        m1.addMolecule(m2, a2, a1, BASIC_BONDS[bond])
+    else:
+        raise NotImplementedError(":, /, and \\ are not-yet-implemented bond types.")
+        ## TODO.
+        ## Idea: Implement / and \\ by adding them as relevant flags,
+        ## then postprocessing molecules to convert them into cis/trans centers
+
+
+
+##### LEXER #####
 
 lg = LexerGenerator()
 lg.ignore(r"\s+")
 lg.add('SYMBOL', r'[@#$%\*\(\)\[\]=\+\-:/\\\.]')
-lg.add('ELEMENT_CHAR', r'[A-IK-PRSTXYZa-ik-pr-uy]')
+lg.add('LETTER', r'[A-IK-PRSTXYZa-ik-pr-vy]')
 lg.add('DIGIT', r'[0-9]')
-lg.add('TERMINATOR', '[ \t\r\n]')
+lg.add('TERMINATOR', r'[ \t\r\n]*')
 
-# This is a list of the token names. precedence is an optional list of
-# tuples which specifies order of operation for avoiding ambiguity.
-# precedence must be one of "left", "right", "nonassoc".
-# cache_id is an optional string which specifies an ID to use for
-# caching. It should *always* be safe to use caching,
-# RPly will automatically detect when your grammar is
-# changed and refresh the cache for you.
-pg = ParserGenerator(["NUMBER", "PLUS", "MINUS"],
-        precedence=[("left", ['PLUS', 'MINUS'])], cache_id="myparser")
 
-@pg.production("main : expr")
+
+
+##### PARSER #####
+# www.opensmiles.org/opensmiles.html
+
+pg = ParserGenerator(['SYMBOL', 'LETTER', 'DIGIT', 'TERMINATOR'], cache_id='molparser')
+
+# main :: [Molecule].
+@pg.production("main : smiles")
 def main(p):
-    # p is a list, of each of the pieces on the right hand side of the
-    # grammar rule
     return p[0]
+
+# smiles ::= terminator | chain terminator
+# smiles :: [Molecule].
+@pg.production("smiles : chain terminator")
+def smiles(p):
+    assert isinstance(p[0], Chain)
+    return p[0].get_molecules()
+@pg.production("smiles : terminator")
+def smiles_empty(p):
+    return []
+
+# terminator ::= SPACE TAB | LINEFEED | CARRIAGE_RETURN | END_OF_STRING
+# terminator :: None.
+@pg.production("terminator : TERMINATOR")
+def terminator(p):
+    return None
+
+##### BONDS #####
+# http://www.opensmiles.org/opensmiles.html#bonds
+
+class Chain(BaseBox):
+    def __init__(self, m, first, last):
+        """m :: Molecule.
+        first, last :: Atom."""
+        self.molecule = m
+        self.first_atom = first
+        self.last_atom = last
+        self.disconnected_molecules = [m]
+
+    def get_molecule(self):
+        "return :: Molecule."
+        return self.molecule
+
+    def get_last_atom(self):
+        "return :: Atom."
+        return self.last_atom
+
+    def get_molecules(self):
+        "return :: [Molecule]."
+        return self.disconnected_molecules
+
+    def append_dotted(self, molecule):
+        "molecule :: Molecule."
+        self.disconnected_molecules.append(molecule)
+
+# chain ::= branched_atom | chain branched_atom | chain bond branched_atom | chain dot branched_atom
+# chain :: Chain.
+@pg.production("chain : branched_atom")
+def chain(p):
+    m, a = p[0].as_tuple()
+    assert isinstance(m, Molecule) and isinstance(a, Atom)
+    return Chain(m, a, a)
+@pg.production("chain : chain branched_atom")
+def chain_chain(p):
+    return chain_bond([p[0], '-', p[1])
+@pg.production("chain : chain bond branched_atom")
+def chain_bond(p):
+    bond = p[1]
+    assert isinstance(bond, str)
+    chain = p[0]
+    m1, a1 = chain.get_molecule(), chain.get_last_atom()
+    m2, a2 = p[2].as_tuple()
+    assert isinstance(m1, Molecule) and isinstance(a1, Atom)
+    assert isinstance(m2, Molecule) and isinstance(a2, Atom)
+    bondAt(bond, m1, a1, a2, m2)
+    chain.last_atom = a2
+    return chain
+@pg.production("chain : chain dot branched_atom")
+def chain_dot(p):
+    chain = p[0]
+    m1, a1 = chain.get_molecule(), chain.get_last_atom()
+    dot = p[1]
+    m2, a2 = p[2].as_tuple()
+    assert dot.getstr() == '.'
+    assert isinstance(m1, Molecule) and isinstance(a1, Atom)
+    assert isinstance(m2, Molecule) and isinstance(a2, Atom)
+    chain.append_dotted(m2)
+    return chain
+
+class BranchedAtom(BaseBox):
+    def __init__(self, m, a):
+        """m :: Molecule.
+        a :: Atom."""
+        self.molecule = m
+        self.atom = a
+        self.disconnected_molecules = []
+        self.
+
+    def as_tuple(self):
+        "return :: (Molecule, Atom)."
+        return (self.molecule, self.atom)
+
+    def append_dotted(self, molecule):
+        "molecule :: Molecule"
+        self.disconnected_molecules.append(molecule)
+
+# branched_atom ::= atom ringbond* branch*
+# branched_atom :: BranchedAtom
+@pg.production("branched_atom : atom ringbondstar branchstar")
+def branched_atom(p):
+    atom = p[0]
+    ringbonds = p[1]
+    branches = p[2]
+    assert isinstance(atom, Atom) and isinstance(ringbonds, list) and isinstance(branches, list)
+    output = BranchedAtom(Molecule(atom), atom)
+
+    for 
+
+    return output
+
+# ringbondstar :: [Ringbond]
+ringbondstar_empty, ringbondstar = star_it("ringbond", Ringbond)
+# branchstar :: [Branch]
+branchstar_empty, branchstar = star_it("branch", Branch)
+
+class Branch(BaseBox):
+    def __init__(self, bond_or_dot, chain):
+        self.bond_or_dot = bond_or_dot
+        self.chain = chain
+
+# branch ::= '(' chain ')' | '(' bond chain ')' | '(' dot chain ')'
+# branch :: Branch.
+@pg.production("branch : ( chain )")  ## TODO: Make ( and ) be lexable tokens in and of themselves -- as with all symbols, really
+def branch(p):
+    assert p[0]=='(' and p[2]==')'
+    chain = p[1]
+    return Branch('-', chain)
+@pg.production("branch : ( bond chain )")
+def branch_bond(p):
+    assert p[0]=='(' and p[3]==')'
+    bond = p[1]
+    chain = p[2]
+    assert isinstance(bond, str) and isinstance(chain, Chain)
+    return Branch(bond, chain)
+@pg.production("branch : ( dot chain )")
+def branch_dot(p):
+    assert p[0]=='(' and p[3]==')'
+    dot = p[1]
+    chain = p[2]
+    assert isinstance(dot, str) and isinstance(chain, Chain)
+    return Branch(dot, chain)
+
+
+# bond ::= '-' | '=' | '#' | '$' | ':' | '/' | '\\'
+# bond :: str
+
+# dot ::= '.'
+# dot :: str
+
+# ringbond ::= bond? DIGIT | bond? '%' DIGIT DIGIT
+# ringbond :: Ringbond
+
+##### ATOMS #####
+
+# atom ::= bracket_atom | aliphatic_organic | aromatic_organic | '*'
+
+##### ORGANIC SUBSET ATOMS #####
+
+# aliphatic_organic ::= 'B' | 'C' | 'N' | 'O' | 'S' | 'P' | 'F' | 'Cl' | 'Br' | 'I'
+
+# aromatic_organic ::= 'b' | 'c' | 'n' | 'o' | 's' | 'p'
+
+##### BRACKET ATOMS #####
+
+# bracket_atom ::= '[' isotope? symbol chiral? hcount? charge? class? ']'
+
+# symbol ::= element_symbols | aromatic_symbols | '*'
+
+# isotope ::= NUMBER
+
+# element_symbols ::= 'H' | 'He' | 'Li' | 'Be' | 'B' | 'C' | 'N' | 'O' | 'F' | 'Ne' | 'Na' | 'Mg' | 'Al' | 'Si' | 'P' | 'S' | 'Cl' | 'Ar' | 'K' | 'Ca' | 'Sc' | 'Ti' | 'V' | 'Cr' | 'Mn' | 'Fe' | 'Co' | 'Ni' | 'Cu' | 'Zn' | 'Ga' | 'Ge' | 'As' | 'Se' | 'Br' | 'Kr' | 'Rb' | 'Sr' | 'Y' | 'Zr' | 'Nb' | 'Mo' | 'Tc' | 'Ru' | 'Rh' | 'Pd' | 'Ag' | 'Cd' | 'In' | 'Sn' | 'Sb' | 'Te' | 'I' | 'Xe' | 'Cs' | 'Ba' | 'Hf' | 'Ta' | 'W' | 'Re' | 'Os' | 'Ir' | 'Pt' | 'Au' | 'Hg' | 'Tl' | 'Pb' | 'Bi' | 'Po' | 'At' | 'Rn' | 'Fr' | 'Ra' | 'Rf' | 'Db' | 'Sg' | 'Bh' | 'Hs' | 'Mt' | 'Ds' | 'Rg' | 'Cn' | 'Fl' | 'Lv' | 'La' | 'Ce' | 'Pr' | 'Nd' | 'Pm' | 'Sm' | 'Eu' | 'Gd' | 'Tb' | 'Dy' | 'Ho' | 'Er' | 'Tm' | 'Yb' | 'Lu' | 'Ac' | 'Th' | 'Pa' | 'U' | 'Np' | 'Pu' | 'Am' | 'Cm' | 'Bk' | 'Cf' | 'Es' | 'Fm' | 'Md' | 'No' | 'Lr'
+
+# aromatic_symbols ::= 'b' | 'c' | 'n' | 'o' | 'p' | 's' | 'se' | 'as'
+
+##### CHIRALITY #####
+
+# chiral ::= '@' | '@@' | '@TH1' | '@TH2' | '@AL1' | '@AL2' | '@SP1' | '@SP2' | '@SP3' | '@TB1' | '@TB2' | '@TB3' | … | '@TB20' | '@OH1' | '@OH2' | '@OH3' | … | '@OH30' | '@TB' DIGIT DIGIT | '@OH' DIGIT DIGIT
+
+##### HYDROGENS #####
+
+# hcount ::= 'H' | 'H' DIGIT
+
+##### CHARGES #####
+
+# charge ::= '-' | '-' DIGIT? DIGIT | '+' | '+' DIGIT? DIGIT | '--' deprecated | '++' deprecated
+
+##### ATOM CLASS #####
+
+# class ::= ':' NUMBER
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @pg.production("expr : expr PLUS expr")
 @pg.production("expr : expr MINUS expr")
@@ -86,6 +327,8 @@ class BoxInt(BaseBox):
 
 
 
+
+
 def moleculify(smiles):
     """
     smiles :: str or [str]. SMILES string(s) e.g. "CC(CN)CCC(O)O"
@@ -105,8 +348,8 @@ def moleculify(smiles):
         tokens = lexerSingle(smiles)
         parsed = parserSingle(tokens)
     elif type(smiles) == list:
-        tokens = lexerMany(smiles)
-        parsed = parserMany(tokens)
+        tokens = map(lexerSingle, smiles)
+        parsed = map(parserSingle, tokens)
     else:
         raise StandardError("Invalid type of input to moleculify: input is %s, type is %s" % (repr(smiles), str(type(smiles))))
     return parsed
@@ -136,13 +379,6 @@ def toAtom(token):
             return Atom(token[1:3])
         else:
             return Atom(token[1:2])
-
-def parserMany(tokensMany):
-    """
-    tokensMany :: [[SMILES token (str)]].
-    return :: [Molecule].
-    """
-    return map(parserSingle, tokensMany)
 
 def parserSingle(tokens):
     """
@@ -228,14 +464,6 @@ def parserWithPassback(tokens):
 
     return molecule, connecting_atom
     ## TODO: finish this method
-
-def lexerMany(smiles_list):
-    """
-    smiles_list :: [SMILES str].
-    return :: [[SMILES tokens (str)]].
-    """
-    ## Many molecules: return a list
-    return map(lexerSingle, smiles_list.split('.'))
 
 def lexerSingle(smiles):
     """
