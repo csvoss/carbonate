@@ -33,7 +33,6 @@ def single_step(request, id):
         reagent = Reagent.objects.get(id=randrange(numReagents) + 1)
         options.append(reagent)
     context["incorrectAnswers"] = options
-            
     context["incorrectAnswer"] = "wrong answer"
     return render(request, 'app/singleStep.html', context)
 

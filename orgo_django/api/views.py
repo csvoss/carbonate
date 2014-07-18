@@ -123,7 +123,6 @@ def find_reactions(request):
         #Recursively filter for each reagent to get only reactions that have ALL the reagents
         for reagent_id in reagent_id_list:
             reaction_list = reaction_list.filter(reagents__id=int(reagent_id))
-
         reaction_list = reaction_list.select_related('name', 'id', 'process_function', 'solvent').prefetch_related('reagents', 'solvent_properties')
         reaction_data = []
         for reaction in reaction_list:
