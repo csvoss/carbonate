@@ -84,11 +84,10 @@ class ReactionStep:
                     #if so, reaction is successful
                     if products != []:
                         self.productBox = MoleculeBox(products)
-                        return True
                     #if not, the old set of molecules remain intact
                     else:
                         self.productBox = MoleculeBox(self.reactantBox.molecules + self.otherMoleculeBox.molecules)
-                        return True
+                    return True
                 elif mode == "generate":
                     if len(products) > 4:
                         #Too many molecules.  It takes too long to moleculeCompare them pairwise, so just 
