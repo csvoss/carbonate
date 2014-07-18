@@ -318,6 +318,10 @@ def ringbond_prod_4(p):
 ##### ATOMS #####
 
 # atom ::= bracket_atom | aliphatic_organic | aromatic_organic | '*'
+@pg.production("atom : C")
+def atom_production(p):
+    ## TODO -- Temporary
+    return Atom("C")
 
 ##### ORGANIC SUBSET ATOMS #####
 
@@ -369,13 +373,16 @@ parser = pg.build()
 def moleculify(smiles):
     """
     smiles :: str or [str]. SMILES string(s) e.g. "CC(CN)CCC(O)O"
-    return :: Molecule or [Molecule]. Correspondingly.
-              If smiles is empty, None.
+    return :: [Molecule].
 
     Raises a StandardError if the SMILES string contains
     as-yet-unsupported features (like delocalization).
     """
-    return example_molecule()
+    #return example_molecule()
+    if isinstance(smiles, list):
+        return map(moleculify, smiles)
+    else:
+        return parser.parse(lexer.lex(smiles))
 
 
 def example_molecule():
