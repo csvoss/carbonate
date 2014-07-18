@@ -21,6 +21,7 @@ def render(smiles, hydrogens=False):
     """
 
     smiles = re.sub("\#", "#", smiles)
+    smiles = re.sub("\@", "@", smiles)
 
     obConversion = openbabel.OBConversion()
     obConversion.SetInAndOutFormats("smi", "svg")

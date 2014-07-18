@@ -33,8 +33,6 @@ urlpatterns = patterns(
     url(r'^randomGenSmiles/$', views.random_gen_smiles, name='random_gen_smiles'),
     #/api/randomGenSVG
     url(r'^randomGenSVG/$', views.random_gen_SVG, name='random_gen_SVG'),
-    
-                       
 )
 
 ## SMILES testcases
