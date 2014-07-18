@@ -36,29 +36,6 @@
     <div class = answerArea>
         <div id = groupThingy>
             What reagents do you need to add to the start molecule to get to the target molecule?<br>
-        
-<!--
-        <script>
-            var reactant = randomGenSmiles;
-            var reactionID = generateRandomReaction(reactant);
-            var reagents = getReactionFromID(reactionID).reagents;
-            var product = react(reactionID, reactant);
-            
-            
-            NUM_OPTIONS = 4
-            function randomGen(least, greatest){
-                return Math.floor((Math.random() * (greatest-least+1)) + least);
-            }
-            var options = []
-            for (i = 0, i < NUM_OPTIONS, i++){
-                options.append(randomGenReagents());
-            }
-            options[randomGen(0, 3)] = reagents
-            
-            
-            
-        </script>
--->
             
             <div class = "molDisplay" id = "leftMol">
                 <div>Start Molecule</div>
@@ -66,34 +43,53 @@
             <div class = "molDisplay" id = "rightMol">
                 <div>Target Molecule</div>
             </div>
-            
-<!--  
-        for (i = 0, i < NUM_OPTIONS, i++){
-                $('#answerArea').append(<input type = "radio" name = "reagent" value = "" + options[i]> options[i]);
-            }
-
--->
         </div>
-        <input type="radio" name="reagent" value="opt1">reagent1<br>
-        <input type="radio" name="reagent" value="opt2" checked>reagent2<br>
-        <input type="radio" name="reagent" value="opt3">reagent3<br>
-        <input type="radio" name="reagent" value="opt4">reagent4<br>
+        
+        
     </div>
     
 </body>
     
 </html>
 <script>
+    var NUM_OPTIONS = {{NUM_OPTIONS}}
+    
     function renderSVG(smiles, jqThing){
-        $.ajax({url:"/api/renderSVG", data: {"molecule": smiles}, success: function(data, st, x){
-//                        alert(data);
-            jqThing.append(data);
-        }})
-
+        $.ajax({url:"/api/renderSVG", data: {"molecule": smiles}, success: function(data, st, x){jqThing.append(data);}})
     }
+    
     var reactant = "{{reactantSmiles}}";
     var product = "{{productSmiles}}";
     renderSVG(reactant, $("#leftMol"));
     renderSVG(product, $("#rightMol"));
+    
+    function randomGen(least, greatest){
+        return Math.floor((Math.random() * (greatest-least+1)) + least);
+    }
+    var answerArea = $(".answerArea");
+    var correctIndex = randomGen(0, NUM_OPTIONS - 1);
+    for (var i = 0; i < NUM_OPTIONS; i++){
+        if (i == correctIndex){
+            answerArea.append('<input type="radio" name="reagent" value="{{correctAnswer}}">{{correctAnswer}}<br>');
+        }
+        else {
+            
+            answerArea.append('<input type="radio" name="reagent" value="{{incorrectAnswer}}">{{incorrectAnswer}}<br>');
+        }
+    }
+    
+    
+    answerArea.append('<button id = "submit" >Submit</button>');
+    answerArea.append('<div id = "answerStatus" ></div>');
+    
+    $("#submit").click(function() {
+        var correctAnswer = "{{correctAnswer}}";
+        if ($("input[@name=radio]:checked").val() == "{{correctAnswer}}"){
+            $("#answerStatus").text("right");
+        }
+        else {
+            $("#answerStatus").text("wrong");
+        }
+}   );
 
 </script>
