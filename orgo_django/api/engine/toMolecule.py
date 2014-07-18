@@ -65,10 +65,17 @@ def assert_isinstance(i, t):
 
 lg = LexerGenerator()
 lg.ignore(r"\s+")
-lg.add('SYMBOL', r'[@#$%\*\(\)\[\]=\+\-:/\\\.]')
-lg.add('LETTER', r'[A-IK-PRSTXYZa-ik-pr-vy]')
-lg.add('DIGIT', r'[0-9]')
-lg.add('TERMINATOR', r'[ \t\r\n]*')
+#lg.add('SYMBOL', r'[@#$%\*\(\)\[\]=\+\-:/\\\.]') ## SPLIT OUT this one
+#lg.add('LETTER', r'[A-IK-PRSTXYZa-ik-pr-vy]') ## SPLIT OUT this one
+SYMBOLS = [c for c in "@#$%*()[]=+-:/\\."]
+LETTERS = [c for c in "ABCDEFGHIKLMNOPRSTXYZabcdefghiklmnoprstuvy"] # omissions intentional
+for sym in SYMBOLS:
+    lg.add(sym, sym)
+for sym in LETTERS:
+    lg.add(sym, sym)
+
+lg.add('DIGIT', r'[0-9]') ## KEEP this one
+lg.add('TERMINATOR', r'[ \t\r\n]*') ## KEEP this one
 
 
 
@@ -76,7 +83,7 @@ lg.add('TERMINATOR', r'[ \t\r\n]*')
 ##### PARSER #####
 # www.opensmiles.org/opensmiles.html
 
-pg = ParserGenerator(['SYMBOL', 'LETTER', 'DIGIT', 'TERMINATOR'], cache_id='molparser')
+pg = ParserGenerator(SYMBOLS + LETTERS + ['DIGIT', 'TERMINATOR'], cache_id='molparser')
 
 # main :: [Molecule].
 @pg.production("main : smiles")
