@@ -12,16 +12,16 @@ urlpatterns = patterns(
     ## /api/test/CCCCCC/test_smiles_to_molecule_and_back
     url(r'^test/'+SMILESREGEX+r'/$', views.test_smiles_to_molecule_and_back, name='test_smiles_to_molecule_and_back'),
     ## /api/reactions
-    url(r'^reactions/$', views.reactions, name='reactions'),
+    url(r'^reactions/$', views.all_reactions, name='all_reactions'),
     ## /api/reaction/123 
-    url(r'^reaction/'+IDREGEX+r'/$', views.reaction, name='reaction'),
+    url(r'^reaction/'+IDREGEX+r'/$', views.get_reaction, name='get_reaction'),
     ## /api/findReactions?reagents=[44,2]
     url(r'^findReactions/$', views.find_reactions, name='find_reactions'),
     ## /api/reagents 
-    url(r'^reagents/$', views.reagents, name='reagents'),
+    url(r'^reagents/$', views.all_reagents, name='all_reagents'),
     ## /api/reagent/123
-    url(r'^reagent/'+IDREGEX+r'/$', views.reagent, name='reagent'),
-    ## /api/findReagents?name="HBr" OR ?properties=["aprotic"]
+    url(r'^reagent/'+IDREGEX+r'/$', views.get_reagent, name='get_reagent'),
+    ## /api/findReagents?name=HBr&properties=["aprotic"]
     url(r'^findReagents/$', views.find_reagents, name='find_reagents'),
     ##/api/checkIfEqual?mol1=ABC&mol2=DEF
     url(r'^checkIfEqual/$', views.check_if_equal, name='check_if_equal'),
