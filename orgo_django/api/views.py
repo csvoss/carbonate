@@ -7,7 +7,7 @@ from engine.toMolecule import moleculify
 from engine.toSmiles import smilesify, to_canonical
 import api.engine.reactions
 
-from api.models import Property, Reagent, Reaction
+from api.models import Property, Reagent, Reaction, ReagentSet
 import json
 # Create your views here.
 
@@ -37,16 +37,16 @@ def test_smiles_to_molecule_and_back(request, smiles):
 
 def get_reaction_data(reaction):
     '''Helper function that extracts data from a Reaction query object'''
-    solvent = reaction.solvent
+    solvent = reaction.reagent_set.solvent
     if solvent is not None:
         solvent = solvent.id
     data = {
         "id": reaction.id,
         "name": reaction.name,
         "process_function": reaction.process_function,
-        "reagents": [r.id for r in reaction.reagents.all()],
+        "reagents": [r.id for r in reaction.reagent_set.reagents.all()],
         "solvent": solvent,
-        "solvent_properties": [prop.name for prop in reaction.solvent_properties.all()],
+        "solvent_properties": [prop.name for prop in reaction.reagent_set.solvent_properties.all()],
     }
     return data
 
@@ -98,18 +98,18 @@ def parse_input(query):
 
 
 #List reaction data for ALL reactions
-def reactions(request):
+def all_reactions(request):
     '''
     Creates a JSON list with data objects for each and every reaction
     '''
-    reaction_list = Reaction.objects.all().select_related('name', 'id', 'process_function', 'solvent').prefetch_related('reagents', 'solvent_properties')
+    reaction_list = Reaction.objects.all().select_related('name', 'id', 'process_function').prefetch_related('reagent_set')
     reaction_data = []
     for reaction in reaction_list:
         reaction_data.append(get_reaction_data(reaction))
     return HttpResponse(json.dumps(reaction_data))
 
 #List basic info about a single reaction, id#123 in the database [as JSON]
-def reaction(request, id):
+def get_reaction(request, id):
     '''Creates a JSON object with data for the reaction specified by id'''
     reaction = Reaction.objects.get(id=id)
     reaction_data = get_reaction_data(reaction)
@@ -119,18 +119,20 @@ def reaction(request, id):
 def find_reactions(request):
     if request.method == "GET":
         reagent_id_list = parse_input(request.GET.get('reagents', ''))
-        reaction_list = Reaction.objects.all()
-        #Recursively filter for each reagent to get only reactions that have ALL the reagents
+        reagent_set_list = ReagentSet.objects.all()
+        #Recursively filter for each reagent to get only reagent sets that have ALL the reagents
         for reagent_id in reagent_id_list:
-            reaction_list = reaction_list.filter(reagents__id=int(reagent_id))
-        reaction_list = reaction_list.select_related('name', 'id', 'process_function', 'solvent').prefetch_related('reagents', 'solvent_properties')
+            reagent_set_list = reagent_set_list.filter(reagents__id=int(reagent_id))
+
+        reaction_list = reagent_set_list.reactions.all()
+
         reaction_data = []
         for reaction in reaction_list:
             reaction_data.append(get_reaction_data(reaction))
     return HttpResponse(json.dumps(reaction_data))
 
 #List links to all reagents
-def reagents(request):
+def all_reagents(request):
     reagent_list = Reagent.objects.all()
     reagent_data = []
     for reagent in reagent_list:
@@ -138,7 +140,7 @@ def reagents(request):
     return HttpResponse(json.dumps(reagent_data))
 
 #List basic info about a single reagent, id#123 in the database [as JSON]
-def reagent(request, id):
+def get_reagent(request, id):
     reagent = Reagent.objects.get(id=id)
     reagent_data = get_reagent_data(reagent)
     return HttpResponse(json.dumps(reagent_data))
@@ -179,7 +181,8 @@ def check_if_equal(request):
 
 #React molecule(s) (by SMILES) with a particular reaction, and return the result (as SMILES)
 def react(request):
-#    pseudocode/almost code but it wouldn't actually work
+    #pseudocode/almost code but it wouldn't actually work
+    # TODO: Make this work!
     reactionID = request.GET.get('reaction', None)
     reactants = moleculify(request.GET.get('reactants', None))
     function_name = Reaction.objects.get(id = reactionID).process_function
