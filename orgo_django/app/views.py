@@ -41,6 +41,7 @@ def single_step(request, id):
     return render(request, 'app/singleStep.html', context)
 
 def predict_products(request):
-    possibleReactions = findReactions(request)
-    products = react(request)
+    ## NOT PERFECTLY DOABLE YET
+    ##possibleReactions = findReactions(request)
+    ##products = react(request)
     return True #### TODO: figure out what in the world is going on
