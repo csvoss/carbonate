@@ -23,8 +23,8 @@ def test_smiles_to_molecule_and_back(request, smiles):
     hydrogens = request.GET.get('hydrogens', False)
     smiles = smiles.replace('/#','#')
     smiles = smiles.replace('~','#')
-    molecule = moleculify(smiles)[0]
-    smiles2 = smilesify(molecule)
+    molecule = moleculify(smiles)
+    smiles2 = '.'.join(smilesify(molecule))
     return HttpResponse('<br />'.join([ smiles, svg_render(smiles, hydrogens), 
                                         smiles2, svg_render(smiles2, hydrogens) ] ))
 

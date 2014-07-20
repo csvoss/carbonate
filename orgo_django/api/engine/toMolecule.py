@@ -18,7 +18,7 @@ Refer to:
 
 from molecularStructure import *
 import string
-from rply import ParserGenerator, LexerGenerator
+from rply import ParserGenerator, LexerGenerator, ParsingError
 from rply.token import BaseBox
 
 
@@ -32,6 +32,7 @@ def star_it(name, classname):
     classname :: type. example: Ringbond
     starname = name + "star"
     """
+    starname = name + "star"
     @pg.production("%s : " % starname)
     def star_empty(p):
         return []
@@ -41,7 +42,7 @@ def star_it(name, classname):
         x = p[1]
         assert_isinstance(xstar, list)
         assert_isinstance(x, classname)
-        return xstar.append(x)
+        return xstar + [x]
     return star_empty, star_full
 
 def bond_at(bond, m1, a1, a2, m2):
@@ -70,10 +71,11 @@ lg = LexerGenerator()
 lg.ignore(r"\s+")
 #lg.add('SYMBOL', r'[@#$%\*\(\)\[\]=\+\-:/\\\.]') ## SPLIT OUT this one
 #lg.add('LETTER', r'[A-IK-PRSTXYZa-ik-pr-vy]') ## SPLIT OUT this one
-SYMBOLS = [c for c in "@#$%*()[]=+-:/\\."]
+SYMBOLS_DICT = {'@':'@','#':'#','$':'$','%':'%','*':'\*','(':'\(',')':'\)','[':'\[',']':'\]','=':'=','+':'\+','-':'\-',':':':','/':'/','\\':r'\\','.':'\.',}
+SYMBOLS = SYMBOLS_DICT.keys()
 LETTERS = [c for c in "ABCDEFGHIKLMNOPRSTXYZabcdefghiklmnoprstuvy"] # omissions intentional
 for sym in SYMBOLS:
-    lg.add(sym, sym)
+    lg.add(sym, SYMBOLS_DICT[sym])
 for sym in LETTERS:
     lg.add(sym, sym)
 
@@ -96,6 +98,7 @@ def main_production(p):
 # smiles ::= terminator | chain terminator
 # smiles :: [Molecule].
 @pg.production("smiles : chain terminator")
+@pg.production("smiles : chain")
 def smiles_production(p):
     chain = p[0]
     assert_isinstance(chain, Chain)
@@ -123,17 +126,22 @@ class Chain(BaseBox):
         self.first_atom = first
         self.last_atom = last
         self.dotted_molecules = []
-        self.ring_data_list = [] ## :: [(Atom, int ring_index, str bond_char)].
+        self.ring_data_list = []
 
     def append_dotteds(self, molecules):
         "molecule :: [Molecule]."
         for molecule in molecules:
             self.dotted_molecules.append(molecule)
 
-    def append_rings(self, ring_index, bond_char):
+    def append_ring(self, ring_index, bond_char):
         """ring_index :: int.
         bond_char :: str."""
         self.ring_data_list.append((self, ring_index, bond_char))
+
+    def append_rings(self, ring_list):
+        """ring_list :: [(Atom, int ring_index, str bond_char)]."""
+        self.ring_data_list += ring_list
+
 
 # chain ::= branched_atom | chain branched_atom | chain bond branched_atom | chain dot branched_atom
 # chain :: Chain.
@@ -149,7 +157,7 @@ def chain_chain(p):
 @pg.production("chain : chain bond branched_atom")
 def chain_bond(p):
     bond = p[1]
-    assert_isinstance(bond, str)
+    assert_isinstance(bond, basestring)
     chain = p[0]
     m1, a1 = chain.molecule, chain.last_atom
     m2, a2 = p[2].as_tuple()
@@ -159,8 +167,8 @@ def chain_bond(p):
     assert_isinstance(a2, Atom)
     bond_at(bond, m1, a1, a2, m2)
     chain.last_atom = a2
-    chain.append_dotteds(branched_atom.dotted_molecules)
-    chain.append_rings(branched_atom.ring_data_list)
+    chain.append_dotteds(p[2].dotted_molecules)
+    chain.append_rings(p[2].ring_data_list)
     return chain
 @pg.production("chain : chain dot branched_atom")
 def chain_dot(p):
@@ -168,14 +176,14 @@ def chain_dot(p):
     m1, a1 = chain.molecule, chain.last_atom
     dot = p[1]
     m2, a2 = p[2].as_tuple()
-    assert dot.getstr() == '.'
+    assert dot == '.'
     assert_isinstance(m1, Molecule)
     assert_isinstance(a1, Atom)
     assert_isinstance(m2, Molecule)
     assert_isinstance(a2, Atom)
     chain.append_dotteds([m2])
-    chain.append_dotteds(branched_atom.dotted_molecules)
-    chain.append_rings(branched_atom.ring_data_list)
+    chain.append_dotteds(p[2].dotted_molecules)
+    chain.append_rings(p[2].ring_data_list) ## Atom, int, str -> int, char
     return chain
 
 
@@ -197,10 +205,14 @@ class BranchedAtom(BaseBox):
         for molecule in molecules:
             self.dotted_molecules.append(molecule)
 
-    def append_rings(self, ring_index, bond_char):
+    def append_ring(self, ring_index, bond_char):
         """ring_index :: int.
         bond_char :: str."""
         self.ring_data_list.append((self, ring_index, bond_char))
+
+    def append_rings(self, ring_list):
+        """ring_list :: [(Atom, int ring_index, str bond_char)]."""
+        self.ring_data_list += ring_list
 
 
 # branched_atom ::= atom ringbond* branch*
@@ -229,40 +241,46 @@ def branched_atom(p):
                 other_molecule
             )
     for ringbond in ringbonds:
-        output.append_rings(ringbond.index, ringbond.bond)
+        output.append_ring(ringbond.index, ringbond.bond)
     return output
+
+class Ringbond(BaseBox):
+    def __init__(self, index, bond):
+        assert_isinstance(index, int)
+        assert_isinstance(bond, basestring)
+        self.index = index
+        self.bond = bond
+class Branch(BaseBox):
+    def __init__(self, bond_or_dot, chain):
+        self.bond_or_dot = bond_or_dot
+        self.chain = chain
 
 # ringbondstar :: [Ringbond]
 ringbondstar_empty, ringbondstar = star_it("ringbond", Ringbond)
 # branchstar :: [Branch]
 branchstar_empty, branchstar = star_it("branch", Branch)
 
-class Branch(BaseBox):
-    def __init__(self, bond_or_dot, chain):
-        self.bond_or_dot = bond_or_dot
-        self.chain = chain
-
 # branch ::= '(' chain ')' | '(' bond chain ')' | '(' dot chain ')'
 # branch :: Branch.
 @pg.production("branch : ( chain )")
 def branch_production(p):
-    assert p[0]=='(' and p[2]==')'
+    assert p[0].getstr()=='(' and p[2].getstr()==')', p
     chain = p[1]
     return Branch('-', chain)
 @pg.production("branch : ( bond chain )")
 def branch_bond(p):
-    assert p[0]=='(' and p[3]==')'
+    assert p[0].getstr()=='(' and p[3].getstr()==')', p
     bond = p[1]
     chain = p[2]
-    assert_isinstance(bond, str)
+    assert_isinstance(bond, basestring)
     assert_isinstance(chain, Chain)
     return Branch(bond, chain)
 @pg.production("branch : ( dot chain )")
 def branch_dot(p):
-    assert p[0]=='(' and p[3]==')'
+    assert p[0].getstr()=='(' and p[3].getstr()==')', p
     dot = p[1]
     chain = p[2]
-    assert_isinstance(dot, str)
+    assert_isinstance(dot, basestring)
     assert_isinstance(chain, Chain)
     return Branch(dot, chain)
 
@@ -276,22 +294,17 @@ def branch_dot(p):
 @pg.production("bond : /")
 @pg.production("bond : \\")
 def bond_production(p):
-    assert_isinstance(p[0], str)
-    return p[0]
+    bond = p[0].getstr()
+    assert_isinstance(bond, basestring)
+    return bond
 
 # dot ::= '.'
 # dot :: str
 @pg.production("dot : .")
 def dot_production(p):
-    assert_isinstance(p[0], str)
-    return p[0]
-
-class Ringbond(BaseBox):
-    def __init__(self, index, bond):
-        assert_isinstance(index, int)
-        assert_isinstance(bond, str)
-        self.index = index
-        self.bond = bond
+    dot = p[0].getstr()
+    assert_isinstance(dot, basestring)
+    return dot
 
 # ringbond ::= bond? DIGIT | bond? '%' DIGIT DIGIT
 # ringbond :: Ringbond
@@ -359,6 +372,9 @@ def atom_production(p):
 
 
 
+@pg.error
+def error_handler(token):
+    raise ValueError("Ran into a %s where it wasn't expected" % token.gettokentype())
 
 
 
@@ -382,7 +398,11 @@ def moleculify(smiles):
     if isinstance(smiles, list):
         return map(moleculify, smiles)
     else:
-        return parser.parse(lexer.lex(smiles))
+        try:
+            lexed = lexer.lex(smiles)
+            return parser.parse(lexed)
+        except ParsingError as e:
+            raise StandardError(e.getsourcepos())
 
 
 def example_molecule():
