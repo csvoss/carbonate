@@ -33,7 +33,7 @@ def single_step(request, id):
     numReagents = len(Reagent.objects.all())
     options = []
     correctIndex = randrange(NUM_OPTIONS)
-    for i in range(NUM_OPTIONS):
+    for i in xrange(NUM_OPTIONS):
         if  (i == correctIndex):
             options.append(problem.correctAnswer)
         else:
