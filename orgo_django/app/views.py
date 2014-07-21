@@ -21,7 +21,7 @@ def synthesis(request):
     # while predict_products(request)!=desiredProduct: (figure out how to desiredProduct)
     #    add_request
     #    get_new_request
-    # return render(
+    # return render(request, 'app/synthesis.html', context)
 
 def single_step(request, id):
     context = {}
