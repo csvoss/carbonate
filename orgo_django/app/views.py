@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
@@ -22,6 +21,7 @@ def synthesis(request):
     # while predict_products(request)!=desiredProduct: (figure out how to desiredProduct)
     #    add_request
     #    get_new_request
+    # return render(
 
 def single_step(request, id):
     context = {}
@@ -29,12 +29,13 @@ def single_step(request, id):
     context["reactantSmiles"] = problem.reactantSmiles
     context["productSmiles"] = problem.productSmiles
     context["correctAnswer"] = problem.correctAnswer
-    
     context["NUM_OPTIONS"] = NUM_OPTIONS
     numReagents = len(Reagent.objects.all())
     options = []
+    print "Huh?"
     for i in xrange(NUM_OPTIONS - 1):
-        reagent = Reagent.objects.get(id=randrange(numReagents) + 1) # can break
+        print numReagents
+        reagent = Reagent.objects.get(id=randrange(numReagents) + 1) # can break, evidently
         options.append(reagent)
     context["incorrectAnswers"] = options
     context["incorrectAnswer"] = "wrong answer"
