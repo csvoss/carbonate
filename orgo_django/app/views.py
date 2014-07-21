@@ -29,10 +29,17 @@ def single_step(request, id):
     context["NUM_OPTIONS"] = NUM_OPTIONS
     numReagents = len(Reagent.objects.all())
     options = []
-    for i in range(NUM_OPTIONS - 1):
-        reagent = Reagent.objects.get(id=randrange(numReagents) + 1)
-        options.append(reagent)
-    context["incorrectAnswers"] = options
+    correctIndex = randrange(NUM_OPTIONS)
+    for i in range(NUM_OPTIONS):
+        if  (i == correctIndex):
+            options.append(problem.correctAnswer)
+        else:
+            reagent = Reagent.objects.get(id=randrange(numReagents) + 1)
+            reagentName = reagent.name
+            options.append(reagentName)
+        
+#    return HttpResponse(options);
+    context["answers"] = options
             
     context["incorrectAnswer"] = "wrong answer"
     return render(request, 'app/singleStep.html', context)
