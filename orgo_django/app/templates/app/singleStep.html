@@ -63,25 +63,15 @@
     renderSVG(reactant, $("#leftMol"));
     renderSVG(product, $("#rightMol"));
     
-    function randomGen(least, greatest){
-        return Math.floor((Math.random() * (greatest-least+1)) + least);
-    }
-    var answerArea = $(".answerArea");
-    var correctIndex = randomGen(0, NUM_OPTIONS - 1);
-    for (var i = 0; i < NUM_OPTIONS; i++){
-        if (i == correctIndex){
-            answerArea.append('<input type="radio" name="reagent" value="{{correctAnswer}}">{{correctAnswer}}<br>');
-        }
-        else {
-            
-            answerArea.append('<input type="radio" name="reagent" value="{{incorrectAnswer}}">{{incorrectAnswer}}<br>');
-        }
-    }
-    console.log("{{correctAnswer}}");
-    console.log("{{answers}}");
-//    for (var i = 0; i < .length; i++){
-//        
+//    function randomGen(least, greatest){
+//        return Math.floor((Math.random() * (greatest-least+1)) + least);
 //    }
+    var answerArea = $(".answerArea");
+    for (var i = 0; i < NUM_OPTIONS; i++){
+        var choice = {{answers|safe}}[i]
+        answerArea.append('<input type="radio" name="reagent" value='+ choice + '>' + choice + '<br>');
+    }
+
     
     
     answerArea.append('<button id = "submit" >Submit</button>');

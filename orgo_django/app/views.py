@@ -3,6 +3,8 @@ from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
 
+import json
+
 from random import randrange
 
 from api.models import Reagent
@@ -18,6 +20,10 @@ def index(request):
 
 def synthesis(request):
     return HttpResponse("hi")
+    # pseudocode:
+    # while predict_products(request)!=desiredProduct: (figure out how to desiredProduct)
+    #    add_request
+    #    get_new_request
 
 def single_step(request, id):
     context = {}
@@ -38,11 +44,11 @@ def single_step(request, id):
             reagentName = reagent.name
             options.append(reagentName)
         
-#    return HttpResponse(options);
-    context["answers"] = options
-            
-    context["incorrectAnswer"] = "wrong answer"
+    context["answers"] = json.dumps(options)
     return render(request, 'app/singleStep.html', context)
 
 def predict_products(request):
-    return HttpResponse("hi")
+    ## NOT PERFECTLY DOABLE YET
+    ## possibleReactions = findReactions(request)
+    ## products = react(request)
+    return True #### TODO: figure out what in the world is going on
