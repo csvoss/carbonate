@@ -54,6 +54,7 @@ def bond_at(bond, m1, a1, a2, m2):
         m1.addMolecule(m2, a2, a1, 1)
     elif bond in BASIC_BONDS.keys():
         ## connect them together
+        # raise StandardError('=') ## TODO
         m1.addMolecule(m2, a2, a1, BASIC_BONDS[bond])
     else:
         raise NotImplementedError(":, /, and \\ are not-yet-implemented bond types.")
@@ -244,6 +245,16 @@ def branched_atom(p):
         output.append_ring(ringbond.index, ringbond.bond)
     return output
 
+## TEST -- TODO
+# ALSO? branched_atom ::= atom ringbond* branch* un-paren'd-branch
+@pg.production("branched_atom : atom ringbondstar branchstar unparenbranch")
+def branched_atom_test(p):
+    atom = p[0]
+    ringbonds = p[1]
+    branches = p[2]
+    last_branch = p[3]
+    return branched_atom([atom, ringbonds, branches + [last_branch]])
+
 class Ringbond(BaseBox):
     def __init__(self, index, bond):
         assert_isinstance(index, int)
@@ -262,24 +273,26 @@ branchstar_empty, branchstar = star_it("branch", Branch)
 
 # branch ::= '(' chain ')' | '(' bond chain ')' | '(' dot chain ')'
 # branch :: Branch.
-@pg.production("branch : ( chain )")
-def branch_production(p):
+@pg.production("branch : ( unparenbranch )")
+def unbranch_production(p):
     assert p[0].getstr()=='(' and p[2].getstr()==')', p
-    chain = p[1]
+    return p[1]
+
+@pg.production("unparenbranch : chain")
+def branch_production(p):
+    chain = p[0]
     return Branch('-', chain)
-@pg.production("branch : ( bond chain )")
+@pg.production("unparenbranch : bond chain")
 def branch_bond(p):
-    assert p[0].getstr()=='(' and p[3].getstr()==')', p
-    bond = p[1]
-    chain = p[2]
+    bond = p[0]
+    chain = p[1]
     assert_isinstance(bond, basestring)
     assert_isinstance(chain, Chain)
     return Branch(bond, chain)
-@pg.production("branch : ( dot chain )")
+@pg.production("unparenbranch : dot chain")
 def branch_dot(p):
-    assert p[0].getstr()=='(' and p[3].getstr()==')', p
-    dot = p[1]
-    chain = p[2]
+    dot = p[0]
+    chain = p[1]
     assert_isinstance(dot, basestring)
     assert_isinstance(chain, Chain)
     return Branch(dot, chain)
