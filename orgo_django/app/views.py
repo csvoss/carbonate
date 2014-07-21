@@ -1,12 +1,9 @@
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
-<<<<<<< HEAD
 
 import json
 
-=======
->>>>>>> 38430a5ef1e3511c969093a74240d8aaf303825b
 from random import randrange
 from api.models import Reagent
 from app.models import SingleStepProblem
