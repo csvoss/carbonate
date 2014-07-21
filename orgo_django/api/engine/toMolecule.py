@@ -24,26 +24,26 @@ from rply.token import BaseBox
 
 ##### HELPER FUNCTIONS #####
 
-def star_it(name, classname):
+def plus_it(name, classname):
     """
     Create some productions representing <name>*.
     The productions output a list of <classname> objects.
     name :: str. example: "ringbond"
     classname :: type. example: Ringbond
-    starname = name + "star"
+    plusname = name + "plus"
     """
-    starname = name + "star"
-    @pg.production("%s : " % starname)
-    def star_empty(p):
+    plusname = name + "plus"
+    @pg.production("%s : %s" % (plusname, name))
+    def plus_empty(p):
         return []
-    @pg.production("%s : %s %s" % (starname, starname, name))
-    def star_full(p):
-        xstar = p[0]
+    @pg.production("%s : %s %s" % (plusname, plusname, name))
+    def plus_full(p):
+        xplus = p[0]
         x = p[1]
-        assert_isinstance(xstar, list)
+        assert_isinstance(xplus, list)
         assert_isinstance(x, classname)
-        return xstar + [x]
-    return star_empty, star_full
+        return xplus + [x]
+    return plus_empty, plus_full
 
 def bond_at(bond, m1, a1, a2, m2):
     BASIC_BONDS = {'-':1, '=':2, '#':3, '$':4}
@@ -62,9 +62,15 @@ def bond_at(bond, m1, a1, a2, m2):
         ## Idea: Implement / and \\ by adding them as relevant flags,
         ## then postprocessing molecules to convert them into cis/trans centers
 
+def debug_decorator(f):
+    def new_f(*args, **kwargs):
+        print "----- Calling %s with %s and %s" % (f, args, kwargs)
+        f(*args, **kwargs)
+    return new_f
+
+
 def assert_isinstance(i, t):
     assert isinstance(i, t), "In parser: Object %s is of type %s; should be %s" % (repr(i), repr(type(i)), repr(t))
-
 
 ##### LEXER #####
 
@@ -72,9 +78,10 @@ lg = LexerGenerator()
 lg.ignore(r"\s+")
 #lg.add('SYMBOL', r'[@#$%\*\(\)\[\]=\+\-:/\\\.]') ## SPLIT OUT this one
 #lg.add('LETTER', r'[A-IK-PRSTXYZa-ik-pr-vy]') ## SPLIT OUT this one
-SYMBOLS_DICT = {'@':'@','#':'#','$':'$','%':'%','*':'\*','(':'\(',')':'\)','[':'\[',']':'\]','=':'=','+':'\+','-':'\-',':':':','/':'/','\\':r'\\','.':'\.',}
+SYMBOLS_DICT = {'@':'@','#':'#','$':'$','%':'%','*':'\*','(':'\(',')':'\)','[':'\[',']':'\]','=':'=','+':'\+','-':'\-','colon':':','/':'/','\\':r'\\','.':'\.',}
 SYMBOLS = SYMBOLS_DICT.keys()
-LETTERS = [c for c in "ABCDEFGHIKLMNOPRSTXYZabcdefghiklmnoprstuvy"] # omissions intentional
+LETTERS = ["C"]
+#LETTERS = [c for c in "ABCDEFGHIKLMNOPRSTXYZabcdefghiklmnoprstuvy"] # omissions intentional
 for sym in SYMBOLS:
     lg.add(sym, SYMBOLS_DICT[sym])
 for sym in LETTERS:
@@ -115,6 +122,7 @@ def smiles_empty(p):
 @pg.production("terminator : TERMINATOR")
 def terminator_production(p):
     return None
+
 
 ##### BONDS #####
 # http://www.opensmiles.org/opensmiles.html#bonds
@@ -188,6 +196,28 @@ def chain_dot(p):
     return chain
 
 
+# bond ::= '-' | '=' | '#' | '$' | ':' | '/' | '\\'
+# bond :: str
+@pg.production("bond : -")
+@pg.production("bond : =")
+@pg.production("bond : #")
+@pg.production("bond : $")
+@pg.production("bond : colon")
+@pg.production("bond : /")
+@pg.production("bond : \\")
+def bond_production(p):
+    bond = p[0].getstr()
+    assert_isinstance(bond, basestring)
+    return bond
+
+# dot ::= '.'
+# dot :: str
+@pg.production("dot : .")
+def dot_production(p):
+    dot = p[0].getstr()
+    assert_isinstance(dot, basestring)
+    return dot
+
 class BranchedAtom(BaseBox):
     def __init__(self, m, a):
         """m :: Molecule.
@@ -215,10 +245,11 @@ class BranchedAtom(BaseBox):
         """ring_list :: [(Atom, int ring_index, str bond_char)]."""
         self.ring_data_list += ring_list
 
+## No shift-reduce conflicts above this line ##
 
 # branched_atom ::= atom ringbond* branch*
 # branched_atom :: BranchedAtom
-@pg.production("branched_atom : atom ringbondstar branchstar")
+@pg.production("branched_atom : atom ringbondplus branchplus")
 def branched_atom(p):
     atom = p[0]
     ringbonds = p[1]
@@ -245,15 +276,26 @@ def branched_atom(p):
         output.append_ring(ringbond.index, ringbond.bond)
     return output
 
-## TEST -- TODO
-# ALSO? branched_atom ::= atom ringbond* branch* un-paren'd-branch
-@pg.production("branched_atom : atom ringbondstar branchstar unparenbranch")
-def branched_atom_test(p):
-    atom = p[0]
-    ringbonds = p[1]
-    branches = p[2]
-    last_branch = p[3]
-    return branched_atom([atom, ringbonds, branches + [last_branch]])
+@pg.production("branched_atom : atom branchplus")
+def branched_atom_no_ringbonds(p):
+    return branched_atom([p[0], [], p[1]])
+@pg.production("branched_atom : atom ringbondplus")
+def branched_atom_no_branches(p):
+    return branched_atom([p[0], p[1], []])
+@pg.production("branched_atom : atom")
+def branched_atom_neither(p):
+    return branched_atom([p[0], [], []])
+
+
+# # TEST -- TODO
+# # ALSO? branched_atom ::= atom ringbond* branch* un-paren'd-branch
+# @pg.production("branched_atom : atom ringbondplus branchplus unparenbranch")
+# def branched_atom_test(p):
+#     atom = p[0]
+#     ringbonds = p[1]
+#     branches = p[2]
+#     last_branch = p[3]
+#     return branched_atom([atom, ringbonds, branches + [last_branch]])
 
 class Ringbond(BaseBox):
     def __init__(self, index, bond):
@@ -266,10 +308,10 @@ class Branch(BaseBox):
         self.bond_or_dot = bond_or_dot
         self.chain = chain
 
-# ringbondstar :: [Ringbond]
-ringbondstar_empty, ringbondstar = star_it("ringbond", Ringbond)
-# branchstar :: [Branch]
-branchstar_empty, branchstar = star_it("branch", Branch)
+# ringbondplus :: [Ringbond]
+ringbondplus_empty, ringbondplus = plus_it("ringbond", Ringbond)
+# branchplus :: [Branch]
+branchplus_empty, branchplus = plus_it("branch", Branch)
 
 # branch ::= '(' chain ')' | '(' bond chain ')' | '(' dot chain ')'
 # branch :: Branch.
@@ -296,28 +338,6 @@ def branch_dot(p):
     assert_isinstance(dot, basestring)
     assert_isinstance(chain, Chain)
     return Branch(dot, chain)
-
-# bond ::= '-' | '=' | '#' | '$' | ':' | '/' | '\\'
-# bond :: str
-@pg.production("bond : -")
-@pg.production("bond : =")
-@pg.production("bond : #")
-@pg.production("bond : $")
-@pg.production("bond : :")
-@pg.production("bond : /")
-@pg.production("bond : \\")
-def bond_production(p):
-    bond = p[0].getstr()
-    assert_isinstance(bond, basestring)
-    return bond
-
-# dot ::= '.'
-# dot :: str
-@pg.production("dot : .")
-def dot_production(p):
-    dot = p[0].getstr()
-    assert_isinstance(dot, basestring)
-    return dot
 
 # ringbond ::= bond? DIGIT | bond? '%' DIGIT DIGIT
 # ringbond :: Ringbond
@@ -387,7 +407,7 @@ def atom_production(p):
 
 @pg.error
 def error_handler(token):
-    raise ValueError("Ran into a %s where it wasn't expected" % token.gettokentype())
+    raise ValueError("Ran into a %s (%s) where it wasn't expected. %s" % (repr(token.name), repr(token.value), str(token.source_pos.__dict__)))
 
 
 
