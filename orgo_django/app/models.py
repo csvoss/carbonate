@@ -7,4 +7,3 @@ class SingleStepProblem(models.Model):
     reactantSmiles = models.CharField(max_length=100)
     productSmiles = models.CharField(max_length=100)
     correctAnswer = models.CharField(max_length=100)
-    
