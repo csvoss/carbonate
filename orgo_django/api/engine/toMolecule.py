@@ -247,13 +247,8 @@ class BranchedAtom(BaseBox):
 
 ## No shift-reduce conflicts above this line ##
 
-# branched_atom ::= atom ringbond* branch*
-# branched_atom :: BranchedAtom
-@pg.production("branched_atom : atom ringbondplus branchplus")
-def branched_atom(p):
-    atom = p[0]
-    ringbonds = p[1]
-    branches = p[2]
+def add_rings_and_branches(atom, ringbonds, branches):
+    "return :: BranchedAtom"
     assert_isinstance(atom, Atom)
     assert_isinstance(ringbonds, list)
     assert_isinstance(branches, list)
@@ -276,16 +271,50 @@ def branched_atom(p):
         output.append_ring(ringbond.index, ringbond.bond)
     return output
 
-@pg.production("branched_atom : atom branchplus")
-def branched_atom_no_ringbonds(p):
-    return branched_atom([p[0], [], p[1]])
-@pg.production("branched_atom : atom ringbondplus")
-def branched_atom_no_branches(p):
-    return branched_atom([p[0], p[1], []])
-@pg.production("branched_atom : atom")
-def branched_atom_neither(p):
-    return branched_atom([p[0], [], []])
 
+# branched_atom ::= atom ringbond* branch*
+# branched_atom :: BranchedAtom
+# @pg.production("branched_atom : atom ringbondplus branchplus")
+# def branched_atom(p):
+#     atom = p[0]
+#     ringbonds = p[1]
+#     branches = p[2]
+#     return add_rings_and_branches(atom, ringbonds, branches)
+# @pg.production("branched_atom : atom branchplus")
+# def branched_atom_no_ringbonds(p):
+#     return add_rings_and_branches(p[0], [], p[1])
+# @pg.production("branched_atom : atom ringbondplus")
+# def branched_atom_no_branches(p):
+#     return add_rings_and_branches(p[0], p[1], [])
+# @pg.production("branched_atom : atom")
+# def branched_atom_neither(p):
+#     return add_rings_and_branches(p[0], [], [])
+
+
+@pg.production("branched_atom : branched_atom2")
+def branched_to_branched2(p):
+    " :: BranchedAtom"
+    atom, ringbonds, branches = p[0]
+    return add_rings_and_branches(atom, ringbonds, branches)
+@pg.production("branched_atom2 : ringed_atom")
+def branched_to_ringed(p):
+    " :: Atom, [Ringbond], [Branch]"
+    return p[0]
+# @pg.production("branched_atom2 : branched_atom2 branch")
+# def branched_to_branched(p):
+#     " :: Atom, [Ringbond], [Branch]"
+#     atom, ringbonds, branches = p[0]
+#     return atom, ringbonds, branches+[p[1]]
+# @pg.production("ringed_atom : ringed_atom ringbond")
+# def ringed_to_ringed(p):
+#     " :: Atom, [Ringbond], [Branch]"
+#     atom, ringbonds, branches = p[0]
+#     return atom, ringbonds+[p[1]], branches
+@pg.production("ringed_atom : atom")
+def ringed_to_atom(p):
+    " :: Atom, [Ringbond], [Branch]"
+    atom = p[0]
+    return atom, [], []
 
 # # TEST -- TODO
 # # ALSO? branched_atom ::= atom ringbond* branch* un-paren'd-branch
