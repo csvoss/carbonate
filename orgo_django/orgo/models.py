@@ -10,6 +10,8 @@ from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordResetForm
 from django.contrib.auth.models import User
 from django.utils import timezone
+from south.modelsinspector import add_introspection_rules
+
 
 class PickledObjectField(models.Field):
     description = "An object."
@@ -34,6 +36,7 @@ class PickledObjectField(models.Field):
     def db_type(self, connection):
         #No unlimited-length fields?
         return 'text'
+add_introspection_rules([], ["^orgo\.models\.PickledObjectField"])
 
 
 """
