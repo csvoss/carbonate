@@ -6,3 +6,6 @@ db.sqlite3
 .vagrant
 *.pickle
 orgo_django/orgo/settings_local.py
+orgo_django/api/migrations
+orgo_django/orgo/migrations
+orgo_django/app/migrations

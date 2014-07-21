@@ -1,18 +1,19 @@
-from django.shortcuts import render
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
+<<<<<<< HEAD
 
 import json
 
+=======
+>>>>>>> 38430a5ef1e3511c969093a74240d8aaf303825b
 from random import randrange
-
 from api.models import Reagent
 from app.models import SingleStepProblem
+
 NUM_OPTIONS = 4
 
 # Create your views here.
-
 ## url(r'^$', views.index, name='index'),
 def index(request):
     context = {}
@@ -24,6 +25,7 @@ def synthesis(request):
     # while predict_products(request)!=desiredProduct: (figure out how to desiredProduct)
     #    add_request
     #    get_new_request
+    # return render(
 
 def single_step(request, id):
     context = {}
@@ -31,7 +33,6 @@ def single_step(request, id):
     context["reactantSmiles"] = problem.reactantSmiles
     context["productSmiles"] = problem.productSmiles
     context["correctAnswer"] = problem.correctAnswer
-    
     context["NUM_OPTIONS"] = NUM_OPTIONS
     numReagents = len(Reagent.objects.all())
     options = []
@@ -45,6 +46,12 @@ def single_step(request, id):
             options.append(reagentName)
         
     context["answers"] = json.dumps(options)
+#    for i in xrange(NUM_OPTIONS - 1):
+#        print numReagents
+#        reagent = Reagent.objects.get(id=randrange(numReagents) + 1) # can break, evidently
+#        options.append(reagent)
+#    context["incorrectAnswers"] = options
+#    context["incorrectAnswer"] = "wrong answer"
     return render(request, 'app/singleStep.html', context)
 
 def predict_products(request):
