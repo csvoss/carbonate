@@ -10,6 +10,8 @@ from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordResetForm
 from django.contrib.auth.models import User
 from django.utils import timezone
+from south.modelsinspector import add_introspection_rules
+
 
 class PickledObjectField(models.Field):
     description = "An object."
@@ -34,15 +36,16 @@ class PickledObjectField(models.Field):
     def db_type(self, connection):
         #No unlimited-length fields?
         return 'text'
+add_introspection_rules([], ["^orgo\.models\.PickledObjectField"])
 
 
-"""
-MoleculeBoxModel
-Contains: foreignkey to a SynthesisProblemModel
-Contains: pickled moleculebox
-Contains: SVG representation
-"""
 class MoleculeBoxModel(models.Model):
+    """
+    MoleculeBoxModel
+    Contains: foreignkey to a SynthesisProblemModel
+    Contains: pickled moleculebox
+    Contains: SVG representation
+    """
     #problemModel = models.ForeignKey('SynthesisProblemModel', null=True, on_delete=models.SET_NULL)
     moleculeBox = PickledObjectField(null=True)
     svg = models.TextField(null=True)
@@ -75,16 +78,10 @@ class ArrowModel(models.Model):
     def create(cls, newPointFrom, newPointTo, newReagentsHtml):
         x = cls(pointFrom = newPointFrom, pointTo = newPointTo, reagentsHtml = newReagentsHtml)
         x.save()
-        return x        
-    
-        
-"""
-SynthesisProblemModel
-Contains: pickled list of molecule-models by unique ID
-Contains: pickled list of reaction-step-models by unique ID
-Contains: pickled synthesis problem solution
-Contains: ForeignKey to the final product the synthesis should produce
-"""
+        return x
+
+
+
 class SolutionModel(models.Model):
     #something to store moleculeboxes --> many to many field, molecule box
     #something to store arrows --> many to many field, ArrowModel{molecule box, molecule box, string}
@@ -154,6 +151,13 @@ def getArrowAndMoleculeModels(reactionSteps):
     
     
 class SynthesisProblemModel(models.Model):
+    """
+    SynthesisProblemModel
+    Contains: pickled list of molecule-models by unique ID
+    Contains: pickled list of reaction-step-models by unique ID
+    Contains: pickled synthesis problem solution
+    Contains: ForeignKey to the final product the synthesis should produce
+    """
     #something to store solutions --> a SolutionModel
     #something to store moleculeboxes --> many to many field, molecule box
     #something to store arrows --> many to many field, ArrowModel{molecule box, molecule box, string}
@@ -210,42 +214,18 @@ class SynthesisProblemModel(models.Model):
             return False
         except:
             raise Exception("06")
-        
-
-            
 
 
-"""
-ReagentModel
-Contains: foreignkey to a SynthesisProblemModel
-Contains: pickled reagentbox
-Contains: its own HTML representation
-"""
-#Unused
-# class ReagentModel(models.Model):
-    # problemModel = models.ForeignKey('SynthesisProblemModel')
-    # reagentBox = PickledObjectField()
-    # html = models.TextField()
-    
-    # Call ReagentModel.create(parentSynthesisProblemModel, reagentBoxObject) to create a ReagentModel representing reagentBoxObject
-    # reagentBoxObject is an instance of ReagentBox
-    # parentSynthesisProblemModel is an instance of SynthesisProblemModel
-    # @classmethod
-    # def create(cls, parentSynthesisProblemModel, reagentBoxObject):
-        # x = cls(reagentBox = reagentBoxObject, problemModel = parentSynthesisProblemModel, html = reagentBoxObject.stringList())
-        # return x
 
 
-    
-    
-"""
-ReactionStepModel
-Contains: foreignkey to a SynthesisProblemModel
-Contains: pickled reactionstep
-Contains: HTML representation
-"""
 #Used in NameReagent
 class ReactionStepModel(models.Model):
+    """
+    ReactionStepModel
+    Contains: foreignkey to a SynthesisProblemModel
+    Contains: pickled reactionstep
+    Contains: HTML representation
+    """
     reactionStep = PickledObjectField()
     reactantBox = models.ForeignKey('MoleculeBoxModel', related_name='reactant', null=True, on_delete=models.SET_NULL)
     productBox = models.ForeignKey('MoleculeBoxModel', related_name='product', null=True, on_delete=models.SET_NULL)

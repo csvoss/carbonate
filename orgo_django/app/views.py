@@ -34,7 +34,7 @@ def single_step(request, id):
     numReagents = len(Reagent.objects.all())
     options = []
     for i in xrange(NUM_OPTIONS - 1):
-        reagent = Reagent.objects.get(id=randrange(numReagents) + 1)
+        reagent = Reagent.objects.get(id=randrange(numReagents) + 1) # can break
         options.append(reagent)
     context["incorrectAnswers"] = options
     context["incorrectAnswer"] = "wrong answer"
@@ -42,6 +42,6 @@ def single_step(request, id):
 
 def predict_products(request):
     ## NOT PERFECTLY DOABLE YET
-    ##possibleReactions = findReactions(request)
-    ##products = react(request)
+    ## possibleReactions = findReactions(request)
+    ## products = react(request)
     return True #### TODO: figure out what in the world is going on

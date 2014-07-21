@@ -17,4 +17,3 @@ urlpatterns = patterns(
     url(r'^predictProducts/$', views.predict_products, name='predict_products'),
                        
 )
-
