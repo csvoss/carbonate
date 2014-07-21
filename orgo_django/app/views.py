@@ -1,15 +1,11 @@
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
-<<<<<<< HEAD
-
 import json
-
-=======
->>>>>>> 38430a5ef1e3511c969093a74240d8aaf303825b
 from random import randrange
 from api.models import Reagent
 from app.models import SingleStepProblem
+from app.models import PredictProductsProblem
 
 NUM_OPTIONS = 4
 
@@ -46,15 +42,18 @@ def single_step(request, id):
             options.append(reagentName)
         
     context["answers"] = json.dumps(options)
-#    for i in xrange(NUM_OPTIONS - 1):
-#        print numReagents
-#        reagent = Reagent.objects.get(id=randrange(numReagents) + 1) # can break, evidently
-#        options.append(reagent)
-#    context["incorrectAnswers"] = options
-#    context["incorrectAnswer"] = "wrong answer"
     return render(request, 'app/singleStep.html', context)
 
-def predict_products(request):
+def predict_products(request, id):
+    context = {}
+    
+    return render(request, 'app/predictProducts.html', context)
+    
+    
+    
+    
+    
+    
     ## NOT PERFECTLY DOABLE YET
     ## possibleReactions = findReactions(request)
     ## products = react(request)
