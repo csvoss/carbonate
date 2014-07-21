@@ -16,6 +16,8 @@ def index(request):
     return render(request, 'app/index.html', context)
 
 def synthesis(request):
+    context = {}
+    problem = SingleStepProblem.objects.get(id=id)
     return HttpResponse("hi")
     # pseudocode:
     # while predict_products(request)!=desiredProduct: (figure out how to desiredProduct)
