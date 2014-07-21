@@ -5,6 +5,8 @@ class Property(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
 
+    class Meta:
+        verbose_name_plural = "Properties"
     def __str__(self):
     	return self.name
 
