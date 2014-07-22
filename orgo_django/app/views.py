@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse
 import json
 from random import randrange
 from api.models import Reagent
+from api.models import Reaction
 from app.models import SingleStepProblem
 from app.models import PredictProductsProblem
 
@@ -46,10 +47,13 @@ def single_step(request, id):
 
 def predict_products(request, id):
     context = {}
-    
+    problem = PredictProductsProblem.objects.get(id=id)
+    context["reactantSmiles"] = problem.reactantSmiles
+    context["reagents"] = problem.reagents
+    context["correctAnswer"] = problem.correctAnswer
     return render(request, 'app/predictProducts.html', context)
-    
-    
+    context["NUM_OPTIONS"] = NUM_OPTIONS
+    numReactions = len(Reactions.objects.all())
     
     
     
