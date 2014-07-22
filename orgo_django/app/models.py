@@ -18,3 +18,6 @@ class PredictProductsProblem(models.Model):
     reactantSmiles = models.CharField(max_length=100)
     reagents = models.CharField(max_length=100)
     correctAnswer = models.CharField(max_length=100)
+    incorrectAnswer1 = models.CharField(max_length=100)
+    incorrectAnswer2 = models.CharField(max_length=100)
+    incorrectAnswer3 = models.CharField(max_length=100)
