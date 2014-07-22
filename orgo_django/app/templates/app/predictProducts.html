@@ -16,8 +16,13 @@
         .answerArea {
             border: 1px solid;
             width: 500px;
-            height:500px;
+            height:1000px;
       }
+        .answerOption {
+            border: 1px solid;
+            width: 500px;
+            height:150px;
+        }
         .molDisplay {
             border: 1px solid;
             width: 200px;
@@ -41,7 +46,7 @@
                 <div>Start Molecule</div>
             </div>
             <div class = "molDisplay" id = "rightMol">
-                <div>Reagents Applied</div>
+                <div>Reagents Applied</div><br>
             </div>
         </div>
         
@@ -53,10 +58,14 @@
 </html>
 
 <script>
-//    var NUM_OPTIONS = {{NUM_OPTIONS}}
+    var NUM_OPTIONS = {{NUM_OPTIONS}}
     
     function renderSVG(smiles, jqThing){
         $.ajax({url:"/api/renderSVG", data: {"molecule": smiles}, success: function(data, st, x){jqThing.append(data);}})
+    }
+    
+    function react(reactionID, reactantSmiles){
+        $.ajax({url:"/api/react", data: {"reaction": reactionID, "reactants": reactantSmiles}, success: function(data, st, x){return data;}})
     }
     
     var reactant = "{{reactantSmiles}}";
@@ -67,24 +76,32 @@
 ////        return Math.floor((Math.random() * (greatest-least+1)) + least);
 ////    }
     var answerArea = $(".answerArea");
-//    for (var i = 0; i < NUM_OPTIONS; i++){
-//        var choice = {{answers|safe}}[i]
-//        answerArea.append('<input type="radio" name="reagent" value='+ choice + '>' + choice + '<br>');
-//    }
+    for (var i = 0; i < NUM_OPTIONS; i++){
+        var choice = {{answers|safe}}[i];
+        var answerOption = '<div class = answerOption id = opt' + i + '></div>';
+        answerArea.append(answerOption);
+        answerOption = $("#opt" + i);
+        answerOption.append('<input type="radio" name="reagent" value='+ choice + '>');
+        renderSVG(choice, answerOption);
+//        answerArea.append('<br>');
+    
+        
+                          
+    }
 //
 //    
 //    
     answerArea.append('<button id = "submit" >Submit</button>');
     answerArea.append('<div id = "answerStatus" ></div>');
-//    
-//    $("#submit").click(function() {
-//        var correctAnswer = "{{correctAnswer}}";
-//        if ($("input[@name=radio]:checked").val() == "{{correctAnswer}}"){
-//            $("#answerStatus").text("right");
-//        }
-//        else {
-//            $("#answerStatus").text("wrong");
-//        }
-//}   );
+    
+    $("#submit").click(function() {
+        var correctAnswer = "{{correctAnswer}}";
+        if ($("input[@name=radio]:checked").val() == "{{correctAnswer}}"){
+            $("#answerStatus").text("right");
+        }
+        else {
+            $("#answerStatus").text("wrong");
+        }
+}   );
 
 </script>
