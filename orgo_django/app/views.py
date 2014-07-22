@@ -24,6 +24,7 @@ def synthesis(request):
     context["productSmiles"] = problem.productSmiles
     context["correctAnswer"] = problem.correctAnswer
     return render(request, 'app/synthesis.html', context)
+    # for future reference
     # pseudocode:
     # while predict_products(request)!=desiredProduct: (figure out how to desiredProduct)
     #    add_request
@@ -47,7 +48,6 @@ def single_step(request, id):
             reagent = Reagent.objects.get(id=randrange(numReagents) + 1)
             reagentName = reagent.name
             options.append(reagentName)
-        
     context["answers"] = json.dumps(options)
     return render(request, 'app/singleStep.html', context)
 
@@ -58,13 +58,13 @@ def predict_products(request, id):
     context["reagents"] = problem.reagents
     context["correctAnswer"] = problem.correctAnswer
     return render(request, 'app/predictProducts.html', context)
-    context["NUM_OPTIONS"] = NUM_OPTIONS
-    numReactions = len(Reactions.objects.all())
+    # context["NUM_OPTIONS"] = NUM_OPTIONS
+    # numReactions = len(Reactions.objects.all())
     
     
     
-    
+    ## MAYBE THIS ACTUALLY WORKS
     ## NOT PERFECTLY DOABLE YET
     ## possibleReactions = findReactions(request)
     ## products = react(request)
-    return True #### TODO: figure out what in the world is going on
+    #### TODO: figure out what in the world is going on
