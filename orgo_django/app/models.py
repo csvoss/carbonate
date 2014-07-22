@@ -1,5 +1,5 @@
 from django.db import models
-from api.fields import StringListField
+from api.models import Property, Reagent, ReagentSet, Reaction
 
 class Synthesis(models.Model):
     id = models.AutoField(primary_key=True)

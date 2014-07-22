@@ -11,8 +11,9 @@ urlpatterns = patterns(
 #    app/synthesis
     url(r'^synthesis/'+IDREGEX+r'/$', views.synthesis, name='synthesis'),
 #    app/singleStep/1
-# V fix
     url(r'^singleStep/'+IDREGEX+r'/$', views.single_step, name='single_step'),
+#    app/singleStepHard
+	
 #    app/predictProducts
     url(r'^predictProducts/'+IDREGEX+r'/$', views.predict_products, name='predict_products'),
                        
