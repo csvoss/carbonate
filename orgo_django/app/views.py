@@ -5,6 +5,7 @@ import json
 from random import randrange
 from api.models import Reagent
 from api.models import Reaction
+from app.models import Synthesis
 from app.models import SingleStepProblem
 from app.models import PredictProductsProblem
 
@@ -22,9 +23,7 @@ def synthesis(request):
     context["reactantSmiles"] = problem.reactantSmiles
     context["productSmiles"] = problem.productSmiles
     context["correctAnswer"] = problem.correctAnswer
-    context["NUM_OPTIONS"] = NUM_OPTIONS
-    # stuff here
-    return render(request, 'app/singleStep.html', context)
+    return render(request, 'app/synthesis.html', context)
     # pseudocode:
     # while predict_products(request)!=desiredProduct: (figure out how to desiredProduct)
     #    add_request
