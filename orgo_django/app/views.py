@@ -51,6 +51,7 @@ def single_step(request, id):
 
 def single_step_hard(request, id):
     problem = SingleStepHardProblem.objects.get(id=id)
+    # TODO: account for solvent being reagent or properties
     # solvent = problem.answer.solvent.name
     return render(request, 'app/SingleStepHard.html', {
         'reactant': problem.reactant_smiles,
