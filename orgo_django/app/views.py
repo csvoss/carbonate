@@ -57,9 +57,27 @@ def predict_products(request, id):
     context["reactantSmiles"] = problem.reactantSmiles
     context["reagents"] = problem.reagents
     context["correctAnswer"] = problem.correctAnswer
+    context["NUM_OPTIONS"] = NUM_OPTIONS
+    numReactions = len(Reaction.objects.all())
+    options = []
+    correctIndex = randrange(NUM_OPTIONS)
+    firstOptionAvailable = True
+    secondOptionAvailable = True
+    for i in xrange(NUM_OPTIONS):
+        if  (i == correctIndex):
+            options.append(problem.correctAnswer)
+        elif (firstOptionAvailable):
+            options.append(problem.incorrectAnswer1)
+            firstOptionAvailable = False
+        elif (secondOptionAvailable):
+            options.append(problem.incorrectAnswer2)
+            secondOptionAvailable = False
+        else:
+            options.append(problem.incorrectAnswer3)
+            
+    context["answers"] = json.dumps(options)
     return render(request, 'app/predictProducts.html', context)
-    # context["NUM_OPTIONS"] = NUM_OPTIONS
-    # numReactions = len(Reactions.objects.all())
+            
     
     
     
