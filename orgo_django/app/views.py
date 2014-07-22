@@ -19,7 +19,12 @@ def index(request):
 def synthesis(request):
     context = {}
     problem = SingleStepProblem.objects.get(id=id)
-    return HttpResponse("hi")
+    context["reactantSmiles"] = problem.reactantSmiles
+    context["productSmiles"] = problem.productSmiles
+    context["correctAnswer"] = problem.correctAnswer
+    context["NUM_OPTIONS"] = NUM_OPTIONS
+    # stuff here
+    return render(request, 'app/singleStep.html', context)
     # pseudocode:
     # while predict_products(request)!=desiredProduct: (figure out how to desiredProduct)
     #    add_request
