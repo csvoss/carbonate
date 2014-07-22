@@ -85,9 +85,6 @@ def predict_products(request, id):
             
     context["answers"] = json.dumps(options)
     return render(request, 'app/predictProducts.html', context)
-            
-    
-    
     
     ## MAYBE THIS ACTUALLY WORKS
     ## NOT PERFECTLY DOABLE YET
