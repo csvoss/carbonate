@@ -17,6 +17,8 @@ def index(request):
     return render(request, 'app/index.html', context)
 
 def synthesis(request):
+    context = {}
+    problem = SingleStepProblem.objects.get(id=id)
     return HttpResponse("hi")
     # pseudocode:
     # while predict_products(request)!=desiredProduct: (figure out how to desiredProduct)
@@ -34,7 +36,7 @@ def single_step(request, id):
     numReagents = len(Reagent.objects.all())
     options = []
     correctIndex = randrange(NUM_OPTIONS)
-    for i in range(NUM_OPTIONS):
+    for i in xrange(NUM_OPTIONS):
         if  (i == correctIndex):
             options.append(problem.correctAnswer)
         else:
