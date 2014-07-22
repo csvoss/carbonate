@@ -5,6 +5,7 @@ import json
 from random import randrange
 from api.models import Reagent
 from api.models import Reaction
+from app.models import Synthesis
 from app.models import SingleStepProblem
 from app.models import PredictProductsProblem
 
@@ -19,7 +20,11 @@ def index(request):
 def synthesis(request):
     context = {}
     problem = SingleStepProblem.objects.get(id=id)
-    return HttpResponse("hi")
+    context["reactantSmiles"] = problem.reactantSmiles
+    context["productSmiles"] = problem.productSmiles
+    context["correctAnswer"] = problem.correctAnswer
+    return render(request, 'app/synthesis.html', context)
+    # for future reference
     # pseudocode:
     # while predict_products(request)!=desiredProduct: (figure out how to desiredProduct)
     #    add_request
@@ -43,7 +48,6 @@ def single_step(request, id):
             reagent = Reagent.objects.get(id=randrange(numReagents) + 1)
             reagentName = reagent.name
             options.append(reagentName)
-        
     context["answers"] = json.dumps(options)
     return render(request, 'app/singleStep.html', context)
 
@@ -74,12 +78,11 @@ def predict_products(request, id):
     context["answers"] = json.dumps(options)
     return render(request, 'app/predictProducts.html', context)
             
-            
     
     
     
-    
+    ## MAYBE THIS ACTUALLY WORKS
     ## NOT PERFECTLY DOABLE YET
     ## possibleReactions = findReactions(request)
     ## products = react(request)
-    return True #### TODO: figure out what in the world is going on
+    #### TODO: figure out what in the world is going on
