@@ -20,6 +20,7 @@ from molecularStructure import *
 import string
 from rply import ParserGenerator, LexerGenerator, ParsingError
 from rply.token import BaseBox
+from toSmiles import smilesify
 
 
 ##### HELPER FUNCTIONS #####
@@ -112,6 +113,7 @@ def smiles_production(p):
     assert_isinstance(chain, Chain)
     ## TODO: Post-processing of ringbond list at chain.ring_data_list
     ## TODO: Post-processing of aromaticity
+    print smilesify(chain.dotted_molecules)
     return [chain.molecule] + chain.dotted_molecules
 @pg.production("smiles : terminator")
 def smiles_empty(p):
@@ -245,7 +247,6 @@ class BranchedAtom(BaseBox):
         """ring_list :: [(Atom, int ring_index, str bond_char)]."""
         self.ring_data_list += ring_list
 
-## No shift-reduce conflicts above this line ##
 
 def add_rings_and_branches(atom, ringbonds, branches):
     "return :: BranchedAtom"
@@ -271,26 +272,6 @@ def add_rings_and_branches(atom, ringbonds, branches):
         output.append_ring(ringbond.index, ringbond.bond)
     return output
 
-
-# branched_atom ::= atom ringbond* branch*
-# branched_atom :: BranchedAtom
-# @pg.production("branched_atom : atom ringbondplus branchplus")
-# def branched_atom(p):
-#     atom = p[0]
-#     ringbonds = p[1]
-#     branches = p[2]
-#     return add_rings_and_branches(atom, ringbonds, branches)
-# @pg.production("branched_atom : atom branchplus")
-# def branched_atom_no_ringbonds(p):
-#     return add_rings_and_branches(p[0], [], p[1])
-# @pg.production("branched_atom : atom ringbondplus")
-# def branched_atom_no_branches(p):
-#     return add_rings_and_branches(p[0], p[1], [])
-# @pg.production("branched_atom : atom")
-# def branched_atom_neither(p):
-#     return add_rings_and_branches(p[0], [], [])
-
-
 @pg.production("branched_atom : branched_atom2")
 def branched_to_branched2(p):
     " :: BranchedAtom"
@@ -300,11 +281,11 @@ def branched_to_branched2(p):
 def branched_to_ringed(p):
     " :: Atom, [Ringbond], [Branch]"
     return p[0]
-# @pg.production("branched_atom2 : branched_atom2 branch")
-# def branched_to_branched(p):
-#     " :: Atom, [Ringbond], [Branch]"
-#     atom, ringbonds, branches = p[0]
-#     return atom, ringbonds, branches+[p[1]]
+@pg.production("branched_atom2 : branched_atom2 branch")
+def branched_to_branched(p):
+    " :: Atom, [Ringbond], [Branch]"
+    atom, ringbonds, branches = p[0]
+    return atom, ringbonds, branches+[p[1]]
 # @pg.production("ringed_atom : ringed_atom ringbond")
 # def ringed_to_ringed(p):
 #     " :: Atom, [Ringbond], [Branch]"
@@ -316,15 +297,6 @@ def ringed_to_atom(p):
     atom = p[0]
     return atom, [], []
 
-# # TEST -- TODO
-# # ALSO? branched_atom ::= atom ringbond* branch* un-paren'd-branch
-# @pg.production("branched_atom : atom ringbondplus branchplus unparenbranch")
-# def branched_atom_test(p):
-#     atom = p[0]
-#     ringbonds = p[1]
-#     branches = p[2]
-#     last_branch = p[3]
-#     return branched_atom([atom, ringbonds, branches + [last_branch]])
 
 class Ringbond(BaseBox):
     def __init__(self, index, bond):
@@ -337,18 +309,13 @@ class Branch(BaseBox):
         self.bond_or_dot = bond_or_dot
         self.chain = chain
 
-# ringbondplus :: [Ringbond]
-ringbondplus_empty, ringbondplus = plus_it("ringbond", Ringbond)
-# branchplus :: [Branch]
-branchplus_empty, branchplus = plus_it("branch", Branch)
-
 # branch ::= '(' chain ')' | '(' bond chain ')' | '(' dot chain ')'
 # branch :: Branch.
 @pg.production("branch : ( unparenbranch )")
 def unbranch_production(p):
     assert p[0].getstr()=='(' and p[2].getstr()==')', p
+    print smilesify(p[1].chain.molecule)
     return p[1]
-
 @pg.production("unparenbranch : chain")
 def branch_production(p):
     chain = p[0]
@@ -365,6 +332,7 @@ def branch_dot(p):
     dot = p[0]
     chain = p[1]
     assert_isinstance(dot, basestring)
+    print 
     assert_isinstance(chain, Chain)
     return Branch(dot, chain)
 
