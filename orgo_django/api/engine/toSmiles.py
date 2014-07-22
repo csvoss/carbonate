@@ -34,7 +34,7 @@ def to_canonical(smiles):
     outMol = openbabel.OBMol()
     obConversion.ReadString(outMol, str(smiles))
     ans = obConversion.WriteString(outMol)
-    return ans
+    return ans.strip()
 
 def assertMolecule(molecule):
     try:
