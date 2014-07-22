@@ -1,0 +1,42 @@
+<html>
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<meta charset="UTF-8"/>
+</head>
+<body>
+  <style type="text/css">
+    .molDisplay{
+      border: 1px solid;
+      width: 200px;
+      height: 200px;
+      float: left;
+    }
+    #groupThingy{
+      border: 1px solid;
+      height: 300px;
+    }
+  </style>
+
+  <div class = answerArea>
+    <div id = groupThingy>
+      What reagents do you need to add to the start molecule to get to the target molecule?<br>
+      <div class = "molDisplay" id = "leftMol">
+        <div>Start Molecule</div>
+      </div>
+      <div class = "molDisplay" id = "rightMol">
+        <div>Target Molecule</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
+<script>
+  function renderSVG(smiles,jqThing){
+    $.ajax({url:"/api/renderSVG",data:{"molecule":smiles},success:function(data,st,x){jqThing.append(data);}});
+  }
+  var reactant = "{{reactantSmiles}}";
+  var product = "{{productSmiles}}";
+  renderSVG(reactant,$("#leftMol"));
+  renderSVG(product,$("#rightMol"));
+</script>
