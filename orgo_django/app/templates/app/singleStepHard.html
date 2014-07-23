@@ -28,6 +28,7 @@
 		$(document).ready(function() {
 
 			var finalReagents = [];
+			var solutionReagents = {{ reagents|safe }};
 
 			function displayMolecule(smiles, location) {
 				$.ajax({ url:"/api/renderSVG", data: {"molecule": smiles}, success: function(data, st, x) {location.append(data);} }); //what is st and x?
@@ -50,11 +51,15 @@
 
 				} });
 			}
-			// TODO: Use api methods to create a dropdown menu of valid reagents to show based on what user typed so far
-
 
 			displayMolecule('{{reactant}}', $('.reactants') );
 			displayMolecule('{{product}}', $('.products') );
+			
+			// for (ii = 0; ii<solutionReagents.length; ii++) {
+			// 	var temp = solutionReagents[ii];
+			// 	console.log(temp);
+			// 	console.log(typeof temp);
+			// }
 
 			$('#reagent-menu').keydown(function(e) {
 				if (e.which == 13) {
@@ -101,9 +106,8 @@
 					menu.focus();
 					
 				}, error: function(x, st, error) {
-					console.log("TextStatus: " + st);
-					console.log("Error: " + error);
 					console.log("No such reagent exists");
+					// TODO: Output an error message on screen saying invalid reagent
 				} });
 
 			})
