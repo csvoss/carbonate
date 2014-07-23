@@ -20,7 +20,9 @@ from molecularStructure import *
 import string
 from rply import ParserGenerator, LexerGenerator, ParsingError
 from rply.token import BaseBox
-from toSmiles import smilesify
+from toSmiles import smilesify, to_canonical
+import unittest
+from random import random, randrange
 
 
 ##### HELPER FUNCTIONS #####
@@ -113,7 +115,7 @@ def smiles_production(p):
     assert_isinstance(chain, Chain)
     ## TODO: Post-processing of ringbond list at chain.ring_data_list
     ## TODO: Post-processing of aromaticity
-    print smilesify(chain.dotted_molecules)
+    # print smilesify(chain.dotted_molecules)
     return [chain.molecule] + chain.dotted_molecules
 @pg.production("smiles : terminator")
 def smiles_empty(p):
@@ -277,6 +279,13 @@ def branched_to_branched2(p):
     " :: BranchedAtom"
     atom, ringbonds, branches = p[0]
     return add_rings_and_branches(atom, ringbonds, branches)
+# @pg.production("branched_atom : branched_atom2 unparenbranch")  ## TODO
+# def branched_to_branched2_with_unparenbranch(p):
+#     " :: BranchedAtom"
+#     atom, ringbonds, branches = p[0]
+#     unparenbranch = p[1]
+#     branches = branches + [unparenbranch]
+#     return add_rings_and_branches(atom, ringbonds, branches)
 @pg.production("branched_atom2 : ringed_atom")
 def branched_to_ringed(p):
     " :: Atom, [Ringbond], [Branch]"
@@ -314,7 +323,7 @@ class Branch(BaseBox):
 @pg.production("branch : ( unparenbranch )")
 def unbranch_production(p):
     assert p[0].getstr()=='(' and p[2].getstr()==')', p
-    print smilesify(p[1].chain.molecule)
+    # print smilesify(p[1].chain.molecule)
     return p[1]
 @pg.production("unparenbranch : chain")
 def branch_production(p):
@@ -332,7 +341,6 @@ def branch_dot(p):
     dot = p[0]
     chain = p[1]
     assert_isinstance(dot, basestring)
-    print 
     assert_isinstance(chain, Chain)
     return Branch(dot, chain)
 
@@ -485,4 +493,48 @@ def example_smiles():
         "CC(C)[C@@]12C[C@@H]1[C@@H](C)C(=O)C2", ## alpha-thujone
         "N1CCN(CC1)C(C(F)=C2)=CC(=C2C4=O)N(C3CC3)C=C4C(=O)O",
         "C[C@@](C)(O1)C[C@@H](O)[C@@]1(O2)[C@@H](C)[C@@H]3CC=C4[C@]3(C2)C(=O)C[C@H]5[C@H]4CC[C@@H](C6)[C@]5(C)CC(N7)C6NC(C[C@@]89(C))C7C[C@@H]8CC[C@@H]%10[C@@H]9C[C@@H](O)[C@@]%11(C)C%10=C[C@H](O%12)[C@]%11(O)[C@H](C)[C@]%12(O%13)[C@H](O)C[C@@]%13(C)CO", ## Cephalostatin-1 without aromaticity. Note the % in front of ring closure labels above 9.
-    ]    
+    ]
+
+
+
+
+
+##### UNIT TESTS #####
+
+def test_it(smiles):
+    return [to_canonical(smiles)], smilesify(moleculify(smiles))
+
+class TestBasic(unittest.TestCase):
+    def test_carbons(self):
+        for num in range(1, 21):
+            mol = "C" * num
+            self.assertEqual(*test_it(mol))
+
+class TestBranches(unittest.TestCase):
+    def test_branches(self):
+        termination_probability = 0.90
+        max_run_length = 5
+        def random_branching_carbons():
+            def end_or_branch():
+                if random() < termination_probability:
+                    return "C" * (1 + randrange(max_run_length))
+                else:
+                    return random_branching_carbons()
+            a = end_or_branch()
+            b = end_or_branch()
+            c = end_or_branch()
+            d = end_or_branch()
+            return a + "(" + b + ")(" + c + ")" + d
+
+        for num in range(1,20):
+            try:
+                mol = random_branching_carbons()
+            except RuntimeError:
+                print "Warning: adjust termination_probability"
+                mol = "CC(CC(CCC))(CC)CC"
+            # print mol
+            self.assertEqual(*test_it(mol))
+
+class TestRings(unittest.TestCase):
+    def test_rings(self):
+        pass
