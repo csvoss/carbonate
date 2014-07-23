@@ -18,11 +18,22 @@ NUM_OPTIONS = 4
 # Create your views here.
 ## url(r'^$', views.index, name='index'),
 def index(request):
+    """
+    Return a page for /app.
+    request :: HttpRequest
+    return :: HttpResponse
+    """
     context = {}
     return render(request, 'app/index.html', context)
 
 def synthesis(request, id):
-    problem = SingleStepProblem.objects.get(id=id)
+    """
+    Create a UI for SynthesisProblem #id.
+    request :: HttpRequest
+    id :: int
+    return :: HttpResponse
+    """
+    problem = Synthesis.objects.get(id=id)
     context = {
         "reactant_smiles": problem.reactant_smiles,
         "product_smiles": problem.product_smiles,
@@ -37,6 +48,12 @@ def synthesis(request, id):
     # return render(request, 'app/synthesis.html', context)
 
 def single_step(request, id):
+    """
+    Create a UI for SingleStepProblem #id.
+    request :: HttpRequest
+    id :: int
+    return :: HttpResponse
+    """
     num_reagents = len(Reagent.objects.all())
     correct_index = randrange(NUM_OPTIONS)
 
@@ -59,6 +76,12 @@ def single_step(request, id):
     return render(request, 'app/singleStep.html', context)
 
 def single_step_hard(request, id):
+    """
+    Create a UI for SingleStepHardProblem #id.
+    request :: HttpRequest
+    id :: int
+    return :: HttpResponse
+    """
     problem = SingleStepHardProblem.objects.get(id=id)
     # solvent = problem.answer.solvent.name
     context = {
@@ -70,6 +93,12 @@ def single_step_hard(request, id):
     return render(request, 'app/SingleStepHard.html', context)
 
 def predict_products(request, id):
+    """
+    Create a UI for PredictProductsProblem #id.
+    request :: HttpRequest
+    id :: int
+    return :: HttpResponse
+    """
     problem = PredictProductsProblem.objects.get(id=id)
     correct_index = randrange(NUM_OPTIONS)
     options = [

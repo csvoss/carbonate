@@ -16,6 +16,9 @@ class Synthesis(models.Model):
     def __unicode__(self):
         return "Synthesis #%s" % str(self.id)
 
+    class Meta:
+        verbose_name_plural = "Syntheses"
+
 class SingleStepProblem(models.Model):
     id = models.AutoField(primary_key=True)
     reactant_smiles = models.CharField(

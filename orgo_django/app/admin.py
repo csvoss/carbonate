@@ -5,7 +5,8 @@ from app import models
 register_models = [
     models.SingleStepProblem,
     models.SingleStepHardProblem,
-    models.PredictProductsProblem
+    models.PredictProductsProblem,
+    models.Synthesis,
 ]
 
 for model in register_models:
