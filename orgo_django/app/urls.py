@@ -1,7 +1,7 @@
 from django.conf.urls import patterns, url
 from app import views
 
-IDREGEX = r'(?P<id>.*)'
+IDREGEX = r'(?P<id>\d+)'
 
 urlpatterns = patterns(
     '',

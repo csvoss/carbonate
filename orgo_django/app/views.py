@@ -15,12 +15,12 @@ def index(request):
     context = {}
     return render(request, 'app/index.html', context)
 
-def synthesis(request):
+def synthesis(request, id):
     context = {}
     problem = SingleStepProblem.objects.get(id=id)
-    context["reactantSmiles"] = problem.reactantSmiles
-    context["productSmiles"] = problem.productSmiles
-    context["correctAnswer"] = problem.correctAnswer
+    context["reactant_smiles"] = problem.reactant_smiles
+    context["product_smiles"] = problem.product_smiles
+    context["correct_answer"] = problem.correct_answer 
     return render(request, 'app/synthesis.html', context)
     # for future reference
     # pseudocode:
@@ -32,16 +32,16 @@ def synthesis(request):
 def single_step(request, id):
     context = {}
     problem = SingleStepProblem.objects.get(id=id)
-    context["reactantSmiles"] = problem.reactantSmiles
-    context["productSmiles"] = problem.productSmiles
-    context["correctAnswer"] = problem.correctAnswer
+    context["reactant_smiles"] = problem.reactant_smiles
+    context["product_smiles"] = problem.product_smiles
+    context["correct_answer"] = problem.correct_answer 
     context["NUM_OPTIONS"] = NUM_OPTIONS
     numReagents = len(Reagent.objects.all())
     options = []
     correctIndex = randrange(NUM_OPTIONS)
     for i in xrange(NUM_OPTIONS):
         if  (i == correctIndex):
-            options.append(problem.correctAnswer)
+            options.append(problem.correct_answer)
         else:
             reagent = Reagent.objects.get(id=randrange(numReagents) + 1)
             reagentName = reagent.name
@@ -62,9 +62,9 @@ def single_step_hard(request, id):
 def predict_products(request, id):
     context = {}
     problem = PredictProductsProblem.objects.get(id=id)
-    context["reactantSmiles"] = problem.reactantSmiles
+    context["reactant_smiles"] = problem.reactant_smiles
     context["reagents"] = problem.reagents
-    context["correctAnswer"] = problem.correctAnswer
+    context["correct_answer"] = problem.correct_answer 
     context["NUM_OPTIONS"] = NUM_OPTIONS
     numReactions = len(Reaction.objects.all())
     options = []
@@ -73,15 +73,15 @@ def predict_products(request, id):
     secondOptionAvailable = True
     for i in xrange(NUM_OPTIONS):
         if  (i == correctIndex):
-            options.append(problem.correctAnswer)
+            options.append(problem.correct_answer  )
         elif (firstOptionAvailable):
-            options.append(problem.incorrectAnswer1)
+            options.append(problem.incorrect_answer1)
             firstOptionAvailable = False
         elif (secondOptionAvailable):
-            options.append(problem.incorrectAnswer2)
+            options.append(problem.incorrect_answer2)
             secondOptionAvailable = False
         else:
-            options.append(problem.incorrectAnswer3)
+            options.append(problem.incorrect_answer3)
             
     context["answers"] = json.dumps(options)
     return render(request, 'app/predictProducts.html', context)

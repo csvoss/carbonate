@@ -32,27 +32,29 @@
 </html>
 
 <script>
+  NUM_OPTIONS = 4;
   function renderSVG(smiles,jqThing){
     $.ajax({url:"/api/renderSVG",data:{"molecule":smiles},success:function(data,st,x){jqThing.append(data);}});
   }
-  var reactant = "{{reactantSmiles}}";
-  var product = "{{productSmiles}}";
+  var reactant = "{{reactant_smiles}}";
+  var product = "{{product_smiles}}";
   renderSVG(reactant,$("#leftMol"));
   renderSVG(product,$("#rightMol"));
   var answerArea = $(".answerArea");
-  for(var i=0;i<NUM_OPTIONS;i++){
+  for (var i=0; i<NUM_OPTIONS; i++) {
     var choice = {{answers|safe}}[i];
     var answerOption = '<div class = answerOption id=opt'+i+'></div>';
     answerArea.append(answerOption);
     answerOption = $("#opt"+i);
     answerOption.append('<input type="radio" name="reagent" value='+ choice + '>');
     renderSVG(choice,answerOption);
+  }
 
-  $('#submit').click(function(){
-    var correctAnswer = "{{correctAnswer}}"
-    if ($("input[@name=radio]:checked").val() == "{{correctAnswer}}"){
+  $('#submit').click(function() {
+    var correctAnswer = "{{correct_answer}}"
+    if ($("input[@name=radio]:checked").val() == correctAnswer) {
       $("answerStatus").text("right");
-    }else{
+    } else {
       $("answerStatus").text("wrong");
     }
   });

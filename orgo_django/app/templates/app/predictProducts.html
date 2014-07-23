@@ -68,7 +68,7 @@
         $.ajax({url:"/api/react", data: {"reaction": reactionID, "reactants": reactantSmiles}, success: function(data, st, x){return data;}})
     }
     
-    var reactant = "{{reactantSmiles}}";
+    var reactant = "{{reactant_smiles}}";
     renderSVG(reactant, $("#leftMol"));
     $("#rightMol").append('<div id = "reagentsApplied">{{reagents}}</div>');
 //    
@@ -95,8 +95,8 @@
     answerArea.append('<div id = "answerStatus" ></div>');
     
     $("#submit").click(function() {
-        var correctAnswer = "{{correctAnswer}}";
-        if ($("input[@name=radio]:checked").val() == "{{correctAnswer}}"){
+        var correctAnswer = "{{correct_answer}}";
+        if ($("input[@name=radio]:checked").val() == correctAnswer){
             $("#answerStatus").text("right");
         }
         else {
