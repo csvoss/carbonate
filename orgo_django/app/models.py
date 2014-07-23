@@ -13,6 +13,16 @@ class SingleStepProblem(models.Model):
     productSmiles = models.CharField(max_length=100)
     correctAnswer = models.CharField(max_length=100)
 
+class SingleStepHardProblem(models.Model):
+    id = models.AutoField(primary_key=True)
+    reactant_smiles = models.TextField()
+    product_smiles = models.TextField()
+    #TODO: change to ManyToManyField to allow multiple solutions
+    answer = models.ForeignKey(ReagentSet, help_text="Contains all reagents and solvent for one valid solution")
+
+    def __unicode__(self):
+        return "SingleStepHardProblem #"+str(self.id)
+
 class PredictProductsProblem(models.Model):
     id = models.AutoField(primary_key=True)
     reactantSmiles = models.CharField(max_length=100)

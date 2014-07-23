@@ -3,11 +3,9 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
 import json
 from random import randrange
-from api.models import Reagent
-from api.models import Reaction
-from app.models import Synthesis
-from app.models import SingleStepProblem
-from app.models import PredictProductsProblem
+from api.models import Property, Reagent, ReagentSet, Reaction
+
+from app.models import Synthesis, SingleStepProblem, SingleStepHardProblem, PredictProductsProblem
 
 NUM_OPTIONS = 4
 
@@ -50,6 +48,16 @@ def single_step(request, id):
             options.append(reagentName)
     context["answers"] = json.dumps(options)
     return render(request, 'app/singleStep.html', context)
+
+def single_step_hard(request, id):
+    problem = SingleStepHardProblem.objects.get(id=id)
+    # solvent = problem.answer.solvent.name
+    return render(request, 'app/SingleStepHard.html', {
+        'reactant': problem.reactant_smiles,
+        'product' : problem.product_smiles,
+        'reagents': [reagent.name for reagent in problem.answer.reagents.all()],
+        # 'solvent' : solvent,
+        })
 
 def predict_products(request, id):
     context = {}
