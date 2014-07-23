@@ -7,7 +7,8 @@ class Property(models.Model):
 
     class Meta:
         verbose_name_plural = "Properties"
-    def __str__(self):
+
+    def __unicode__(self):
     	return self.name
 
 class Reagent(models.Model):

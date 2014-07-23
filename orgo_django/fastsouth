@@ -1,0 +1,6 @@
+python manage.py schemamigration orgo --auto
+python manage.py migrate orgo
+python manage.py schemamigration app --auto
+python manage.py migrate app
+python manage.py schemamigration api --auto
+python manage.py migrate api
