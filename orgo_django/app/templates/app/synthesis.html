@@ -1,0 +1,61 @@
+<html>
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<meta charset="UTF-8"/>
+</head>
+<body>
+  <style type="text/css">
+    .molDisplay{
+      border: 1px solid;
+      width: 200px;
+      height: 200px;
+      float: left;
+    }
+    #groupThingy{
+      border: 1px solid;
+      height: 300px;
+    }
+  </style>
+
+  <div class = answerArea>
+    <div id = groupThingy>
+      What reagents do you need to add to the start molecule to get to the target molecule?<br>
+      <div class = "molDisplay" id = "leftMol">
+        <div>Start Molecule</div>
+      </div>
+      <div class = "molDisplay" id = "rightMol">
+        <div>Target Molecule</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
+<script>
+  NUM_OPTIONS = 4;
+  function renderSVG(smiles,jqThing){
+    $.ajax({url:"/api/renderSVG",data:{"molecule":smiles},success:function(data,st,x){jqThing.append(data);}});
+  }
+  var reactant = "{{reactant_smiles}}";
+  var product = "{{product_smiles}}";
+  renderSVG(reactant,$("#leftMol"));
+  renderSVG(product,$("#rightMol"));
+  var answerArea = $(".answerArea");
+  for (var i=0; i<NUM_OPTIONS; i++) {
+    var choice = {{answers|safe}}[i];
+    var answerOption = '<div class = answerOption id=opt'+i+'></div>';
+    answerArea.append(answerOption);
+    answerOption = $("#opt"+i);
+    answerOption.append('<input type="radio" name="reagent" value='+ choice + '>');
+    renderSVG(choice,answerOption);
+  }
+
+  $('#submit').click(function() {
+    var correctAnswer = "{{correct_answer}}"
+    if ($("input[@name=radio]:checked").val() == correctAnswer) {
+      $("answerStatus").text("right");
+    } else {
+      $("answerStatus").text("wrong");
+    }
+  });
+</script>
