@@ -49,6 +49,8 @@
     answerOption.append('<input type="radio" name="reagent" value='+ choice + '>');
     renderSVG(choice,answerOption);
   }
+  answerArea.append('<button id = "submit" >Submit</button>');
+  answerArea.append('<div id = "answerStatus" ></div>');
 
   $('#submit').click(function() {
     var correctAnswer = "{{correct_answer}}"
