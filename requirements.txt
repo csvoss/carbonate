@@ -2,6 +2,7 @@ sudo pip install
 ================
 django-forkit
 django-crispy-forms
+rply
 
 sudo apt-get install
 ====================
