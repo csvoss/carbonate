@@ -39,4 +39,21 @@
   var product = "{{productSmiles}}";
   renderSVG(reactant,$("#leftMol"));
   renderSVG(product,$("#rightMol"));
+  var answerArea = $(".answerArea");
+  for(var i=0;i<NUM_OPTIONS;i++){
+    var choice = {{answers|safe}}[i];
+    var answerOption = '<div class = answerOption id=opt'+i+'></div>';
+    answerArea.append(answerOption);
+    answerOption = $("#opt"+i);
+    answerOption.append('<input type="radio" name="reagent" value='+ choice + '>');
+    renderSVG(choice,answerOption);
+
+  $('#submit').click(function(){
+    var correctAnswer = "{{correctAnswer}}"
+    if ($("input[@name=radio]:checked").val() == "{{correctAnswer}}"){
+      $("answerStatus").text("right");
+    }else{
+      $("answerStatus").text("wrong");
+    }
+  });
 </script>
