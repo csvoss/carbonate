@@ -44,7 +44,7 @@ class SingleStepHardProblem(models.Model):
         max_length=100,
         help_text = "Product's SMILES string",
     )
-    #TODO: change to ManyToManyField to allow multiple solutions
+    #TODO: change to ManyToManyField to allow multiple solutions if we want to later
     answer = models.ForeignKey(ReagentSet, help_text="Contains all reagents and solvent for one valid solution")
 
     def __unicode__(self):

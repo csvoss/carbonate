@@ -145,6 +145,15 @@ def get_reagent(request, id):
     reagent_data = get_reagent_data(reagent)
     return HttpResponse(json.dumps(reagent_data))
 
+#use to get a valid reagent by name. throws error otherwise
+def get_valid_reagent(request):
+    name = request.GET.get("name", '')
+    name = name.strip('"').strip("'")
+    if len(name) == 0:
+        raise error("No name provided")
+    reagent = Reagent.objects.get(name__iexact=name)
+    return HttpResponse(reagent.name)
+
 #If the user entered in name=input or properties=input, what reagent(s) do I get?
 def find_reagents(request):
     if request.method == "GET":
@@ -156,7 +165,7 @@ def find_reagents(request):
         reagent_list = Reagent.objects.all()
 
         if reagent_name is not '':
-            reagent_list = reagent_list.filter(name=reagent_name) #TODO: Change once name is changed to StringListField
+            reagent_list = reagent_list.filter(name__istartswith=reagent_name) #TODO: Change once name is changed to StringListField
         
         #Recursively filter for each property to get only reagents that have ALL the properties
         for prop_name in reagent_props:
