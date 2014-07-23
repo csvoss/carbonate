@@ -1,13 +1,13 @@
 """
 admin.py
-Controls which models from app/models.py are accessible from 
+Controls which models from orgo/models.py are accessible from 
 the admin interface.
 You can access the admin interface at localhost:4000/admin.
 """
 
 from django.contrib import admin
 from django.db.models import Model
-from app import models
+from orgo import models
 import inspect
 
 ## Register all the models!

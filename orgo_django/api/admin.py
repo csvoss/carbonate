@@ -1,8 +1,21 @@
+"""
+admin.py
+Controls which models from api/models.py are accessible from 
+the admin interface.
+You can access the admin interface at localhost:4000/admin.
+"""
+
 from django.contrib import admin
+from django.db.models import Model
 from api import models
+import inspect
 
-# Register your models here.
-register_models = [models.Property, models.Reagent, models.ReagentSet, models.Reaction]
-
-for model in register_models:
-	admin.site.register(model)
+## Register ALL the models!
+for i in dir(models):
+    thing = getattr(models, i)
+    if inspect.isclass(thing):
+        if issubclass(thing, Model):
+            try:
+                admin.site.register(thing)
+            except admin.sites.AlreadyRegistered as e:
+                pass
