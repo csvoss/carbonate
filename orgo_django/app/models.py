@@ -3,12 +3,10 @@ from api.models import Property, Reagent, ReagentSet, Reaction
 
 class Synthesis(models.Model):
     id = models.AutoField(primary_key=True)
-    reactant_smiles = models.CharField(
-        max_length=100,
+    reactant_smiles = models.TextField(
         help_text = "Starting molecule's SMILES string",
     )
-    product_smiles = models.CharField(
-        max_length=100,
+    product_smiles = models.TextField(
         help_text = "Target molecule's SMILES string",
     )
     correct_answer = models.CharField(max_length=100) 
@@ -21,12 +19,10 @@ class Synthesis(models.Model):
 
 class SingleStepProblem(models.Model):
     id = models.AutoField(primary_key=True)
-    reactant_smiles = models.CharField(
-        max_length=100,
+    reactant_smiles = models.TextField(
         help_text = "Reactant's SMILES string",
     )
-    product_smiles = models.CharField(
-        max_length=100,
+    product_smiles = models.TextField(
         help_text = "Product's SMILES string",
     )
     correct_answer = models.CharField(max_length=100)
@@ -36,12 +32,10 @@ class SingleStepProblem(models.Model):
 
 class SingleStepHardProblem(models.Model):
     id = models.AutoField(primary_key=True)
-    reactant_smiles = models.CharField(
-        max_length=100,
+    reactant_smiles = models.TextField(
         help_text = "Reactant's SMILES string",
     )
-    product_smiles = models.CharField(
-        max_length=100,
+    product_smiles = models.TextField(
         help_text = "Product's SMILES string",
     )
     #TODO: change to ManyToManyField to allow multiple solutions
@@ -52,15 +46,22 @@ class SingleStepHardProblem(models.Model):
 
 class PredictProductsProblem(models.Model):
     id = models.AutoField(primary_key=True)
-    reactant_smiles = models.CharField(
-        max_length=100,
+    reactant_smiles = models.TextField(
         help_text = "Reactant's SMILES string",
     )
     reagents = models.CharField(max_length=100, help_text="Human-readable description of reagents added")
-    correct_answer = models.CharField(max_length=100, help_text="SMILES for the correct product")
-    incorrect_answer1 = models.CharField(max_length=100, help_text="SMILES for a fake answer")
-    incorrect_answer2 = models.CharField(max_length=100, help_text="SMILES for a fake answer")
-    incorrect_answer3 = models.CharField(max_length=100, help_text="SMILES for a fake answer")
+    correct_answer = models.TextField(
+        help_text="SMILES for the correct product",
+    )
+    incorrect_answer1 = models.TextField(
+        help_text="SMILES for a fake answer",
+    )
+    incorrect_answer2 = models.TextField(
+        help_text="SMILES for a fake answer",
+    )
+    incorrect_answer3 = models.TextField(
+        help_text="SMILES for a fake answer",
+    )
 
     def __unicode__(self):
         return "PredictProductsProblem #%s" % str(self.id)
