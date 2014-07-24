@@ -84,11 +84,12 @@ def single_step_hard(request, id):
     return :: HttpResponse
     """
     problem = SingleStepHardProblem.objects.get(id=id)
+    # TODO: account for solvent being reagent or properties
     # solvent = problem.answer.solvent.name
     context = {
         'reactant': problem.reactant_smiles,
         'product' : problem.product_smiles,
-        'reagents': [reagent.name for reagent in problem.answer.reagents.all()],
+        'reagents': json.dumps([reagent.name for reagent in problem.answer.reagents.all()]),
         # 'solvent' : solvent,
     }
     return render(request, 'app/SingleStepHard.html', context)

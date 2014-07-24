@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <meta charset="UTF-8">
+    <style type="text/css">
+      .column {
+        display: inline-block;
+        border: solid;
+        padding: 10px;
+      }
+      .submitted-reagent {
+        padding: 2px;
+        border: dashed;
+        margin: 2px;
+      }
+    </style>
+    <script>
+    </script>
+  </head>
+  <body>
+    <div id="predictProductsHardProblem">
+      <div class="reactants column"></div>
+      <div class="reaction column"></div>
+      <div class="products column">
+        
+        <div class="arrow">
+          <!-- insert arrow -->
+        </div>
+        <div class="product-menu-box">
+          <input class="menu" id="reagent-menu" type="text" list="valid-reagents" placeholder="Insert product here" autofocus>
+          <datalist id="valid-reagents" class="menu"></datalist>
+        </div> <!-- maybe should be something else?-->
+        <!-- input etc. goes here later -->
+      </div>
+    </div>
+  </body>
+</html>
