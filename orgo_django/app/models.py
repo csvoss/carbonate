@@ -65,14 +65,3 @@ class PredictProductsProblem(models.Model):
 
     def __unicode__(self):
         return "PredictProductsProblem #%s" % str(self.id)
-
-class PredictProductsHardProblem(models.Model):
-    id = models.AutoField(primary_key=True)
-    reactant_smiles = models.TextField(
-        help_text = "Reactant's SMILES string",
-    )
-    reagents = models.CharField(max_length=100, help_text="Human-readable description of reagents added")
-    answer = models.TextField(help_text="SMILES for the correct product")
-
-    def __unicode__(self):
-      return "PredictProductsProblem #%s" % str(self.id)
