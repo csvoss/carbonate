@@ -12,40 +12,51 @@
 <body>
 
     <style type="text/css">
+        body {
+          font-family: Arial, Verdana, sans-serif;
+        }
+        button#submit {
+            margin:20px;
+            margin-left:100px;
+            clear:both;
+        }
       
         .answerArea {
             width: 902px;
             height:900px;
-      }
+        }
         .answerArea div {
 
-      }
+        }
         #groupThingy div {
             text-align: center;
         }
         .answerOption {
-            border: 1px solid;
-            width: 450px;
+            border: 0px solid;
+            background-color:#EEEEEE;
+            border-radius:10px;
+            width: 350px;
             height:150px;
             float: left;
+            margin:20px;
         }
         .molDisplay {
             width: 200px;
             height:200px;
             float: left;
-      }
+        }
         #groupThingy {
-            border: 1px solid;
+            border: 0px solid;
             height: 200px;
-            width: 410px;
-/*            float: left;*/
+            width: 600px;
+            margin:auto;
         }
         #intro {
             text-align: center;
         }
         #answers{
             height: 305px;
-            width: 905px;
+            width: 1000px;
 
         }
         
@@ -55,16 +66,16 @@
     </style>
 
     <div class = answerArea>
-        <div id = "intro">Start Molecule + Reagents Applied -> ???</div>
+        <!--<div id = "intro">Start Molecule + Reagents Applied -> ???</div>-->
         <div id = groupThingy>
-            
-            
-            <div class = "molDisplay" id = "leftMol">
-                <div>Start Molecule</div>
+            <div class = "molDisplay" id = "leftMol" style="float:left;">
+                <div style="margin:20px"><b>Start Molecule</b></div>
             </div>
-            <div class = "molDisplay" id = "rightMol">
-                <div>Reagents Applied</div>
+            <img class="math" src="/orgo/static/bigplus.png" style="float:left;margin-top:15px;"></img>
+            <div class = "molDisplay" id = "rightMol" style="float:left;width:200;height:200">
+                <div style="margin:20px"><b>Reagents Applied</b></div>
             </div>
+            <img class="math" src="/orgo/static/equalswhat.png" style="float:left;margin-top:15px;"></img>
         </div>
         <div id = "answers">
         
@@ -92,9 +103,28 @@
         var parentWidth = stuff.parent().width();
         var stuffWidth = stuff.width();
         var margin = .5*(parentWidth - stuffWidth);
-        stuff.css("margin-left", margin);
+        //margin:auto will also center a div
+        /*stuff.css("margin-left", margin);*/
+        stuff.css("margin", "auto");
     }
     
+
+    /// Stuff for edX integration
+    function student_answer_for_edx() {
+        return $("input.reagent:checked").val();
+    }
+    function right_answer_for_edx() {
+        return "{{correct_answer}}";
+    }
+    function reset_student_answer(old_value) {
+        $("input.reagent").each(function(index, elem) {
+            if (elem.defaultValue == old_value) {
+                elem.checked = true;
+            } else {
+                elem.checked = false;
+            }
+        });
+    }
 
     var reactant = "{{reactant_smiles}}";
 
@@ -110,13 +140,13 @@
         var answerOption = '<div class = answerOption id = opt' + i + '></div>';
         $("#answers").append(answerOption);
         answerOption = $("#opt" + i);
-        answerOption.append('<input type="radio" name="reagent" value='+ choice + '>');
+        answerOption.append('<input type="radio" class="reagent" name="reagent" value='+ choice + '>');
         renderSVG(choice, answerOption);
     
         
                           
     }   
-    $(".answerArea").append('<button id = "submit" >Submit</button>');
+    $(".answerArea").append('<button id = "submit">Submit</button>');
     $(".answerArea").append('<div id = "answerStatus" ></div>');
     
     centerStuff($('#groupThingy'));
@@ -125,7 +155,7 @@
     
     $("#submit").click(function() {
         var correctAnswer = "{{correct_answer}}";
-        if ($("input[@name=radio]:checked").val() == correctAnswer){
+        if ($("input.reagent:checked").val() == correctAnswer){
             $("#answerStatus").text("right");
         }
         else {
