@@ -50,9 +50,9 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     url(r'^orgo/admin/', include(admin.site.urls)),
+    
+    # Static files
+    #url(r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_ROOT}),
+    url(r'^orgo/static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_ROOT}),
+    url(r'^orgo/bootstrap/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_ROOT}),
 )
-
-if settings.DEBUG:
-    urlpatterns += patterns('',
-        (r'^orgo/static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_ROOT}), (r'^orgo/bootstrap/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_ROOT}),
-    )

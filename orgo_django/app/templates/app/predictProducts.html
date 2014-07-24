@@ -93,25 +93,11 @@
         var stuffWidth = stuff.width();
         var margin = .5*(parentWidth - stuffWidth);
         stuff.css("margin-left", margin);
-//        $(this).css("text-align", "center");
-//        this.parent().css("position","absolute");
-//        var t = this.parent().css("top");
-//        var l = this.parent().css("left");
-//
-//        this.css("position","absolute");
-//        this.css("top", ((this.parent().height() - this.outerHeight()) / 2) + this.parent().scrollTop() + "px");
-//        this.css("left", ((this.parent().width() - this.outerWidth()) / 2) + this.parent().scrollLeft() + "px");
-        console.log(stuff);
-        console.log(stuff.parent());
-        console.log(stuff.parent().width());
-        console.log(stuff.width());
-//        $('#blah').css({'margin-left':(((this.parent().width() - this.outerWidth()) / 2) + this.parent().scrollLeft() + "px")});
-//        return this;
     }
     
-    
-    
-    var reactant = "{{reactantSmiles}}";
+
+    var reactant = "{{reactant_smiles}}";
+
     renderSVG(reactant, $("#leftMol"));
     $("#rightMol").append('<div id = "reagentsApplied">{{reagents}}</div>');
 //    
@@ -138,13 +124,13 @@
     centerStuff($('#answerStatus'));
     
     $("#submit").click(function() {
-        var correctAnswer = "{{correctAnswer}}";
-        if ($("input[@name=radio]:checked").val() == "{{correctAnswer}}"){
+        var correctAnswer = "{{correct_answer}}";
+        if ($("input[@name=radio]:checked").val() == correctAnswer){
             $("#answerStatus").text("right");
         }
         else {
             $("#answerStatus").text("wrong");
         }
-}   );
+    });
 
 </script>

@@ -51,15 +51,33 @@
 </body>
     
 </html>
+<script type="text/javascript" src="/orgo/static/edx_include/demo_files/jquery.js"></script>
+<script type="text/javascript" src="/orgo/static/edx_include/demo_files/jschannel.js"></script>
+<script type="text/javascript" src="/orgo/static/edx_include/demo_files/jsinput_client.js"></script>
 <script>
+    function centerStuff(stuff) {
+        var parentWidth = stuff.parent().width();
+        var stuffWidth = stuff.width();
+        var margin = .5*(parentWidth - stuffWidth);
+        stuff.css("margin-left", margin);
+    }
+    
+    function student_answer_for_edx() {
+        return $("input[@name=radio]:checked").val();
+    }
+
+    function right_answer_for_edx() {
+        return "{{correct_answer}}";
+    }
+
     var NUM_OPTIONS = {{NUM_OPTIONS}}
     
     function renderSVG(smiles, jqThing){
         $.ajax({url:"/api/renderSVG", data: {"molecule": smiles}, success: function(data, st, x){jqThing.append(data);}})
     }
     
-    var reactant = "{{reactantSmiles}}";
-    var product = "{{productSmiles}}";
+    var reactant = "{{reactant_smiles}}";
+    var product = "{{product_smiles}}";
     renderSVG(reactant, $("#leftMol"));
     renderSVG(product, $("#rightMol"));
     
@@ -69,7 +87,7 @@
     var answerArea = $(".answerArea");
     for (var i = 0; i < NUM_OPTIONS; i++){
         var choice = {{answers|safe}}[i]
-        answerArea.append('<input type="radio" name="reagent" value='+ choice + '>' + choice + '<br>');
+        answerArea.append('<input type="radio" name="reagent" class="reagent" value='+ choice + '>' + choice + '<br>');
     }
 
     
@@ -78,8 +96,8 @@
     answerArea.append('<div id = "answerStatus" ></div>');
     
     $("#submit").click(function() {
-        var correctAnswer = "{{correctAnswer}}";
-        if ($("input[@name=radio]:checked").val() == "{{correctAnswer}}"){
+        var correctAnswer = "{{correct_answer}}";
+        if ($("input.reagent:checked").val() == correctAnswer){
             $("#answerStatus").text("right");
         }
         else {
