@@ -14,18 +14,20 @@
     <style type="text/css">
       
         .answerArea {
-            border: 1px solid;
-            width: 500px;
-            height:500px;
+            border: 0px solid;
+/*            width: 500px;
+            height:500px;*/
+            margin:10px;
       }
         .molDisplay {
-            border: 1px solid;
-            width: 200px;
-            height:200px;
+            border: 0px solid;
+/*            width: 200px;
+            height:200px;*/
             float: left;
+            margin:20px;
       }
         #groupThingy {
-            border: 1px solid;
+            border: 0px solid;
             height: 300px;
         }
 
@@ -36,7 +38,6 @@
     <div class = answerArea>
         <div id = groupThingy>
             What reagents do you need to add to the start molecule to get to the target molecule?<br>
-            
             <div class = "molDisplay" id = "leftMol">
                 <div>Start Molecule</div>
             </div>
@@ -44,8 +45,6 @@
                 <div>Target Molecule</div>
             </div>
         </div>
-        
-        
     </div>
     
 </body>
@@ -57,11 +56,21 @@
 <script>
     
     function student_answer_for_edx() {
-        return $("input[@name=radio]:checked").val();
+        return $("input.reagent:checked").val();
     }
 
     function right_answer_for_edx() {
         return "{{correct_answer}}";
+    }
+
+    function reset_student_answer(old_value) {
+        $("input.reagent").each(function(index, elem) {
+            if (elem.defaultValue == old_value) {
+                elem.checked = true;
+            } else {
+                elem.checked = false;
+            }
+        });
     }
 
     var NUM_OPTIONS = {{NUM_OPTIONS}}
@@ -78,11 +87,16 @@
 //    function randomGen(least, greatest){
 //        return Math.floor((Math.random() * (greatest-least+1)) + least);
 //    }
-    var answerArea = $(".answerArea");
-    for (var i = 0; i < NUM_OPTIONS; i++){
-        var choice = {{answers|safe}}[i]
-        answerArea.append('<input type="radio" name="reagent" class="reagent" value='+ choice + '>' + choice + '<br>');
+
+    function putAnswers() {
+        var answerArea = $(".answerArea");
+        for (var i = 0; i < NUM_OPTIONS; i++){
+          var choice = ["H<sub>2</sub>, Pd|C", "HCl", "NaOH", "BH<sub>3</sub>"][i]
+          answerArea.append('<input type="radio" name="reagent" class="reagent" value=\"'+ choice + '\"">' + choice + '<br />');
+        }
+        answerArea.append('<div id = "answerStatus" ></div>');
     }
+    putAnswers();
 
     
     
