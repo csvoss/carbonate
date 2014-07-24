@@ -9,6 +9,10 @@
   <link rel="stylesheet" type="text/css" href="singleStep.css">
 -->
 	<style type="text/css">
+        .singleStepHardProblem {
+            width: 800px;
+        }
+
 		.column {
 			display: inline-block;
 			border: solid;
@@ -21,6 +25,15 @@
 			margin: 2px;
 		}
 
+        .submitted-reagent:hover {
+            background-color: gray;
+        }
+
+        .controls * {
+            float: right;
+            margin-top: 10px;
+        }
+
 	</style>
 
 
@@ -28,7 +41,7 @@
 		$(document).ready(function() {
 
 			var finalReagents = [];
-			var solutionReagents = {{ reagents|safe }};
+			var solutionReagents = {{ reagents|safe }}; //list of Strings with reagent names
 
 			function displayMolecule(smiles, location) {
 				$.ajax({ url:"/api/renderSVG", data: {"molecule": smiles}, success: function(data, st, x) {location.append(data);} }); //what is st and x?
@@ -52,6 +65,15 @@
 				} });
 			}
 
+            function createSubmittedReagent(value) {
+                var reagent = $('<span>', {
+                    class : "submitted-reagent",
+                    'title' : "Remove" 
+                });
+                reagent.text(value);
+                return reagent;
+            }
+
 			displayMolecule('{{reactant}}', $('.reactants') );
 			displayMolecule('{{product}}', $('.products') );
 			
@@ -61,6 +83,7 @@
 			// 	console.log(typeof temp);
 			// }
 
+            //Do different things for certain keys
 			$('#reagent-menu').keydown(function(e) {
 				if (e.which == 13) {
 					// The enter key was pressed
@@ -68,10 +91,11 @@
 					$('.add-reagent').click();
 				}
 				if (e.which == 32) {
-					return false;
+					return false; //prevents space bar from working
 				}
 			});
 
+            // Update dropdown when value is entered
 			$('#reagent-menu').keyup(function(e) {
 
 				var rgStart = this.value;
@@ -80,7 +104,7 @@
 				} else {
 					$('#valid-reagents').children().remove();
 				}
-			})
+			});
 
 
 			// When a reagent is added, do this:
@@ -94,23 +118,54 @@
 				}
 
 				$.ajax({ url:"/api/getValidReagent", data: {"name": value}, success: function(data, st, x) {
-					finalReagents.push(data);
-					var reagent = $('<span>', {
-						class: "submitted-reagent"
-					});
-					reagent.text(data);
+                    var reagent = createSubmittedReagent(data);
 					$('.submitted-reagents-box').append(reagent);
-					$('.no-reagents').remove();
+                    // $('.submitted-reagent').addEventListener("click", deleteReagent, false);
+
+					$('.no-reagents').css("display", "none");
 					$('#valid-reagents').children().remove();
 					menu.val('');
 					menu.focus();
 					
 				}, error: function(x, st, error) {
-					console.log("No such reagent exists");
-					// TODO: Output an error message on screen saying invalid reagent
+					$('.message').text("No such reagent exists");
 				} });
 
-			})
+			});
+
+            $('.submitted-reagents-box').on("click", "span", function(e) {
+                $(this).remove();
+
+                if ($('.submitted-reagent').length == 0) {
+                    $('.no-reagents').css("display","inline");
+                }
+            });
+
+            $('.check').click(function(e) {
+                var tempSolution = solutionReagents.slice(0);
+                var correct = true;
+                $('.submitted-reagent').each(function(ii, ele) {
+                    var rg = $(this).text();
+                    var iSol = tempSolution.indexOf(rg);
+                    if (iSol < 0) {
+                        correct = false; //submitted reagent is not in solutions
+                    } else {
+                        tempSolution.splice(iSol, 1); //remove that reagent
+                    }
+                });
+                if (tempSolution.length > 0) {
+                    correct = false; //didn't get all the reagents in the solution
+                }
+
+                if (correct) {
+                    $('.message').text("That's right!");
+                } else {
+                    $('.message').text("Not quite");
+                }
+
+            })
+
+
 		})
 	</script>
 
@@ -119,34 +174,42 @@
 <body>
 
 	<div class="singleStepHardProblem">
-		<div class="reactants column">
-		</div>
 
-		<div class="reaction column">
-			<div class="submitted-reagents-box">
-				<span class="no-reagents">? ?</span>
-			</div>
+        <div class="problem">
+    		<div class="reactants column">
+    		</div>
 
-			<div class="arrow">
-				-------------------------> <!-- Use a legit arrow later -->
-			</div>
+    		<div class="reaction column">
+    			<div class="submitted-reagents-box">
+    				<span class="no-reagents">? ?</span>
+    			</div>
 
-			<div class="solvent">
-				Solvent?
-			</div>
+    			<div class="arrow">
+    				-------------------------> <!-- Use a legit arrow later -->
+    			</div>
 
-			<div class="reagent-menu-box">
-				<input class="menu" id="reagent-menu" type="text" list="valid-reagents" placeholder="Insert reagent or solvent here" autofocus>
-				<button class="add-reagent">Add</button>
+    			<div class="solvent">
+    				Solvent?
+    			</div>
 
-				<datalist id="valid-reagents" class="menu">
-				</datalist>
+    			<div class="reagent-menu-box">
+    				<input class="menu" id="reagent-menu" type="text" list="valid-reagents" placeholder="Insert reagent or solvent here" autofocus>
+    				<button class="add-reagent">Add</button>
 
-			</div>
-		</div>
+    				<datalist id="valid-reagents" class="menu">
+    				</datalist>
+    			</div>
+    		</div>
 
-		<div class="products column">
-		</div>
+    		<div class="products column">
+    		</div>
+        </div>
+
+        <div class="controls">
+            <span class="message"> Test message </span>
+            <button class="check">Submit</button>
+
+        </div>
 	</div>
 
 
