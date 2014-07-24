@@ -13,18 +13,16 @@
 
   <style type="text/css">
     .answerArea {
-      border: 1px solid;
-      width: 500px;
-      height:500px;
+      border: 0px solid;
+      margin:10px;
     }
     .molDisplay {
-      border: 1px solid;
-      width: 200px;
-      height:200px;
+      border: 0px solid;
+      margin:20px;
       float: left;
     }
     #groupThingy {
-      border: 1px solid;
+      border: 0px solid;
       height: 300px;
     }
 
@@ -40,8 +38,6 @@
         <div>Target Molecule</div>
       </div>
     </div>
-        
-        
   </div>
     
 </body>
@@ -51,6 +47,7 @@
 <script type="text/javascript" src="/orgo/static/edx_include/demo_files/jschannel.js"></script>
 <script type="text/javascript" src="/orgo/static/edx_include/demo_files/jsinput_client.js"></script>
 <script>
+
   function centerStuff(stuff) {
     var parentWidth = stuff.parent().width();
     var stuffWidth = stuff.width();
@@ -58,10 +55,20 @@
     stuff.css("margin-left", margin);
   }
   function student_answer_for_edx() {
-    return $("input[@name=radio]:checked").val();
+    return $("input.reagent:checked").val();
   }
   function right_answer_for_edx() {
     return "{{correct_answer}}";
+  }
+
+  function reset_student_answer(old_value) {
+    $("input.reagent").each(function(index, elem) {
+      if (elem.defaultValue == old_value) {
+        elem.checked = true;
+      } else {
+        elem.checked = false;
+      }
+    });
   }
   var NUM_OPTIONS = {{NUM_OPTIONS}}
   function renderSVG(smiles, jqThing){
@@ -71,16 +78,18 @@
   var product = "{{product_smiles}}";
   renderSVG(reactant, $("#leftMol"));
   renderSVG(product, $("#rightMol"));
-//  function randomGen(least, greatest){
-//      return Math.floor((Math.random() * (greatest-least+1)) + least);
-//  }
-  var answerArea = $(".answerArea");
-  for (var i = 0; i < NUM_OPTIONS; i++){
-    var choice = {{answers|safe}}[i]
-    answerArea.append('<input type="radio" name="reagent" class="reagent" value='+ choice + '>' + choice + '<br>');
+
+  function putAnswers() {
+    var answerArea = $(".answerArea");
+    for (var i = 0; i < NUM_OPTIONS; i++){
+      var choice = {{answers|safe}}[i]
+      answerArea.append('<input type="radio" name="reagent" class="reagent" value=\"'+ choice + '\"">' + choice + '<br />');
+    }
+    answerArea.append('<button id = "submit" >Submit</button>');
+    answerArea.append('<div id = "answerStatus" ></div>');
   }
-  answerArea.append('<button id = "submit" >Submit</button>');
-  answerArea.append('<div id = "answerStatus" ></div>');
+  putAnswers();
+
   $("#submit").click(function() {
     var correctAnswer = "{{correct_answer}}";
     if ($("input.reagent:checked").val() == correctAnswer){
