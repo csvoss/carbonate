@@ -5,7 +5,7 @@ IDREGEX = r'(?P<id>\d+)'
 
 urlpatterns = patterns(
     '',
-    # ex: /api/
+#    ex: /api/
     url(r'^$', views.index, name='index'),
 #    app/synthesis
     url(r'^synthesis/'+IDREGEX+r'/$', views.synthesis, name='synthesis'),

@@ -10,7 +10,6 @@ from django.core.urlresolvers import reverse
 import json
 from random import randrange, shuffle
 from api.models import Property, Reagent, ReagentSet, Reaction
-
 from app.models import Synthesis, SingleStepProblem, SingleStepHardProblem, PredictProductsProblem
 
 NUM_OPTIONS = 4
