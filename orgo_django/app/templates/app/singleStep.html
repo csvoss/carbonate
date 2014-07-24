@@ -11,6 +11,7 @@
 </head>
 <body>
 
+<<<<<<< HEAD
     <style type="text/css">
       
         .answerArea {
@@ -39,11 +40,26 @@
         #intro {
             text-align: center;
         }
+=======
+  <style type="text/css">
+    .answerArea {
+      border: 0px solid;
+      margin:10px;
+    }
+    .molDisplay {
+      border: 0px solid;
+      margin:20px;
+      float: left;
+    }
+    #groupThingy {
+      border: 0px solid;
+      height: 300px;
+    }
+>>>>>>> d89323deb6571036296633ec32ddfcb08cdec65f
 
-        
-    
-    </style>
+  </style>
 
+<<<<<<< HEAD
     <div class = answerArea>
         <div id = "intro">Start Molecule + ??? -> Products</div>
         <div id = groupThingy>
@@ -61,7 +77,19 @@
         </div>
         
         
+=======
+  <div class = answerArea>
+    <div id = groupThingy>
+      What reagents do you need to add to the start molecule to get to the target molecule?<br>
+      <div class = "molDisplay" id = "leftMol">
+        <div>Start Molecule</div>
+      </div>
+      <div class = "molDisplay" id = "rightMol">
+        <div>Target Molecule</div>
+      </div>
+>>>>>>> d89323deb6571036296633ec32ddfcb08cdec65f
     </div>
+  </div>
     
 </body>
     
@@ -72,57 +100,62 @@
 <script type="text/javascript" src="/orgo/static/edx_include/demo_files/jsinput_client.js"></script>
 -->
 <script>
-    function centerStuff(stuff) {
-        var parentWidth = stuff.parent().width();
-        var stuffWidth = stuff.width();
-        var margin = .5*(parentWidth - stuffWidth);
-        stuff.css("margin-left", margin);
-    }
-    
-    function student_answer_for_edx() {
-        return $("input[@name=radio]:checked").val();
-    }
 
-    function right_answer_for_edx() {
-        return "{{correct_answer}}";
-    }
+  function centerStuff(stuff) {
+    var parentWidth = stuff.parent().width();
+    var stuffWidth = stuff.width();
+    var margin = .5*(parentWidth - stuffWidth);
+    stuff.css("margin-left", margin);
+  }
+  function student_answer_for_edx() {
+    return $("input.reagent:checked").val();
+  }
+  function right_answer_for_edx() {
+    return "{{correct_answer}}";
+  }
 
-    var NUM_OPTIONS = {{NUM_OPTIONS}}
+
     
-    function renderSVG(smiles, jqThing){
-        $.ajax({url:"/api/renderSVG", data: {"molecule": smiles}, success: function(data, st, x){jqThing.append(data);}})
-    }
-    
-    var reactant = "{{reactant_smiles}}";
-    var product = "{{product_smiles}}";
-    renderSVG(reactant, $("#leftMol"));
-    renderSVG(product, $("#rightMol"));
-    
-//    function randomGen(least, greatest){
-//        return Math.floor((Math.random() * (greatest-least+1)) + least);
-//    }
+
+  function reset_student_answer(old_value) {
+    $("input.reagent").each(function(index, elem) {
+      if (elem.defaultValue == old_value) {
+        elem.checked = true;
+      } else {
+        elem.checked = false;
+      }
+    });
+  }
+  var NUM_OPTIONS = {{NUM_OPTIONS}}
+  function renderSVG(smiles, jqThing){
+    $.ajax({url:"/api/renderSVG", data: {"molecule": smiles}, success: function(data, st, x){jqThing.append(data);}})
+  }
+  var reactant = "{{reactant_smiles}}";
+  var product = "{{product_smiles}}";
+  renderSVG(reactant, $("#leftMol"));
+  renderSVG(product, $("#rightMol"));
+
+  function putAnswers() {
     var answerStuff = $("#answerStuff");
     for (var i = 0; i < NUM_OPTIONS; i++){
         var choice = {{answers|safe}}[i]
         answerStuff.append('<input type="radio" name="reagent" class="reagent" value='+ choice + '>' + choice + '<br>');
     }
-
-    
-    
     answerStuff.append('<button id = "submit" >Submit</button>');
     answerStuff.append('<div id = "answerStatus" ></div>');
     
     centerStuff($('#groupThingy'));
     centerStuff(answerStuff);
-    
-    $("#submit").click(function() {
-        var correctAnswer = "{{correct_answer}}";
-        if ($("input.reagent:checked").val() == correctAnswer){
-            $("#answerStatus").text("right");
-        }
-        else {
-            $("#answerStatus").text("wrong");
-        }
-    });
+  }
+  putAnswers();
 
+  $("#submit").click(function() {
+    var correctAnswer = "{{correct_answer}}";
+    if ($("input.reagent:checked").val() == correctAnswer){
+      $("#answerStatus").text("right");
+    }
+    else {
+      $("#answerStatus").text("wrong");
+    }
+  });
 </script>

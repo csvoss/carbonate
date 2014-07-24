@@ -1,0 +1,26 @@
+<problem display_name="carbonate_demo">
+<script type="loncapa/python">
+import json
+def grade_the_thing(e, ans):
+  try:
+    par = json.loads(ans)
+    answer = par["answer"]
+    state = par["state"]
+    is_correct = answer == state
+    return {'ok': is_correct, 'msg': "Good job!" if is_correct else "Not quite!" }
+  except:
+    return {'ok': False, 'msg': "Not quite!" }
+</script>
+<p>
+Solve the organic chemistry problem below.
+</p>
+<customresponse cfn="grade_the_thing">
+  <jsinput gradefn="jsinput_client.getGrade"
+    get_statefn="jsinput_client.getState"
+    set_statefn="jsinput_client.setState"
+    width="700"
+    height="550"
+           html_file="https://csvoss.scripts.mit.edu/edx_include/demo.html"
+    sop="false"/>
+</customresponse>
+</problem>
