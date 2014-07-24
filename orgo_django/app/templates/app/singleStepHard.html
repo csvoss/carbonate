@@ -39,6 +39,21 @@
 
 
     <script>
+
+
+        function student_answer_for_edx() {
+            var solList = [];
+            $('.submitted-reagent').each( function(ii, ele) {
+                solList.push($(this).text());
+            });
+            return solList.sort(); //order makes list unique
+        }
+
+        function right_answer_for_edx() {
+            var solList = {{reagents|safe}};
+            return solList.sort(); //order makes list unique
+        }
+
         $(document).ready(function() {
 
             var finalReagents = [];
@@ -78,11 +93,6 @@
             displayMolecule('{{reactant}}', $('.reactants') );
             displayMolecule('{{product}}', $('.products') );
             
-            // for (ii = 0; ii<solutionReagents.length; ii++) {
-            //     var temp = solutionReagents[ii];
-            //     console.log(temp);
-            //     console.log(typeof temp);
-            // }
 
             //Do different things for certain keys
             $('#reagent-menu').keydown(function(e) {
