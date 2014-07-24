@@ -7,7 +7,6 @@ urlpatterns = patterns(
     '',
     # ex: /api/
     url(r'^$', views.index, name='index'),
-    
 #    app/synthesis
     url(r'^synthesis/'+IDREGEX+r'/$', views.synthesis, name='synthesis'),
 #    app/singleStep/1
