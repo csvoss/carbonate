@@ -11,92 +11,77 @@
 </head>
 <body>
 
-    <style type="text/css">
-      
-        .answerArea {
-            border: 1px solid;
-            width: 500px;
-            height:500px;
-      }
-        .molDisplay {
-            border: 1px solid;
-            width: 200px;
-            height:200px;
-            float: left;
-      }
-        #groupThingy {
-            border: 1px solid;
-            height: 300px;
-        }
+  <style type="text/css">
+    .answerArea {
+      border: 1px solid;
+      width: 500px;
+      height:500px;
+    }
+    .molDisplay {
+      border: 1px solid;
+      width: 200px;
+      height:200px;
+      float: left;
+    }
+    #groupThingy {
+      border: 1px solid;
+      height: 300px;
+    }
 
-        
-    
-    </style>
+  </style>
 
-    <div class = answerArea>
-        <div id = groupThingy>
-            What reagents do you need to add to the start molecule to get to the target molecule?<br>
-            
-            <div class = "molDisplay" id = "leftMol">
-                <div>Start Molecule</div>
-            </div>
-            <div class = "molDisplay" id = "rightMol">
-                <div>Target Molecule</div>
-            </div>
-        </div>
-        
-        
+  <div class = answerArea>
+    <div id = groupThingy>
+      What reagents do you need to add to the start molecule to get to the target molecule?<br>
+      <div class = "molDisplay" id = "leftMol">
+        <div>Start Molecule</div>
+      </div>
+      <div class = "molDisplay" id = "rightMol">
+        <div>Target Molecule</div>
+      </div>
     </div>
+        
+        
+  </div>
     
 </body>
     
 </html>
-<script type="text/javascript" src="/orgo/static/edx_include/demo_files/jquery.js"></script>
-<script type="text/javascript" src="/orgo/static/edx_include/demo_files/jschannel.js"></script>
-<script type="text/javascript" src="/orgo/static/edx_include/demo_files/jsinput_client.js"></script>
-<script>
-    
+  <script type="text/javascript" src="/orgo/static/edx_include/demo_files/jquery.js"></script>
+  <script type="text/javascript" src="/orgo/static/edx_include/demo_files/jschannel.js"></script>
+  <script type="text/javascript" src="/orgo/static/edx_include/demo_files/jsinput_client.js"></script>
+  <script>
     function student_answer_for_edx() {
-        return $("input[@name=radio]:checked").val();
+      return $("input[@name=radio]:checked").val();
     }
-
     function right_answer_for_edx() {
-        return "{{correct_answer}}";
+      return "{{correct_answer}}";
     }
-
     var NUM_OPTIONS = {{NUM_OPTIONS}}
-    
     function renderSVG(smiles, jqThing){
-        $.ajax({url:"/api/renderSVG", data: {"molecule": smiles}, success: function(data, st, x){jqThing.append(data);}})
+      $.ajax({url:"/api/renderSVG", data: {"molecule": smiles}, success: function(data, st, x){jqThing.append(data);}})
     }
-    
     var reactant = "{{reactant_smiles}}";
     var product = "{{product_smiles}}";
     renderSVG(reactant, $("#leftMol"));
     renderSVG(product, $("#rightMol"));
-    
 //    function randomGen(least, greatest){
 //        return Math.floor((Math.random() * (greatest-least+1)) + least);
 //    }
     var answerArea = $(".answerArea");
     for (var i = 0; i < NUM_OPTIONS; i++){
-        var choice = {{answers|safe}}[i]
-        answerArea.append('<input type="radio" name="reagent" class="reagent" value='+ choice + '>' + choice + '<br>');
+      var choice = {{answers|safe}}[i]
+      answerArea.append('<input type="radio" name="reagent" class="reagent" value='+ choice + '>' + choice + '<br>');
     }
-
-    
-    
     answerArea.append('<button id = "submit" >Submit</button>');
     answerArea.append('<div id = "answerStatus" ></div>');
-    
     $("#submit").click(function() {
-        var correctAnswer = "{{correct_answer}}";
-        if ($("input.reagent:checked").val() == correctAnswer){
-            $("#answerStatus").text("right");
-        }
-        else {
-            $("#answerStatus").text("wrong");
-        }
-}   );
-
+      var correctAnswer = "{{correct_answer}}";
+      if ($("input.reagent:checked").val() == correctAnswer){
+        $("#answerStatus").text("right");
+      }
+      else {
+        $("#answerStatus").text("wrong");
+      }
+    });
 </script>
