@@ -1,98 +1,152 @@
 <html>
 
 <head>
-	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-	<meta charset="UTF-8">
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <meta charset="UTF-8">
 <!--
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
   <script src="singleStep.js"></script>
   <link rel="stylesheet" type="text/css" href="singleStep.css">
 -->
-	<style type="text/css">
-		.column {
-			display: inline-block;
-			border: solid;
-			padding: 10px;
-		}
+  <style type="text/css">
+    .column {
+      display: inline-block;
+      border: solid;
+      padding: 10px;
+    }
+    .submitted-reagent {
+      padding: 2px;
+      border: dashed;
+      margin: 2px;
+    }
 
-		.submitted-reagent {
-			padding: 2px;
-			border: dashed;
-			margin: 2px;
-		}
-
-	</style>
-
-
-	<script>
-		$(document).ready(function() {
-
-			var finalReagents = [];
-
-			function displayMolecule(smiles, location) {
-				$.ajax({ url:"/api/renderSVG", data: {"molecule": smiles}, success: function(data, st, x) {location.append(data);} }) //what is st and x?
-			}
-
-			// TODO: Use api methods to create a dropdown menu of valid reagents to show based on what user typed so far
+  </style>
 
 
-			displayMolecule('{{reactant}}', $('.reactants') );
-			displayMolecule('{{product}}', $('.products') );
+  <script>
+    $(document).ready(function() {
 
-			$('.reagent-menu').keydown(function(e) {
-				if (e.which == 13) {
-					// The enter key was pressed
-					e.preventDefault();
-					$('.add-reagent').click();
-				}
-			});
+      var finalReagents = [];
+      var solutionReagents = {{ reagents|safe }};
 
-			$('.add-reagent').click(function(e) {
-				var menu = $('.reagent-menu');
-				var value = menu.val();
-				finalReagents.push(value);
-				var reagent = $('<span>', {
-					class: "submitted-reagent"
-				});
-				reagent.text(value);
-				$('.submitted-reagents-box').append(reagent);
-				$('.no-reagents').remove();
-				menu.val('');
-				menu.focus();
-			})
-		})
-	</script>
+      function displayMolecule(smiles, location) {
+        $.ajax({ url:"/api/renderSVG", data: {"molecule": smiles}, success: function(data, st, x) {location.append(data);} }); //what is st and x?
+      }
+
+      function updateValidReagents(rgStart) {
+        $.ajax({ url:"/api/findReagents", data:{"name": rgStart}, success:function(data, st, x) {
+          var menu = $('#valid-reagents');
+          menu.children().remove();
+          data = JSON.parse(data);
+          for (iRg = 0; iRg < data.length; iRg++) {
+            var new_reagent = $('<option>', {
+              "value": data[iRg]["name"]
+            });
+            if (data[iRg]["is_solvent"]) {
+              new_reagent.text("Solvent");
+            }
+            menu.append(new_reagent);
+          }
+
+        } });
+      }
+
+      displayMolecule('{{reactant}}', $('.reactants') );
+      displayMolecule('{{product}}', $('.products') );
+      
+      // for (ii = 0; ii<solutionReagents.length; ii++) {
+      //   var temp = solutionReagents[ii];
+      //   console.log(temp);
+      //   console.log(typeof temp);
+      // }
+
+      $('#reagent-menu').keydown(function(e) {
+        if (e.which == 13) {
+          // The enter key was pressed
+          e.preventDefault();
+          $('.add-reagent').click();
+        }
+        if (e.which == 32) {
+          return false;
+        }
+      });
+
+      $('#reagent-menu').keyup(function(e) {
+
+        var rgStart = this.value;
+        if (rgStart.length > 0) {
+          updateValidReagents(rgStart);
+        } else {
+          $('#valid-reagents').children().remove();
+        }
+      })
+
+
+      // When a reagent is added, do this:
+      $('.add-reagent').click(function(e) {
+        var menu = $('#reagent-menu');
+        var value = $.trim(menu.val());
+        if (value.length == 0) {
+          menu.val(''); //reset the bar in case there were spaces, etc. that got trimmed
+          menu.focus();
+          return;
+        }
+
+        $.ajax({ url:"/api/getValidReagent", data: {"name": value}, success: function(data, st, x) {
+          finalReagents.push(data);
+          var reagent = $('<span>', {
+            class: "submitted-reagent"
+          });
+          reagent.text(data);
+          $('.submitted-reagents-box').append(reagent);
+          $('.no-reagents').remove();
+          $('#valid-reagents').children().remove();
+          menu.val('');
+          menu.focus();
+          
+        }, error: function(x, st, error) {
+          console.log("No such reagent exists");
+          // TODO: Output an error message on screen saying invalid reagent
+        } });
+
+      })
+    })
+  </script>
 
 </head>
 
 <body>
 
-	<div class="singleStepHardProblem">
-		<div class="reactants column">
-		</div>
+  <div class="singleStepHardProblem">
+    <div class="reactants column">
+    </div>
 
-		<div class="reaction column">
-			<div class="submitted-reagents-box">
-				<span class="no-reagents">? ?</span>
-			</div>
+    <div class="reaction column">
+      <div class="submitted-reagents-box">
+        <span class="no-reagents">? ?</span>
+      </div>
 
-			<div class="arrow">
-				-------------------------> <!-- Use a legit arrow later -->
-			</div>
+      <div class="arrow">
+        -------------------------> <!-- Use a legit arrow later -->
+      </div>
 
-			<div class="solvent">
-				Solvent?
-			</div>
+      <div class="solvent">
+        Solvent?
+      </div>
 
-			<div class="reagent-menu-box">
-				<input class="reagent-menu" type="text" placeholder="Insert reagent or solvent here" autofocus autocomplete="on">
-				<button class="add-reagent">Add</button>
-			</div>
-		</div>
+      <div class="reagent-menu-box">
+        <input class="menu" id="reagent-menu" type="text" list="valid-reagents" placeholder="Insert reagent or solvent here" autofocus>
+        <button class="add-reagent">Add</button>
 
-		<div class="products column">
-		</div>
-	</div>
+        <datalist id="valid-reagents" class="menu">
+        </datalist>
+
+      </div>
+    </div>
+
+    <div class="products column">
+    </div>
+  </div>
 
 
 </body>

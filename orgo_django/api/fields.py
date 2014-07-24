@@ -12,6 +12,9 @@ fields.py
 from django.db import models
 from django import forms
 
+# Currently does NOT work and is not being used. Fix at some point?
+#Alternatively use a ReagentName model to account for multiple names
+
 class StringListField(models.Field):
     """
     Save a list of strings in a CharField (or TextField) column.

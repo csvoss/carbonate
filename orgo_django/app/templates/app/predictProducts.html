@@ -14,40 +14,60 @@
     <style type="text/css">
       
         .answerArea {
-/*            border: 1px solid;*/
-            width: 450px;
-            height:1000px;
+            width: 902px;
+            height:900px;
       }
+        .answerArea div {
+
+      }
+        #groupThingy div {
+            text-align: center;
+        }
         .answerOption {
             border: 1px solid;
             width: 450px;
             height:150px;
+            float: left;
         }
         .molDisplay {
-            border: 1px solid;
             width: 200px;
             height:200px;
             float: left;
       }
         #groupThingy {
             border: 1px solid;
-            height: 250px;
+            height: 200px;
+            width: 410px;
+/*            float: left;*/
         }
+        #intro {
+            text-align: center;
+        }
+        #answers{
+            height: 305px;
+            width: 905px;
+
+        }
+        
 
         
     
     </style>
 
     <div class = answerArea>
+        <div id = "intro">Start Molecule + Reagents Applied -> ???</div>
         <div id = groupThingy>
-            What when the following reagent is added to the reactant molecule, what molecule will be produced?<br>
+            
             
             <div class = "molDisplay" id = "leftMol">
                 <div>Start Molecule</div>
             </div>
             <div class = "molDisplay" id = "rightMol">
-                <div>Reagents Applied</div><br>
+                <div>Reagents Applied</div>
             </div>
+        </div>
+        <div id = "answers">
+        
         </div>
         
         
@@ -64,35 +84,44 @@
         $.ajax({url:"/api/renderSVG", data: {"molecule": smiles}, success: function(data, st, x){jqThing.append(data);}})
     }
     
-    function react(reactionID, reactantSmiles){
-        $.ajax({url:"/api/react", data: {"reaction": reactionID, "reactants": reactantSmiles}, success: function(data, st, x){return data;}})
+//    function react(reactionID, reactantSmiles){
+//        $.ajax({url:"/api/react", data: {"reaction": reactionID, "reactants": reactantSmiles}, success: function(data, st, x){return data;}})
+//    }
+    
+    function centerStuff(stuff) {
+        var parentWidth = stuff.parent().width();
+        var stuffWidth = stuff.width();
+        var margin = .5*(parentWidth - stuffWidth);
+        stuff.css("margin-left", margin);
     }
     
+
     var reactant = "{{reactant_smiles}}";
+
     renderSVG(reactant, $("#leftMol"));
     $("#rightMol").append('<div id = "reagentsApplied">{{reagents}}</div>');
 //    
 ////    function randomGen(least, greatest){
 ////        return Math.floor((Math.random() * (greatest-least+1)) + least);
 ////    }
-    var answerArea = $(".answerArea");
+   
     for (var i = 0; i < NUM_OPTIONS; i++){
         var choice = {{answers|safe}}[i];
         var answerOption = '<div class = answerOption id = opt' + i + '></div>';
-        answerArea.append(answerOption);
+        $("#answers").append(answerOption);
         answerOption = $("#opt" + i);
         answerOption.append('<input type="radio" name="reagent" value='+ choice + '>');
         renderSVG(choice, answerOption);
-//        answerArea.append('<br>');
     
         
                           
-    }
-//
-//    
-//    
-    answerArea.append('<button id = "submit" >Submit</button>');
-    answerArea.append('<div id = "answerStatus" ></div>');
+    }   
+    $(".answerArea").append('<button id = "submit" >Submit</button>');
+    $(".answerArea").append('<div id = "answerStatus" ></div>');
+    
+    centerStuff($('#groupThingy'));
+    centerStuff($('#submit'));
+    centerStuff($('#answerStatus'));
     
     $("#submit").click(function() {
         var correctAnswer = "{{correct_answer}}";

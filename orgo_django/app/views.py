@@ -58,14 +58,15 @@ def single_step(request, id):
     correct_index = randrange(NUM_OPTIONS)
 
     # This way, no reagents will be repeated
-    reagents = range(num_reagents)
+    reagents = range(1,num_reagents+1)
     shuffle(reagents)
     reagent_choices = reagents[:NUM_OPTIONS-1] 
 
+    problem = SingleStepProblem.objects.get(id=id)
+    
     options = [Reagent.objects.get(id=i).name for i in reagent_choices]
     options.insert(correct_index, problem.correct_answer)
 
-    problem = SingleStepProblem.objects.get(id=id)
     context = {
         "reactant_smiles": problem.reactant_smiles,
         "product_smiles": problem.product_smiles,
@@ -83,11 +84,12 @@ def single_step_hard(request, id):
     return :: HttpResponse
     """
     problem = SingleStepHardProblem.objects.get(id=id)
+    # TODO: account for solvent being reagent or properties
     # solvent = problem.answer.solvent.name
     context = {
         'reactant': problem.reactant_smiles,
         'product' : problem.product_smiles,
-        'reagents': [reagent.name for reagent in problem.answer.reagents.all()],
+        'reagents': json.dumps([reagent.name for reagent in problem.answer.reagents.all()]),
         # 'solvent' : solvent,
     }
     return render(request, 'app/SingleStepHard.html', context)
