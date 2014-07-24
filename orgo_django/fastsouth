@@ -1,3 +1,4 @@
+#!/bin/bash
 python manage.py syncdb
 python manage.py schemamigration orgo --auto
 python manage.py migrate orgo
