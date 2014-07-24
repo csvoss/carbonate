@@ -11,6 +11,36 @@
 </head>
 <body>
 
+<<<<<<< HEAD
+    <style type="text/css">
+      
+        .answerArea {
+/*            border: 1px solid;*/
+            width: 410px;
+            height:500px;
+        }
+        #answerStuff{
+            border: 1px solid;
+            width:100%;
+        }
+        .molDisplay {
+/*            border: 1px solid;*/
+            width: 205px;
+            height:200px;
+            float: left;
+        }
+        #groupThingy {
+            border: 1px solid;
+            height: 200px;
+            width:410px;
+        }
+        #groupThingy div {
+            text-align: center;
+        }
+        #intro {
+            text-align: center;
+        }
+=======
   <style type="text/css">
     .answerArea {
       border: 0px solid;
@@ -25,9 +55,29 @@
       border: 0px solid;
       height: 300px;
     }
+>>>>>>> d89323deb6571036296633ec32ddfcb08cdec65f
 
   </style>
 
+<<<<<<< HEAD
+    <div class = answerArea>
+        <div id = "intro">Start Molecule + ??? -> Products</div>
+        <div id = groupThingy>
+            
+            
+            <div class = "molDisplay" id = "leftMol">
+                <div>Start Molecule</div>
+            </div>
+            <div class = "molDisplay" id = "rightMol">
+                <div>Target Molecule</div>
+            </div>
+        </div>
+        <div id = "answerStuff">
+        
+        </div>
+        
+        
+=======
   <div class = answerArea>
     <div id = groupThingy>
       What reagents do you need to add to the start molecule to get to the target molecule?<br>
@@ -37,15 +87,18 @@
       <div class = "molDisplay" id = "rightMol">
         <div>Target Molecule</div>
       </div>
+>>>>>>> d89323deb6571036296633ec32ddfcb08cdec65f
     </div>
   </div>
     
 </body>
     
 </html>
+<!--
 <script type="text/javascript" src="/orgo/static/edx_include/demo_files/jquery.js"></script>
 <script type="text/javascript" src="/orgo/static/edx_include/demo_files/jschannel.js"></script>
 <script type="text/javascript" src="/orgo/static/edx_include/demo_files/jsinput_client.js"></script>
+-->
 <script>
 
   function centerStuff(stuff) {
@@ -60,6 +113,9 @@
   function right_answer_for_edx() {
     return "{{correct_answer}}";
   }
+
+
+    
 
   function reset_student_answer(old_value) {
     $("input.reagent").each(function(index, elem) {
@@ -80,13 +136,16 @@
   renderSVG(product, $("#rightMol"));
 
   function putAnswers() {
-    var answerArea = $(".answerArea");
+    var answerStuff = $("#answerStuff");
     for (var i = 0; i < NUM_OPTIONS; i++){
-      var choice = {{answers|safe}}[i]
-      answerArea.append('<input type="radio" name="reagent" class="reagent" value=\"'+ choice + '\"">' + choice + '<br />');
+        var choice = {{answers|safe}}[i]
+        answerStuff.append('<input type="radio" name="reagent" class="reagent" value='+ choice + '>' + choice + '<br>');
     }
-    answerArea.append('<button id = "submit" >Submit</button>');
-    answerArea.append('<div id = "answerStatus" ></div>');
+    answerStuff.append('<button id = "submit" >Submit</button>');
+    answerStuff.append('<div id = "answerStatus" ></div>');
+    
+    centerStuff($('#groupThingy'));
+    centerStuff(answerStuff);
   }
   putAnswers();
 
