@@ -7,7 +7,6 @@ urlpatterns = patterns(
     '',
     # ex: /api/
     url(r'^$', views.index, name='index'),
-    
 #    app/synthesis
     url(r'^synthesis/'+IDREGEX+r'/$', views.synthesis, name='synthesis'),
 #    app/singleStep/1
@@ -16,5 +15,6 @@ urlpatterns = patterns(
     url(r'^singleStepHard/'+IDREGEX+r'/$', views.single_step_hard, name='single_step'),
 #    app/predictProducts
     url(r'^predictProducts/'+IDREGEX+r'/$', views.predict_products, name='predict_products'),
-                       
+#    app/predictProductsHard
+    url(r'^predictProductsHard/'+IDREGEX+r'/$', views. predict_products, name='predict_products'),
 )
