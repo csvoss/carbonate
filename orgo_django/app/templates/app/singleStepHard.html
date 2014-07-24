@@ -1,44 +1,52 @@
 <html>
 
 <head>
+  <title>Single-Step Problem (Hard Mode)</title>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
   <meta charset="UTF-8">
-<!--
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-  <script src="singleStep.js"></script>
-  <link rel="stylesheet" type="text/css" href="singleStep.css">
--->
-  <style type="text/css">
-    body {
-      font-family: Arial, Verdana, sans-serif;
-    }
-    .column {
-      display: inline-block;
-      border: solid;
-      padding: 10px;
-    }
-    .submitted-reagent {
-      padding: 2px;
-      border: dashed;
-      margin: 2px;
-    }
-    .singleStepHardProblem {
-        width: 800px;
-    }
-
-    .submitted-reagent:hover {
-        background-color: gray;
-    }
-
-    .controls * {
-        float: right;
-        margin-top: 10px;
-    }
-
-  </style>
 
 
-  <script>
+    <style type="text/css">
+        .singleStepHardProblem {
+            width: 800px;
+        }
+        body {
+            font-family:Arial,Verdana,sans-serif;
+        }
+
+        .column {
+            display: inline-block;
+            border: 0px solid;
+            padding: 10px;
+        }
+        .reactants, .products {
+            background-color:#EEEEEE;
+            border-radius:10px;
+        }
+
+        .submitted-reagent {
+            padding: 2px;
+            border: dashed;
+            margin: 2px;
+        }
+
+        .submitted-reagent:hover {
+            background-color: gray;
+            cursor: pointer;
+        }
+
+        .controls * {
+            float: right;
+            margin: 10px;
+        }
+        img {
+            margin-bottom:50px;
+        }
+
+    </style>
+
+
+    <script>
 
         function student_answer_for_edx() {
             var solList = [];
@@ -200,7 +208,7 @@
                 </div>
 
                 <div class="solvent">
-                    Solvent?
+                    Reagents?
                 </div>
 
                 <div class="reagent-menu-box">
@@ -217,8 +225,8 @@
         </div>
 
         <div class="controls">
-            <span class="message"> Test message </span>
             <button class="check">Submit</button>
+            <span class="message"> Test message </span>
 
         </div>
     </div>
