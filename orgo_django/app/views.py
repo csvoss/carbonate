@@ -120,13 +120,6 @@ def predict_products(request, id):
             
     return render(request, 'app/predictProducts.html', context)
 
-def predict_products_hard(request, id):
-    problem = PredictProductsHardProblem.objects.get(id=id)
-    context = {
-      'reactant': problem.reactant_smiles,
-      'reagents': json.dumps([reagent.name for reagent in problem.answer.reagents.all()])
-    }
-    return render(request, 'app/predictProductsHard.html', context)
     ## MAYBE THIS ACTUALLY WORKS
     ## NOT PERFECTLY DOABLE YET
     ## possibleReactions = findReactions(request)

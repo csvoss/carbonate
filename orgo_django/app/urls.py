@@ -15,6 +15,4 @@ urlpatterns = patterns(
     url(r'^singleStepHard/'+IDREGEX+r'/$', views.single_step_hard, name='single_step'),
 #    app/predictProducts
     url(r'^predictProducts/'+IDREGEX+r'/$', views.predict_products, name='predict_products'),
-#    app/predictProductsHard
-    url(r'^predictProductsHard/'+IDREGEX+r'/$', views. predict_products, name='predict_products'),
 )
