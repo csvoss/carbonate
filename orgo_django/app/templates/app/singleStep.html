@@ -1,5 +1,6 @@
 <html>
 <head>
+  <title>Single-Step Problem (Easy Mode)</title>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 <meta charset="UTF-8">
 <!--
@@ -17,30 +18,30 @@
       font-family: Arial, Verdana, sans-serif;
     }
     .answerArea {
-/*    border: 1px solid;*/
-      width: 410px;
-      height:500px;
+      border: 0px solid;
+      margin:10px;
     }
     #answerStuff{
-      border: 1px solid;
+      border: 0px solid;
       width:100%;
     }
     .molDisplay {
-/*    border: 1px solid;*/
-      width: 205px;
-      height:200px;
+      border: 0px solid;
+      padding:20px;
+      margin:20px;
+      border-radius:10px;
+      background-color:#EEEEEE;
       float: left;
     }
     #groupThingy {
-      border: 1px solid;
-      height: 200px;
-      width:410px;
+      border: 0px solid;
+      height: 300px;
     }
     #groupThingy div {
       text-align: center;
     }
     #intro {
-      text-align: center;
+      text-align: left;
     }
   </style>
 
@@ -105,7 +106,7 @@
     var answerStuff = $("#answerStuff");
     for (var i = 0; i < NUM_OPTIONS; i++){
         var choice = {{answers|safe}}[i]
-        answerStuff.append('<input type="radio" name="reagent" class="reagent" value='+ choice + '>' + choice + '<br>');
+        answerStuff.append('<input type="radio" name="reagent" class="reagent" value=\"'+ choice + '\">' + choice + '<br>');
     }
     answerStuff.append('<button id = "submit" >Submit</button>');
     answerStuff.append('<div id = "answerStatus" ></div>');
