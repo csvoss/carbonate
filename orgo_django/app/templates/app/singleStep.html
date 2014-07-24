@@ -51,6 +51,12 @@
   <script type="text/javascript" src="/orgo/static/edx_include/demo_files/jschannel.js"></script>
   <script type="text/javascript" src="/orgo/static/edx_include/demo_files/jsinput_client.js"></script>
   <script>
+    function centerStuff(stuff) {
+      var parentWidth = stuff.parent().width();
+      var stuffWidth = stuff.width();
+      var margin = .5*(parentWidth - stuffWidth);
+      stuff.css("margin-left", margin);
+    }
     function student_answer_for_edx() {
       return $("input[@name=radio]:checked").val();
     }
