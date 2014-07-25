@@ -38,7 +38,6 @@ class ReagentSet(models.Model):
     for reagent in self.reagents.all():
       reagent_names += str(reagent.name) + ", "
     reagent_names = reagent_names.rstrip(', ')
-
     solvent_names = ""
     if self.solvent is not None:
       solvent_names += str(self.solvent.name)
