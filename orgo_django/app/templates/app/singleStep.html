@@ -61,6 +61,7 @@
 -->
 <script>
 
+// Centers something with respect to its parent element
   function centerStuff(stuff) {
     var parentWidth = stuff.parent().width();
     var stuffWidth = stuff.width();
@@ -86,16 +87,21 @@
       }
     });
   }
+    // Number of multiple choice options
   var NUM_OPTIONS = {{NUM_OPTIONS}}
+  // Gets the renderSVG function from the API
   function renderSVG(smiles, jqThing){
     $.ajax({url:"/api/renderSVG", data: {"molecule": smiles}, success: function(data, st, x){jqThing.append(data);}})
   }
+// Displays the reactant and product molecules
   var reactant = "{{reactant_smiles}}";
   var product = "{{product_smiles}}";
   renderSVG(reactant, $("#leftMol"));
   renderSVG(product, $("#rightMol"));
 
+    // Displays and formats the answer choices
   function putAnswers() {
+    
     var answerStuff = $("#answerStuff");
     for (var i = 0; i < NUM_OPTIONS; i++){
         var choice = {{answers|safe}}[i]
@@ -109,6 +115,7 @@
   }
   putAnswers();
 
+    // Once the user submits their question, it checks whether it matches the database entry for the correct answer.
   $("#submit").click(function() {
     var correctAnswer = "{{correct_answer}}";
     if ($("input.reagent:checked").val() == correctAnswer){
