@@ -10,7 +10,7 @@ from django.db.models import Model
 from app import models
 import inspect
 
-## Register all the models!
+## Register ALL the models!
 for i in dir(models):
     thing = getattr(models, i)
     if inspect.isclass(thing):
