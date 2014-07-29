@@ -34,7 +34,6 @@ def test_smiles_to_molecule_and_back(request, smiles):
 
 #/api/react?reaction=123&molecules=["SM1","SM2"]
 
-
 def get_reaction_data(reaction):
     '''Helper function that extracts data from a Reaction query object'''
     solvent = reaction.reagent_set.solvent
@@ -94,8 +93,6 @@ def parse_input(query):
     #     raise
     # else:
     #     return parsed_query
-
-
 
 #List reaction data for ALL reactions
 def all_reactions(request):

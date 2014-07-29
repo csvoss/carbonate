@@ -1,13 +1,8 @@
 <html>
 <head>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-<meta charset="UTF-8">
-<!--
+  <title>Single-Step Problem (Easy Mode)</title>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-  <script src="singleStep.js"></script>
-  <link rel="stylesheet" type="text/css" href="singleStep.css">
--->
-
+  <meta charset="UTF-8">
 </head>
 <body>
 
@@ -16,26 +11,37 @@
     body {
       font-family: Arial, Verdana, sans-serif;
     }
-
     .answerArea {
       border: 0px solid;
       margin:10px;
     }
+    #answerStuff{
+      border: 0px solid;
+      width:100%;
+    }
     .molDisplay {
       border: 0px solid;
+      padding:20px;
       margin:20px;
+      border-radius:10px;
+      background-color:#EEEEEE;
       float: left;
     }
     #groupThingy {
       border: 0px solid;
       height: 300px;
     }
-
+    #groupThingy div {
+      text-align: center;
+    }
+    #intro {
+      text-align: left;
+    }
   </style>
 
   <div class = answerArea>
+    <div id = "intro">Start Molecule + ??? -> Products</div>
     <div id = groupThingy>
-      What reagents do you need to add to the start molecule to get to the target molecule?<br>
       <div class = "molDisplay" id = "leftMol">
         <div><b>Start Molecule</b></div>
       </div>
@@ -43,16 +49,20 @@
         <div><b>Target Molecule</b></div>
       </div>
     </div>
+    <div id = "answerStuff">
+    </div>
   </div>
-    
 </body>
     
 </html>
+<!--
 <script type="text/javascript" src="/orgo/static/edx_include/demo_files/jquery.js"></script>
 <script type="text/javascript" src="/orgo/static/edx_include/demo_files/jschannel.js"></script>
 <script type="text/javascript" src="/orgo/static/edx_include/demo_files/jsinput_client.js"></script>
+-->
 <script>
 
+// Centers something with respect to its parent element
   function centerStuff(stuff) {
     var parentWidth = stuff.parent().width();
     var stuffWidth = stuff.width();
@@ -66,6 +76,9 @@
     return "{{correct_answer}}";
   }
 
+
+    
+
   function reset_student_answer(old_value) {
     $("input.reagent").each(function(index, elem) {
       if (elem.defaultValue == old_value) {
@@ -75,26 +88,35 @@
       }
     });
   }
+    // Number of multiple choice options
   var NUM_OPTIONS = {{NUM_OPTIONS}}
+  // Gets the renderSVG function from the API
   function renderSVG(smiles, jqThing){
     $.ajax({url:"/api/renderSVG", data: {"molecule": smiles}, success: function(data, st, x){jqThing.append(data);}})
   }
+// Displays the reactant and product molecules
   var reactant = "{{reactant_smiles}}";
   var product = "{{product_smiles}}";
   renderSVG(reactant, $("#leftMol"));
   renderSVG(product, $("#rightMol"));
 
+    // Displays and formats the answer choices
   function putAnswers() {
-    var answerArea = $(".answerArea");
+    
+    var answerStuff = $("#answerStuff");
     for (var i = 0; i < NUM_OPTIONS; i++){
-      var choice = {{answers|safe}}[i]
-      answerArea.append('<input type="radio" name="reagent" class="reagent" value=\"'+ choice + '\"">' + choice + '<br />');
+        var choice = {{answers|safe}}[i]
+        answerStuff.append('<input type="radio" name="reagent" class="reagent" value=\"'+ choice + '\">' + choice + '<br>');
     }
-    answerArea.append('<button id = "submit" >Submit</button>');
-    answerArea.append('<div id = "answerStatus" ></div>');
+    answerStuff.append('<button id = "submit" >Submit</button>');
+    answerStuff.append('<div id = "answerStatus" ></div>');
+    
+    centerStuff($('#groupThingy'));
+    centerStuff(answerStuff);
   }
   putAnswers();
 
+    // Once the user submits their question, it checks whether it matches the database entry for the correct answer.
   $("#submit").click(function() {
     var correctAnswer = "{{correct_answer}}";
     if ($("input.reagent:checked").val() == correctAnswer){

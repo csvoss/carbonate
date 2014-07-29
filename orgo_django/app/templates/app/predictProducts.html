@@ -1,12 +1,8 @@
 <html>
 <head>
+  <title>Predict the Products</title>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 <meta charset="UTF-8">
-<!--
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-  <script src="singleStep.js"></script>
-  <link rel="stylesheet" type="text/css" href="singleStep.css">
--->
 
 </head>
 <body>
@@ -24,9 +20,6 @@
         .answerArea {
             width: 902px;
             height:900px;
-        }
-        .answerArea div {
-
         }
         #groupThingy div {
             text-align: center;
@@ -59,6 +52,9 @@
             width: 1000px;
 
         }
+        #answerStatus{
+            text-align: center;
+        }
         
 
         
@@ -89,16 +85,14 @@
 </html>
 
 <script>
+    // the number of multiple choice options
     var NUM_OPTIONS = {{NUM_OPTIONS}}
-    
+    // Uses the API renderSVG function
     function renderSVG(smiles, jqThing){
         $.ajax({url:"/api/renderSVG", data: {"molecule": smiles}, success: function(data, st, x){jqThing.append(data);}})
     }
     
-//    function react(reactionID, reactantSmiles){
-//        $.ajax({url:"/api/react", data: {"reaction": reactionID, "reactants": reactantSmiles}, success: function(data, st, x){return data;}})
-//    }
-    
+    // Centers something with respect to its parent element
     function centerStuff(stuff) {
         var parentWidth = stuff.parent().width();
         var stuffWidth = stuff.width();
@@ -130,21 +124,15 @@
 
     renderSVG(reactant, $("#leftMol"));
     $("#rightMol").append('<div id = "reagentsApplied">{{reagents}}</div>');
-//    
-////    function randomGen(least, greatest){
-////        return Math.floor((Math.random() * (greatest-least+1)) + least);
-////    }
-   
+    
+// Displays and formats the answer choices
     for (var i = 0; i < NUM_OPTIONS; i++){
         var choice = {{answers|safe}}[i];
         var answerOption = '<div class = answerOption id = opt' + i + '></div>';
         $("#answers").append(answerOption);
         answerOption = $("#opt" + i);
         answerOption.append('<input type="radio" class="reagent" name="reagent" value='+ choice + '>');
-        renderSVG(choice, answerOption);
-    
-        
-                          
+        renderSVG(choice, answerOption);                   
     }   
     $(".answerArea").append('<button id = "submit">Submit</button>');
     $(".answerArea").append('<div id = "answerStatus" ></div>');
@@ -152,7 +140,7 @@
     centerStuff($('#groupThingy'));
     centerStuff($('#submit'));
     centerStuff($('#answerStatus'));
-    
+    // Once the user submits their question, it checks whether it matches the database entry for the correct answer.
     $("#submit").click(function() {
         var correctAnswer = "{{correct_answer}}";
         if ($("input.reagent:checked").val() == correctAnswer){

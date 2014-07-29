@@ -1,7 +1,6 @@
 # -*- coding: iso-8859-1 -*-
 # $Id: StringListField.py 344 2009-05-06 06:57:27Z tguettler $
 # $HeadURL: svn+ssh://svnserver/svn/djangotools/trunk/dbfields/StringListField.py $
-
 # http://www.djangosnippets.org/snippets/1491/
 
 """
@@ -13,7 +12,7 @@ from django.db import models
 from django import forms
 
 # Currently does NOT work and is not being used. Fix at some point?
-#Alternatively use a ReagentName model to account for multiple names
+# Alternatively use a ReagentName model to account for multiple names
 
 class StringListField(models.Field):
     """

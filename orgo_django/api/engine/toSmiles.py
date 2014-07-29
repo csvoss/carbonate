@@ -73,7 +73,6 @@ def smilesify(molecule):
     #Create the dictionary nonHNeighbors for each atom.
     for atom in molecule.atoms:
         atom.nonHNeighbors = dict((a, b) for (a, b)in atom.neighbors.items() if a.element.lower() != "h")
-    
 
     #Traverse the molecule once, to hunt down and flag rings.
     #Each iteration: (...while we aren't back to the home atom, or if we are,
@@ -130,9 +129,7 @@ def smilesify(molecule):
                 print "Regressing to "+str(cur_atom.parentAtom)+" from "+str(cur_atom)
             cur_atom = cur_atom.parentAtom
             
-            
     #Traverse twice to generate the SMILES.
-            
         
     if debugSmiles:
         for atom in molecule.atoms:
