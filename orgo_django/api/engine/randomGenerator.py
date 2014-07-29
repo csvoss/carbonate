@@ -58,7 +58,9 @@ def randomStart(endProb=0.3, maxBranchLength=15,
     return mol, frontAtom, None
 
 def randC(ClProb, BrProb, OHProb, BranchProb):
-    #Makes a random carbon atom with some substituents
+    '''
+    Makes a random carbon atom with some substituents
+    '''
     c = Atom("C")
     mol = Molecule(c)
     #Add up to 2 substituents
@@ -80,6 +82,9 @@ def randC(ClProb, BrProb, OHProb, BranchProb):
     return mol, c, c
 
 def randRing(noCs, BrProb, ClProb, OHProb):
+    '''
+    Makes a random ring
+    '''
     initAtom = Atom("C")
     mol = Molecule(initAtom)
     oldAtom = initAtom
@@ -116,7 +121,9 @@ def randRing(noCs, BrProb, ClProb, OHProb):
     return mol, initAtom, outAtom
 
 def fixStereo(mol, thisAtom, lastAtom):
-    #Look to see if the *last* piece we added requires stereochem
+    '''
+    Look to see if the *last* piece we added requires stereochem
+    '''
     otherC = lastAtom.findAlkeneBond()
     if hasattr(lastAtom, "makeCTFlag"):
         del(lastAtom.makeCTFlag)
@@ -150,7 +157,9 @@ def fixStereo(mol, thisAtom, lastAtom):
             
 
 def probablyChiral(atom):
-    #A rather bootleg heruistic for determining whether an atom
+    '''
+    A rather bootleg heruistic for determining whether an atom
+    '''
     #may need a chiral center.
     if len(atom.neighbors) <= 2:
         return False

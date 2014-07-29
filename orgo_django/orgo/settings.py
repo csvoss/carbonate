@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
 
@@ -60,7 +59,6 @@ ROOT_URLCONF = 'orgo.urls'
 
 WSGI_APPLICATION = 'orgo.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
 
@@ -83,7 +81,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
@@ -124,7 +121,6 @@ MIDDLEWARE_CLASSES = (
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
-
 
 AUTH_PROFILE_MODULE = "models.UserProfile"
 

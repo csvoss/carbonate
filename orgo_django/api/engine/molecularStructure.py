@@ -380,9 +380,6 @@ class Atom:
                 return neighbor
         return None
         
-
-
-
 ## Example usage
 """
 c40 = Atom("C")
