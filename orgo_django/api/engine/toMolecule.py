@@ -6,7 +6,7 @@ http://en.wikipedia.org/wiki/SMILES
 
 This code is not yet complete.
 
-Only ``moleculify`` is meant to be public-facing. The other methods in this file are private.
+Only ``moleculify'' is meant to be public-facing. The other methods in this file are private.
 
 This would allow us to take in SMILES strings as inputs, from students or professors, to specify their own molecules to use in problems. Hooray!
 
@@ -25,11 +25,13 @@ import unittest
 from random import random, randrange
 
 
+debug = True
+
 ##### HELPER FUNCTIONS #####
 
 def plus_it(name, classname):
     """
-    Create some productions representing <name>*.
+    Create some productions representing <name>+.
     The productions output a list of <classname> objects.
     name :: str. example: "ringbond"
     classname :: type. example: Ringbond
@@ -66,6 +68,10 @@ def bond_at(bond, m1, a1, a2, m2):
         ## then postprocessing molecules to convert them into cis/trans centers
 
 def debug_decorator(f):
+    """
+    Apply this decorator to a function to make that function print at you
+    whenever it is called.
+    """
     def new_f(*args, **kwargs):
         print "----- Calling %s with %s and %s" % (f, args, kwargs)
         f(*args, **kwargs)
@@ -295,7 +301,7 @@ def branched_to_branched(p):
     " :: Atom, [Ringbond], [Branch]"
     atom, ringbonds, branches = p[0]
     return atom, ringbonds, branches+[p[1]]
-# @pg.production("ringed_atom : ringed_atom ringbond")
+# @pg.production("ringed_atom : ringed_atom ringbond")  ## TODO
 # def ringed_to_ringed(p):
 #     " :: Atom, [Ringbond], [Branch]"
 #     atom, ringbonds, branches = p[0]
@@ -497,18 +503,19 @@ def example_smiles():
 
 
 
-
-
 ##### UNIT TESTS #####
 
-def test_it(smiles):
-    return [to_canonical(smiles)], smilesify(moleculify(smiles))
+def two_smiles(smiles):
+    ret = [to_canonical(smiles)], smilesify(moleculify(smiles))
+    if debug:
+        print ret
+    return ret
 
 class TestBasic(unittest.TestCase):
     def test_carbons(self):
         for num in range(1, 21):
-            mol = "C" * num
-            self.assertEqual(*test_it(mol))
+            smi = "C" * num
+            self.assertEqual(*two_smiles(smi))
 
 class TestBranches(unittest.TestCase):
     def test_branches(self):
@@ -528,13 +535,22 @@ class TestBranches(unittest.TestCase):
 
         for num in range(1,20):
             try:
-                mol = random_branching_carbons()
+                smi = random_branching_carbons()
             except RuntimeError:
                 print "Warning: adjust termination_probability"
-                mol = "CC(CC(CCC))(CC)CC"
-            # print mol
-            self.assertEqual(*test_it(mol))
+                smi = "CC(CC(CCC))(CC)CC"
+            # print smi ##TODO remove
+            self.assertEqual(*two_smiles(smi))
+
+class TestBonds(unittest.TestCase):
+    def test_bonds(self):
+        smi = "CCC=CCC"
+        self.assertEqual(*two_smiles(smi))
+
 
 class TestRings(unittest.TestCase):
     def test_rings(self):
-        pass
+        smi = "C1CCCCC1"
+        #self.assertEqual(*two_smiles(smi))
+
+
