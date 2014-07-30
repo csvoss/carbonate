@@ -29,6 +29,8 @@ debug = True
 
 ##### HELPER FUNCTIONS #####
 
+BASIC_BONDS = {'-':1, '=':2, '#':3, '$':4}
+
 def plus_it(name, classname):
     """
     Create some productions representing <name>+.
@@ -51,7 +53,10 @@ def plus_it(name, classname):
     return plus_empty, plus_full
 
 def bond_at(bond, m1, a1, a2, m2):
-    BASIC_BONDS = {'-':1, '=':2, '#':3, '$':4}
+    """
+    Create a bond between molecules m1 and m2, at atoms a1 and a2, using bond.
+    THIS METHOD IS INCOMPLETE. #TODO
+    """
     if bond == '.':
         raise StandardError("bond_at called with '.' as bond")
     elif bond == 'default':
@@ -79,25 +84,33 @@ def debug_decorator(f):
 
 
 def assert_isinstance(i, t):
+    """
+    Raise an error if type(i) is not t.
+    """
     assert isinstance(i, t), "In parser: Object %s is of type %s; should be %s" % (repr(i), repr(type(i)), repr(t))
 
 ##### LEXER #####
+
+## Create a Lexer, which splits up a string into tokens.
+## Tokens may be, for example, SYMBOLs or LETTERs or TERMINATORs or DIGITs.
+## Whitespace will be ignored.
 
 lg = LexerGenerator()
 lg.ignore(r"\s+")
 #lg.add('SYMBOL', r'[@#$%\*\(\)\[\]=\+\-:/\\\.]') ## SPLIT OUT this one
 #lg.add('LETTER', r'[A-IK-PRSTXYZa-ik-pr-vy]') ## SPLIT OUT this one
-SYMBOLS_DICT = {'@':'@','#':'#','$':'$','%':'%','*':'\*','(':'\(',')':'\)','[':'\[',']':'\]','=':'=','+':'\+','-':'\-','colon':':','/':'/','\\':r'\\','.':'\.',}
+SYMBOLS_DICT = {'@':'@','%':'%','*':'\*','(':'\(',')':'\)','[':'\[',']':'\]','+':'\+','.':'\.'}
 SYMBOLS = SYMBOLS_DICT.keys()
-LETTERS = ["C"]
+LETTERS = ["C"] ## TODO this is for debugging
 #LETTERS = [c for c in "ABCDEFGHIKLMNOPRSTXYZabcdefghiklmnoprstuvy"] # omissions intentional
 for sym in SYMBOLS:
     lg.add(sym, SYMBOLS_DICT[sym])
 for sym in LETTERS:
     lg.add(sym, sym)
 
-lg.add('DIGIT', r'[0-9]') ## KEEP this one
-lg.add('TERMINATOR', r'[ \t\r\n]*') ## KEEP this one
+lg.add('DIGIT', r'[0-9]')
+lg.add('TERMINATOR', r'[ \t\r\n]')
+lg.add('BOND', r'[\-=#\$:/\\]')
 
 
 
@@ -105,7 +118,12 @@ lg.add('TERMINATOR', r'[ \t\r\n]*') ## KEEP this one
 ##### PARSER #####
 # www.opensmiles.org/opensmiles.html
 
-pg = ParserGenerator(SYMBOLS + LETTERS + ['DIGIT', 'TERMINATOR'], cache_id='molparser')
+pg = ParserGenerator(
+    SYMBOLS + LETTERS + ['DIGIT', 'TERMINATOR', 'BOND'],
+    precedence = [
+    ],
+    cache_id='molparser',
+)
 
 # main :: [Molecule].
 @pg.production("main : smiles")
@@ -208,13 +226,18 @@ def chain_dot(p):
 
 # bond ::= '-' | '=' | '#' | '$' | ':' | '/' | '\\'
 # bond :: str
-@pg.production("bond : -")
-@pg.production("bond : =")
-@pg.production("bond : #")
-@pg.production("bond : $")
-@pg.production("bond : colon")
-@pg.production("bond : /")
-@pg.production("bond : \\")
+# @pg.production("bond : -")
+# @pg.production("bond : =")
+# @pg.production("bond : #")
+# @pg.production("bond : $")
+# @pg.production("bond : colon")
+# @pg.production("bond : /")
+# @pg.production("bond : \\")
+# def bond_production(p):
+#     bond = p[0].getstr()
+#     assert_isinstance(bond, basestring)
+#     return bond
+@pg.production("bond : BOND")
 def bond_production(p):
     bond = p[0].getstr()
     assert_isinstance(bond, basestring)
@@ -285,13 +308,13 @@ def branched_to_branched2(p):
     " :: BranchedAtom"
     atom, ringbonds, branches = p[0]
     return add_rings_and_branches(atom, ringbonds, branches)
-# @pg.production("branched_atom : branched_atom2 unparenbranch")  ## TODO
-# def branched_to_branched2_with_unparenbranch(p):
-#     " :: BranchedAtom"
-#     atom, ringbonds, branches = p[0]
-#     unparenbranch = p[1]
-#     branches = branches + [unparenbranch]
-#     return add_rings_and_branches(atom, ringbonds, branches)
+@pg.production("branched_atom : branched_atom2 unparenbranch")  ## TODO I think this rule is unnecessary.
+def branched_to_branched2_with_unparenbranch(p):
+    " :: BranchedAtom"
+    atom, ringbonds, branches = p[0]
+    unparenbranch = p[1]
+    branches = branches + [unparenbranch]
+    return add_rings_and_branches(atom, ringbonds, branches)
 @pg.production("branched_atom2 : ringed_atom")
 def branched_to_ringed(p):
     " :: Atom, [Ringbond], [Branch]"
@@ -301,11 +324,11 @@ def branched_to_branched(p):
     " :: Atom, [Ringbond], [Branch]"
     atom, ringbonds, branches = p[0]
     return atom, ringbonds, branches+[p[1]]
-# @pg.production("ringed_atom : ringed_atom ringbond")  ## TODO
-# def ringed_to_ringed(p):
-#     " :: Atom, [Ringbond], [Branch]"
-#     atom, ringbonds, branches = p[0]
-#     return atom, ringbonds+[p[1]], branches
+@pg.production("ringed_atom : ringed_atom ringbond")
+def ringed_to_ringed(p):
+    " :: Atom, [Ringbond], [Branch]"
+    atom, ringbonds, branches = p[0]
+    return atom, ringbonds+[p[1]], branches
 @pg.production("ringed_atom : atom")
 def ringed_to_atom(p):
     " :: Atom, [Ringbond], [Branch]"
@@ -352,25 +375,33 @@ def branch_dot(p):
 
 # ringbond ::= bond? DIGIT | bond? '%' DIGIT DIGIT
 # ringbond :: Ringbond
+@pg.production("ringbond : ringbond2")  ## TODO aaaughh
+def ringbond_to_ringbond2(p):
+    return p[0]
 @pg.production("ringbond : DIGIT")
 def ringbond_prod_1(p):
     return ringbond_prod_2(['default'] + p)
-@pg.production("ringbond : bond DIGIT")
+@pg.production("ringbond2 : bond DIGIT")
 def ringbond_prod_2(p):
     bond = p[0]
     index = int(p[1].getstr())
     return Ringbond(index, bond)
-@pg.production("ringbond : % DIGIT DIGIT")
+@pg.production("ringbond : percentdigit")
 def ringbond_prod_3(p):
-    return ringbond_prod_4(['default'] + p)
-@pg.production("ringbond : bond % DIGIT DIGIT")
+    return Ringbond(p[0], 'default')
+@pg.production("ringbond2 : bond percentdigit")
 def ringbond_prod_4(p):
     bond = p[0]
-    useless_percent = p[1]
-    index_1 = int(p[2].getstr())
-    index_2 = int(p[3].getstr())
+    return Ringbond(p[1], bond)
+
+# percentdigit : int
+@pg.production("percentdigit : % DIGIT DIGIT")
+def percentdigit(p):
+    useless_percent_sign = p[0]
+    index_1 = int(p[1].getstr())
+    index_2 = int(p[2].getstr())
     index = 10*index_1 + index_2
-    return Ringbond(index, bond)
+    return index
 
 ##### ATOMS #####
 
@@ -416,9 +447,15 @@ def atom_production(p):
 
 
 
+def dictof(thing):
+    try:
+        return str(thing.__dict__)
+    except:
+        return str(thing)
+
 @pg.error
-def error_handler(token):
-    raise ValueError("Ran into a %s (%s) where it wasn't expected. %s" % (repr(token.name), repr(token.value), str(token.source_pos.__dict__)))
+def error_handler(token, expected=[]):
+    raise ValueError("Ran into a %s (%s) where it wasn't expected. %s. Instead expected: %s." % (repr(token.name), repr(token.value), dictof(token.source_pos), repr(expected)))
 
 
 
@@ -507,8 +544,7 @@ def example_smiles():
 
 def two_smiles(smiles):
     ret = [to_canonical(smiles)], smilesify(moleculify(smiles))
-    if debug:
-        print ret
+    # print ret
     return ret
 
 class TestBasic(unittest.TestCase):
@@ -544,13 +580,22 @@ class TestBranches(unittest.TestCase):
 
 class TestBonds(unittest.TestCase):
     def test_bonds(self):
-        smi = "CCC=CCC"
-        self.assertEqual(*two_smiles(smi))
+        smi = "CCC%sCCCC"
+        for bondsym in BASIC_BONDS:
+            self.assertEqual(*two_smiles(smi % bondsym))
 
+    def test_bonds2(self):
+        smi = "C%sC"
+        for bondsym in BASIC_BONDS:
+            self.assertEqual(*two_smiles(smi % bondsym))
 
 class TestRings(unittest.TestCase):
     def test_rings(self):
-        smi = "C1CCCCC1"
-        #self.assertEqual(*two_smiles(smi))
+        smi = "CCCCCC"
+        self.assertEqual(*two_smiles(smi))
 
 
+
+## TODO temporary
+m = moleculify
+s = smilesify
