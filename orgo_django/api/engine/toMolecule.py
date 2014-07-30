@@ -31,26 +31,26 @@ debug = True
 
 BASIC_BONDS = {'-':1, '=':2, '#':3, '$':4}
 
-def plus_it(name, classname):
-    """
-    Create some productions representing <name>+.
-    The productions output a list of <classname> objects.
-    name :: str. example: "ringbond"
-    classname :: type. example: Ringbond
-    plusname = name + "plus"
-    """
-    plusname = name + "plus"
-    @pg.production("%s : %s" % (plusname, name))
-    def plus_empty(p):
-        return []
-    @pg.production("%s : %s %s" % (plusname, plusname, name))
-    def plus_full(p):
-        xplus = p[0]
-        x = p[1]
-        assert_isinstance(xplus, list)
-        assert_isinstance(x, classname)
-        return xplus + [x]
-    return plus_empty, plus_full
+# def plus_it(name, classname):
+#     """
+#     Create some productions representing <name>+.
+#     The productions output a list of <classname> objects.
+#     name :: str. example: "ringbond"
+#     classname :: type. example: Ringbond
+#     plusname = name + "plus"
+#     """
+#     plusname = name + "plus"
+#     @pg.production("%s : %s" % (plusname, name))
+#     def plus_empty(p):
+#         return []
+#     @pg.production("%s : %s %s" % (plusname, plusname, name))
+#     def plus_full(p):
+#         xplus = p[0]
+#         x = p[1]
+#         assert_isinstance(xplus, list)
+#         assert_isinstance(x, classname)
+#         return xplus + [x]
+#     return plus_empty, plus_full
 
 def bond_at(bond, m1, a1, a2, m2):
     """
@@ -97,14 +97,16 @@ def assert_isinstance(i, t):
 
 lg = LexerGenerator()
 lg.ignore(r"\s+")
+
 #lg.add('SYMBOL', r'[@#$%\*\(\)\[\]=\+\-:/\\\.]') ## SPLIT OUT this one
-#lg.add('LETTER', r'[A-IK-PRSTXYZa-ik-pr-vy]') ## SPLIT OUT this one
 SYMBOLS_DICT = {'@':'@','%':'%','*':'\*','(':'\(',')':'\)','[':'\[',']':'\]','+':'\+','.':'\.'}
 SYMBOLS = SYMBOLS_DICT.keys()
-LETTERS = ["C"] ## TODO this is for debugging
-#LETTERS = [c for c in "ABCDEFGHIKLMNOPRSTXYZabcdefghiklmnoprstuvy"] # omissions intentional
 for sym in SYMBOLS:
     lg.add(sym, SYMBOLS_DICT[sym])
+
+#lg.add('LETTER', r'[A-IK-PRSTXYZa-ik-pr-vy]') ## SPLIT OUT this one
+LETTERS = ["C"] ## TODO this is for debugging
+#LETTERS = [c for c in "ABCDEFGHIKLMNOPRSTXYZabcdefghiklmnoprstuvy"] # omissions intentional
 for sym in LETTERS:
     lg.add(sym, sym)
 
@@ -188,40 +190,67 @@ def chain_production(p):
     assert_isinstance(m, Molecule)
     assert_isinstance(a, Atom)
     return Chain(m, a, a)
-@pg.production("chain : chain branched_atom")
-def chain_chain(p):
-    return chain_bond([p[0], 'default', p[1]])
-@pg.production("chain : chain bond branched_atom")
-def chain_bond(p):
-    bond = p[1]
-    assert_isinstance(bond, basestring)
+@pg.production("chain : chain unparenbranch")
+def chain_unparenbranch_testing_temporary(p): #TODO: Does it work?
     chain = p[0]
+    branch = p[1]
+    assert_isinstance(chain, Chain)
+    assert_isinstance(branch, Branch)
+    ## Now, ligate branch onto chain at the last atom of chain
+    bond_to_use = branch.bond_or_dot
+    is_dot = (bond_to_use == '.')
     m1, a1 = chain.molecule, chain.last_atom
-    m2, a2 = p[2].as_tuple()
+    m2, a2 = branch.chain.molecule, branch.chain.first_atom
     assert_isinstance(m1, Molecule)
     assert_isinstance(a1, Atom)
     assert_isinstance(m2, Molecule)
     assert_isinstance(a2, Atom)
-    bond_at(bond, m1, a1, a2, m2)
-    chain.last_atom = a2
-    chain.append_dotteds(p[2].dotted_molecules)
-    chain.append_rings(p[2].ring_data_list)
-    return chain
-@pg.production("chain : chain dot branched_atom")
-def chain_dot(p):
-    chain = p[0]
-    m1, a1 = chain.molecule, chain.last_atom
-    dot = p[1]
-    m2, a2 = p[2].as_tuple()
-    assert dot == '.'
-    assert_isinstance(m1, Molecule)
-    assert_isinstance(a1, Atom)
-    assert_isinstance(m2, Molecule)
-    assert_isinstance(a2, Atom)
-    chain.append_dotteds([m2])
-    chain.append_dotteds(p[2].dotted_molecules)
-    chain.append_rings(p[2].ring_data_list) ## Atom, int, str -> int, char
-    return chain
+    if is_dot:
+        chain.append_dotteds([m2])
+        chain.append_dotteds(branch.chain.dotted_molecules)
+        chain.append_rings(branch.chain.ring_data_list) ## Atom, int, str -> int, char
+        return chain
+    else:
+        bond_at(bond_to_use, m1, a1, a2, m2)
+        chain.last_atom = branch.chain.last_atom
+        chain.append_dotteds(branch.chain.dotted_molecules)
+        chain.append_rings(branch.chain.ring_data_list)
+        return chain
+
+# @pg.production("chain : chain branched_atom")
+# def chain_chain(p):
+#     return chain_bond([p[0], 'default', p[1]])
+# @pg.production("chain : chain bond branched_atom")
+# def chain_bond(p):
+#     bond = p[1]
+#     assert_isinstance(bond, basestring)
+#     chain = p[0]
+#     m1, a1 = chain.molecule, chain.last_atom
+#     m2, a2 = p[2].as_tuple()
+#     assert_isinstance(m1, Molecule)
+#     assert_isinstance(a1, Atom)
+#     assert_isinstance(m2, Molecule)
+#     assert_isinstance(a2, Atom)
+#     bond_at(bond, m1, a1, a2, m2)
+#     chain.last_atom = a2
+#     chain.append_dotteds(p[2].dotted_molecules)
+#     chain.append_rings(p[2].ring_data_list)
+#     return chain
+# @pg.production("chain : chain dot branched_atom")
+# def chain_dot(p):
+#     chain = p[0]
+#     m1, a1 = chain.molecule, chain.last_atom
+#     dot = p[1]
+#     m2, a2 = p[2].as_tuple()
+#     assert dot == '.'
+#     assert_isinstance(m1, Molecule)
+#     assert_isinstance(a1, Atom)
+#     assert_isinstance(m2, Molecule)
+#     assert_isinstance(a2, Atom)
+#     chain.append_dotteds([m2])
+#     chain.append_dotteds(p[2].dotted_molecules)
+#     chain.append_rings(p[2].ring_data_list) ## Atom, int, str -> int, char
+#     return chain
 
 
 # bond ::= '-' | '=' | '#' | '$' | ':' | '/' | '\\'
@@ -303,22 +332,30 @@ def add_rings_and_branches(atom, ringbonds, branches):
         output.append_ring(ringbond.index, ringbond.bond)
     return output
 
+# branched_atom :: BranchedAtom.
+# branched_atom2 :: Atom, [Ringbond], [Branch].
+# ringed_atom :: Atom, [Ringbond], [Branch].
 @pg.production("branched_atom : branched_atom2")
 def branched_to_branched2(p):
     " :: BranchedAtom"
     atom, ringbonds, branches = p[0]
     return add_rings_and_branches(atom, ringbonds, branches)
-@pg.production("branched_atom : branched_atom2 unparenbranch")  ## TODO I think this rule is unnecessary.
-def branched_to_branched2_with_unparenbranch(p):
-    " :: BranchedAtom"
-    atom, ringbonds, branches = p[0]
-    unparenbranch = p[1]
-    branches = branches + [unparenbranch]
-    return add_rings_and_branches(atom, ringbonds, branches)
+# @pg.production("branched_atom : branched_atom2 unparenbranch")  ## TODO I think this rule is unnecessary.
+# def branched_to_branched2_with_unparenbranch(p):
+#     " :: BranchedAtom"
+#     atom, ringbonds, branches = p[0]
+#     unparenbranch = p[1]
+#     branches = branches + [unparenbranch]
+#     return add_rings_and_branches(atom, ringbonds, branches)
 @pg.production("branched_atom2 : ringed_atom")
 def branched_to_ringed(p):
     " :: Atom, [Ringbond], [Branch]"
     return p[0]
+# @pg.production("branched_atom2 : atom")
+# def branched_to_plain_atom_maybe_this_will_work(p):
+#     " :: Atom, [Ringbond], [Branch]"
+#     atom = p[0]
+#     return atom, [], []
 @pg.production("branched_atom2 : branched_atom2 branch")
 def branched_to_branched(p):
     " :: Atom, [Ringbond], [Branch]"
@@ -349,9 +386,11 @@ class Branch(BaseBox):
 
 # branch ::= '(' chain ')' | '(' bond chain ')' | '(' dot chain ')'
 # branch :: Branch.
+# unparenbranch :: Branch.
 @pg.production("branch : ( unparenbranch )")
 def unbranch_production(p):
-    assert p[0].getstr()=='(' and p[2].getstr()==')', p
+    assert p[0].getstr()=='(' and p[2].getstr()==')', \
+        "Not enclosed in parentheses: %s" % str(p)
     # print smilesify(p[1].chain.molecule)
     return p[1]
 @pg.production("unparenbranch : chain")
@@ -389,10 +428,10 @@ def ringbond_prod_2(p):
 @pg.production("ringbond : percentdigit")
 def ringbond_prod_3(p):
     return Ringbond(p[0], 'default')
-@pg.production("ringbond2 : bond percentdigit")
-def ringbond_prod_4(p):
-    bond = p[0]
-    return Ringbond(p[1], bond)
+# @pg.production("ringbond2 : bond percentdigit")  ## TODO uncomment
+# def ringbond_prod_4(p):
+#     bond = p[0]
+#     return Ringbond(p[1], bond)
 
 # percentdigit : int
 @pg.production("percentdigit : % DIGIT DIGIT")
