@@ -26,9 +26,17 @@ def test_smiles_to_molecule_and_back(request, smiles):
     molecule = moleculify(smiles)
     smiles2 = '.'.join(smilesify(molecule, canonical=False))
     return HttpResponse('<br />'.join([
-        smiles, svg_render(smiles, hydrogens), 
+        "<h2>Smiles-to-Molecule Testing Viewer</h2>",
+        "<b>Original:</b>",
+        smiles,
+        "<b>Canonical:</b>",
+        to_canonical(smiles),
+        svg_render(smiles, hydrogens), 
+        "<b>After two passes:</b>",
+        smiles2,
+        "<b>Canonical:</b>",
         to_canonical(smiles2),
-        smiles2, svg_render(smiles2, hydrogens),
+        svg_render(smiles2, hydrogens),
     ]))
 
 #/api/findReactions?reagents=[44,2]
@@ -150,7 +158,7 @@ def get_valid_reagent(request):
     name = request.GET.get("name", '')
     name = name.strip('"').strip("'")
     if len(name) == 0:
-        raise error("No name provided")
+        raise StandardError("No name provided")
     reagent = Reagent.objects.get(name__iexact=name)
     return HttpResponse(reagent.name)
 

@@ -711,6 +711,8 @@ example_smiles_easy = [
     r"N#N",              ## dinitrogen
     r"CN=C=O",           ## methyl isocyanate
     r"N1CCN(CC1)C(C(F)=C2)=CC(=C2C4=O)N(C3CC3)C=C4C(=O)O",
+    r"C12C3(CO)C4C1(CC(=O)O)C5(N)C2(CC(=O)C)C3(C=CC=C)C45",
+    r"C(C=C2)C1C(=O)C(C(C)(C)C)C(CN)CC21",
 ]
 example_smiles_atoms = [
     r"[2H]C(Cl)(Cl)Cl",  ## deuterochloroform (hydrogen-2)
