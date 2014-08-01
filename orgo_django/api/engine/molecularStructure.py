@@ -195,7 +195,7 @@ class Atom:
         self.flag :: int.
         self.rflag :: [(int, Atom)].
         self.nRead :: int.
-        self.parentAtom :: 0 or Atom.
+        self.parent_atom :: 0 or Atom.
         self.nonHNeighbors = [Atom].
     """
 
@@ -209,12 +209,13 @@ class Atom:
 
         ## We're ignoring isotopes.
 
-        if startAtom.charge < 0:
-            outp = "["+outp + str(startAtom.charge)+"]"
-        if startAtom.charge > 0:
-            outp = "["+outp + "+"+str(startAtom.charge)+"]"
+        outp = self.element
+        if self.charge < 0:
+            outp = "["+outp + str(self.charge)+"]"
+        if self.charge > 0:
+            outp = "["+outp + "+"+str(self.charge)+"]"
 
-        return self.element
+        return outp
     
     def __init__(self, element, charge=0):
         """
@@ -232,7 +233,7 @@ class Atom:
         #for ring-finding
         self.rflag = [] #empty if not part of a ring bond, nonempty if otherwise
         self.nRead = 0 #neighbors already read
-        self.parentAtom = 0 #atom right before this one
+        self.parent_atom = 0 #atom right before this one
         self.nonHNeighbors = []
 
     def newChiralCenter(self, reference, clockwiseList):

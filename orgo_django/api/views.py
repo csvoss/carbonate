@@ -24,9 +24,12 @@ def test_smiles_to_molecule_and_back(request, smiles):
     smiles = smiles.replace('/#','#')
     smiles = smiles.replace('~','#')
     molecule = moleculify(smiles)
-    smiles2 = '.'.join(smilesify(molecule))
-    return HttpResponse('<br />'.join([ smiles, svg_render(smiles, hydrogens), 
-                                        smiles2, svg_render(smiles2, hydrogens) ] ))
+    smiles2 = '.'.join(smilesify(molecule, canonical=False))
+    return HttpResponse('<br />'.join([
+        smiles, svg_render(smiles, hydrogens), 
+        to_canonical(smiles2),
+        smiles2, svg_render(smiles2, hydrogens),
+    ]))
 
 #/api/findReactions?reagents=[44,2]
 
