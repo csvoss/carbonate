@@ -1,129 +1,124 @@
 <html>
-<head>
-  <title>Single-Step Problem (Easy Mode)</title>
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-  <meta charset="UTF-8">
-</head>
-<body>
-
-  <style type="text/css">
-
-    body {
-      font-family: Arial, Verdana, sans-serif;
-    }
-    .answerArea {
-      border: 0px solid;
-      margin:10px;
-    }
-    #answerStuff{
-      border: 0px solid;
-      width:100%;
-    }
-    .molDisplay {
-      border: 0px solid;
-      padding:20px;
-      margin:20px;
-      border-radius:10px;
-      background-color:#EEEEEE;
-      float: left;
-    }
-    #groupThingy {
-      border: 0px solid;
-      height: 300px;
-    }
-    #groupThingy div {
-      text-align: center;
-    }
-    #intro {
-      text-align: left;
-    }
-  </style>
-
-  <div class = answerArea>
-    <div id = "intro">Start Molecule + ??? -> Products</div>
-    <div id = groupThingy>
-      <div class = "molDisplay" id = "leftMol">
-        <div><b>Start Molecule</b></div>
-      </div>
-      <div class = "molDisplay" id = "rightMol">
-        <div><b>Target Molecule</b></div>
-      </div>
-    </div>
-    <div id = "answerStuff">
-    </div>
-  </div>
-</body>
-    
-</html>
-<!--
-<script type="text/javascript" src="/orgo/static/edx_include/demo_files/jquery.js"></script>
-<script type="text/javascript" src="/orgo/static/edx_include/demo_files/jschannel.js"></script>
-<script type="text/javascript" src="/orgo/static/edx_include/demo_files/jsinput_client.js"></script>
--->
-<script>
-
-// Centers something with respect to its parent element
-  function centerStuff(stuff) {
-    var parentWidth = stuff.parent().width();
-    var stuffWidth = stuff.width();
-    var margin = .5*(parentWidth - stuffWidth);
-    stuff.css("margin-left", margin);
-  }
-  function student_answer_for_edx() {
-    return $("input.reagent:checked").val();
-  }
-  function right_answer_for_edx() {
-    return "{{correct_answer}}";
-  }
-
-
-    
-
-  function reset_student_answer(old_value) {
-    $("input.reagent").each(function(index, elem) {
-      if (elem.defaultValue == old_value) {
-        elem.checked = true;
-      } else {
-        elem.checked = false;
+  <head>
+    <title>Single-Step Problem (Easy Mode)</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <meta charset="UTF-8">
+  </head>
+  <body>
+    <style type="text/css">
+      body {
+        font-family: Arial, Verdana, sans-serif;
       }
-    });
-  }
+      .answerArea {
+        border: 0px solid;
+        margin:10px;
+      }
+      #answerStuff{
+        border: 0px solid;
+        width:100%;
+      }
+      .molDisplay {
+        border: 0px solid;
+        padding:20px;
+        margin:20px;
+        border-radius:10px;
+        background-color:#EEEEEE;
+        float: left;
+      }
+      #groupThingy {
+        border: 0px solid;
+        height: 300px;
+      }
+      #groupThingy div {
+        text-align: center;
+      }
+      #intro {
+        text-align: left;
+      }
+    </style>
+    <div class = answerArea>
+      <div id = "intro">Start Molecule + ??? -> Products</div>
+      <div id = groupThingy>
+        <div class = "molDisplay" id = "leftMol">
+          <div><b>Start Molecule</b></div>
+        </div>
+        <div class = "molDisplay" id = "rightMol">
+          <div><b>Target Molecule</b></div>
+        </div>
+      </div>
+      <div id = "answerStuff">
+      </div>
+    </div>
+  </body>
+
+  <!--
+  <script type="text/javascript" src="/orgo/static/edx_include/demo_files/jquery.js"></script>
+  <script type="text/javascript" src="/orgo/static/edx_include/demo_files/jschannel.js"></script>
+  <script type="text/javascript" src="/orgo/static/edx_include/demo_files/jsinput_client.js"></script>
+  -->
+  <script>
+
+    // Centers something with respect to its parent element
+    function centerStuff(stuff) {
+      var parentWidth = stuff.parent().width();
+      var stuffWidth = stuff.width();
+      var margin = .5*(parentWidth - stuffWidth);
+      stuff.css("margin-left", margin);
+    }
+    function student_answer_for_edx() {
+      return $("input.reagent:checked").val();
+    }
+    function right_answer_for_edx() {
+      return "{{correct_answer}}";
+    }
+
+    function reset_student_answer(old_value) {
+      $("input.reagent").each(function(index, elem) {
+        if (elem.defaultValue == old_value) {
+          elem.checked = true;
+        } else {
+          elem.checked = false;
+        }
+      });
+    }
     // Number of multiple choice options
-  var NUM_OPTIONS = {{NUM_OPTIONS}}
-  // Gets the renderSVG function from the API
-  function renderSVG(smiles, jqThing){
-    $.ajax({url:"/api/renderSVG", data: {"molecule": smiles}, success: function(data, st, x){jqThing.append(data);}})
-  }
-// Displays the reactant and product molecules
-  var reactant = "{{reactant_smiles}}";
-  var product = "{{product_smiles}}";
-  renderSVG(reactant, $("#leftMol"));
-  renderSVG(product, $("#rightMol"));
+    var NUM_OPTIONS = {{NUM_OPTIONS}}
+    // Gets the renderSVG function from the API
+    function renderSVG(smiles, jqThing){
+      $.ajax({url:"/api/renderSVG", data: {"molecule": smiles}, success: function(data, st, x){jqThing.append(data);}})
+    }
+    // Displays the reactant and product molecules
+    var reactant = "{{reactant_smiles}}";
+    var product = "{{product_smiles}}";
+    renderSVG(reactant, $("#leftMol"));
+    renderSVG(product, $("#rightMol"));
 
     // Displays and formats the answer choices
-  function putAnswers() {
-    
-    var answerStuff = $("#answerStuff");
-    for (var i = 0; i < NUM_OPTIONS; i++){
+    function putAnswers() {
+
+      var answerStuff = $("#answerStuff");
+      for (var i = 0; i < NUM_OPTIONS; i++){
         var choice = {{answers|safe}}[i]
         answerStuff.append('<input type="radio" name="reagent" class="reagent" value=\"'+ choice + '\">' + choice + '<br>');
+      }
+      answerStuff.append('<button id = "submit" >Submit</button>');
+      answerStuff.append('<div id = "answerStatus" ></div>');
+
+      centerStuff($('#groupThingy'));
+      centerStuff(answerStuff);
     }
-    answerStuff.append('<button id = "submit" >Submit</button>');
-    answerStuff.append('<div id = "answerStatus" ></div>');
-    
-    centerStuff($('#groupThingy'));
-    centerStuff(answerStuff);
-  }
-  putAnswers();
+    putAnswers();
 
     // Once the user submits their question, it checks whether it matches the database entry for the correct answer.
-  $("#submit").click(function() {
-    var correctAnswer = "{{correct_answer}}";
-    if ($("input.reagent:checked").val() == correctAnswer){
-      $("#answerStatus").text("right");
-    }
-    else {
-      $("#answerStatus").text("wrong");
-    }
-  });
-</script>
+    $("#submit").click(function() {
+      var correctAnswer = "{{correct_answer}}";
+      if ($("input.reagent:checked").val() == correctAnswer){
+        $("#answerStatus").text("right");
+      }
+      else {
+        $("#answerStatus").text("wrong");
+      }
+    });
+  </script>
+
+</html>
