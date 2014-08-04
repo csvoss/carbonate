@@ -19,6 +19,7 @@ Refer to:
     http://www.opensmiles.org/opensmiles.html
 """
 from random import random, randrange
+import itertools
 import re
 import unittest
 
@@ -28,39 +29,47 @@ from rply.token import BaseBox
 from molecularStructure import Molecule, Atom
 from toSmiles import smilesify, to_canonical
 
-
-
-## TODO Remove old, commented-out code
-## TODO Refactor hastily-renamed productions, etc.
-
 DEBUG = True
 
+############################
+##### PUBLIC FUNCTIONS #####
+############################
+
+def moleculify(smiles):
+    """
+    smiles :: str or [str]. SMILES string(s) e.g. "CC(CN)CCC(O)O"
+    return :: [Molecule].
+
+    Raises a StandardError if the SMILES string contains
+    as-yet-unsupported features (like delocalization).
+    """
+    #return example_molecule()
+    if isinstance(smiles, list):
+        return [moleculify(i) for i in smiles]
+    else:
+        try:
+            smiles = preprocess(smiles)
+            lexed = LEXER.lex(smiles)
+            return PARSER.parse(lexed)
+        except ParsingError as e:
+            raise StandardError(e.getsourcepos())
+
+
+############################
 ##### HELPER FUNCTIONS #####
+############################
 
 BASIC_BONDS = {'-':1, '=':2, '#':3, '$':4}
 
 DEFAULT_BOND = 'default'
 
-# def plus_it(name, classname):
-#     """
-#     Create some productions representing <name>+.
-#     The productions output a list of <classname> objects.
-#     name :: str. example: "ringbond"
-#     classname :: type. example: Ringbond
-#     plusname = name + "plus"
-#     """
-#     plusname = name + "plus"
-#     @PG.production("%s : %s" % (plusname, name))
-#     def plus_empty(p):
-#         return []
-#     @PG.production("%s : %s %s" % (plusname, plusname, name))
-#     def plus_full(p):
-#         xplus = p[0]
-#         x = p[1]
-#         assert_isinstance(xplus, list)
-#         assert_isinstance(x, classname)
-#         return xplus + [x]
-#     return plus_empty, plus_full
+def assert_isinstance(instance, some_type):
+    """
+    Raise an error if type(instance) is not some_type.
+    """
+    assert isinstance(instance, some_type), \
+        "In parser: Object %s is of type %s; should be %s" % \
+        (repr(instance), repr(type(instance)), repr(some_type))
 
 def bond_at(bond, mol1, atom1, atom2, mol2):
     """
@@ -69,7 +78,9 @@ def bond_at(bond, mol1, atom1, atom2, mol2):
 
     REQUIRES that atom1 precede atom2 in the SMILES string.
 
-    THIS METHOD IS INCOMPLETE. #TODO
+    mol1, mol2 :: Molecule.
+    atom1, atom2 :: Atom.
+    return :: None. Works via side effects.
     """
     if bond == '.':
         raise StandardError("bond_at called with '.' as bond")
@@ -85,6 +96,13 @@ def bond_at(bond, mol1, atom1, atom2, mol2):
         ## Idea: Implement / and \\ by adding them as relevant flags,
         ## then postprocessing molecules to add cis/trans centers
 
+def dictof(thing):
+    "Printable `thing.__dict__` if possible, else just `thing`"
+    try:
+        return str(thing.__dict__)
+    except AttributeError:
+        return str(thing)
+
 def debug_decorator(func):
     """
     Apply this decorator to a function to make that function print at you
@@ -96,16 +114,17 @@ def debug_decorator(func):
         func(*args, **kwargs)
     return new_f
 
-
-def assert_isinstance(instance, some_type):
+def int_from_digit(digit):
     """
-    Raise an error if type(instance) is not some_type.
+    digit :: Token.
+    return :: int.
     """
-    assert isinstance(instance, some_type), \
-        "In parser: Object %s is of type %s; should be %s" % \
-        (repr(instance), repr(type(instance)), repr(some_type))
+    return int(digit.getstr())
 
+
+#################
 ##### LEXER #####
+#################
 
 ## Create a Lexer, which splits up a string into tokens.
 ## Tokens may be, for example, SYMBOLs or LETTERs or TERMINATORs or DIGITs
@@ -114,7 +133,6 @@ def assert_isinstance(instance, some_type):
 LG = LexerGenerator()
 LG.ignore(r"\s+")
 
-#LG.add('SYMBOL', r'[@#$%\*\(\)\[\]=\+\-:/\\\.]') ## SPLIT OUT this one
 SYMBOLS_DICT = {
     '@': '@', '%': '%', '*': r'\*', '(': r'\(', ')': r'\)',
     '[': r'\[', ']': r'\]', '+': r'\+', '.': r'\.'
@@ -123,10 +141,7 @@ SYMBOLS = SYMBOLS_DICT.keys()
 for sym in SYMBOLS:
     LG.add(sym, SYMBOLS_DICT[sym])
 
-#LG.add('LETTER', r'[A-IK-PRSTXYZa-ik-pr-vy]') ## SPLIT OUT this one
-LETTERS = ["C", "N", "O", "F"] ## TODO this is for debugging
-#LETTERS = [c for c in "ABCDEFGHIKLMNOPRSTXYZabcdefghiklmnoprstuvy"]
-# (omissions intentional)
+LETTERS = [letter for letter in "ABCDEFGHIKLMNOPRSTUVWXYZabcdefghiklmnoprstuvy"]
 for sym in LETTERS:
     LG.add(sym, sym)
 
@@ -170,7 +185,7 @@ FOR_PREPROCESSOR = {
     r'/': '~/~',
     r'\\': '~\\~',
 }
-ATOM_MATCHER = r'ABCDEFGHIKLMNOPRSTXYZabcdefghiklmnoprstuvy'
+ATOM_MATCHER = r'\[ABCDEFGHIKLMNOPRSTUVWXYZabcdefghiklmnoprstuvy'
 
 def preprocess(smiles):
     """
@@ -191,8 +206,9 @@ def preprocess(smiles):
     return output
 
 
+##################
 ##### PARSER #####
-# www.opensmiles.org/opensmiles.html
+##################
 
 PG = ParserGenerator(
     SYMBOLS+LETTERS+['DIGIT', 'TERMINATOR']+BOND_SYMBOLS+BOND_SYMBOLS_TILDE,
@@ -214,10 +230,12 @@ def smiles_production(p):
     "Return a list of molecules."
     chain = p[0]
     assert_isinstance(chain, Chain)
-    ## TODO: Post-processing of ringbond list at chain.ring_data_list
+
+    ## Postprocessing!
 
     ## :: [(Atom, int ring_index, str bond_char)]. Order matters!
     ring_data = chain.ring_data_list
+
     molecule = chain.molecule
     pending_rings = {}  ## { int ring_index : (atom, str bond_char)}
     for atom, ring_index, bond in ring_data:
@@ -226,7 +244,7 @@ def smiles_production(p):
             del pending_rings[ring_index]
             if not (other_bond == DEFAULT_BOND or bond == DEFAULT_BOND):
                 assert other_bond == bond, \
-                "Unequal ringbonds used: %s, %s" % (other_bond, bond)
+                "Unequal ringlinks used: %s, %s" % (other_bond, bond)
             bond_to_use = other_bond if bond == DEFAULT_BOND else bond
             bond_at(bond_to_use, molecule, other_atom, atom, molecule)
         else:
@@ -236,8 +254,15 @@ def smiles_production(p):
         "Invalid! Unfinished ring bonds! %s" % repr(pending_rings.keys())
 
     ## TODO: Post-processing of aromaticity
-    # print smilesify(chain.dotted_molecules)
+
+    ## TODO: Post-processing of chirality
+
+    chain.molecule.addHydrogens()
+    for mol in chain.dotted_molecules:
+        mol.addHydrogens()
+
     return [chain.molecule] + chain.dotted_molecules
+
 @PG.production("smiles : terminator")
 def smiles_empty(p):
     "Return an empty list of molecules."
@@ -294,7 +319,7 @@ def chain_production(p):
     chain.append_rings(p[0].ring_data_list)
     return chain
 @PG.production("chain : chain unparenbranch")
-def chain_unparenbranch_testing_temporary(p): #TODO: Does it work?
+def chain_unparenbranch_production(p):
     "Attach a chain to the following branch (the rest of the chain)."
     chain = p[0]
     branch = p[1]
@@ -322,43 +347,6 @@ def chain_unparenbranch_testing_temporary(p): #TODO: Does it work?
         chain.append_rings(branch.chain.ring_data_list)
         return chain
 
-# @PG.production("chain : chain branched_atom")
-# def chain_chain(p):
-#     return chain_bond([p[0], DEFAULT_BOND, p[1]])
-# @PG.production("chain : chain bond branched_atom")
-# def chain_bond(p):
-#     bond = p[1]
-#     assert_isinstance(bond, basestring)
-#     chain = p[0]
-#     mol1, atom1 = chain.molecule, chain.last_atom
-#     mol2, atom2 = p[2].as_tuple()
-#     assert_isinstance(mol1, Molecule)
-#     assert_isinstance(atom1, Atom)
-#     assert_isinstance(mol2, Molecule)
-#     assert_isinstance(atom2, Atom)
-#     bond_at(bond, mol1, atom1, atom2, mol2)
-#     chain.last_atom = atom2
-#     chain.append_dotteds(p[2].dotted_molecules)
-#     chain.append_rings(p[2].ring_data_list)
-#     return chain
-# @PG.production("chain : chain dot branched_atom")
-# def chain_dot(p):
-#     chain = p[0]
-#     mol1, atom1 = chain.molecule, chain.last_atom
-#     dot = p[1]
-#     mol2, atom2 = p[2].as_tuple()
-#     assert dot == '.'
-#     assert_isinstance(mol1, Molecule)
-#     assert_isinstance(atom1, Atom)
-#     assert_isinstance(mol2, Molecule)
-#     assert_isinstance(atom2, Atom)
-#     chain.append_dotteds([mol2])
-#     chain.append_dotteds(p[2].dotted_molecules)
-#     ## Atom, int, str -> int, char
-#     chain.append_rings(p[2].ring_data_list)
-#     return chain
-
-
 # bond ::= '-' | '=' | '#' | '$' | ':' | '/' | '\\'
 # bond :: str
 @PG.production("bond : -")
@@ -385,11 +373,7 @@ def letterbond_production(p):
     bond = p[0].getstr()
     assert_isinstance(bond, basestring)
     return bond.replace("~", "")
-# @PG.production("bond : BOND")
-# def bond_production(p):
-#     bond = p[0].getstr()
-#     assert_isinstance(bond, basestring)
-#     return bond
+
 
 # dot ::= '.'
 # dot :: str
@@ -430,17 +414,17 @@ class BranchedAtom(BaseBox):
         self.ring_data_list += ring_list
 
 
-def add_rings_and_branches(atom, ringbonds, branches):
+def add_rings_and_branches(atom, ringlinks, branches):
     "return :: BranchedAtom"
     assert_isinstance(atom, Atom)
-    assert_isinstance(ringbonds, list)
+    assert_isinstance(ringlinks, list)
     assert_isinstance(branches, list)
     output = BranchedAtom(Molecule(atom), atom)
     for branch in branches:
         output.append_dotteds(branch.chain.dotted_molecules)
         output.append_rings(branch.chain.ring_data_list)
         if branch.bond_or_dot == '.':
-            pass  ## TODO: Is this meant to be blank?
+            output.append_dotteds([branch.chain.molecule])
         else:
             other_molecule = branch.chain.molecule
             other_atom = branch.chain.first_atom
@@ -451,54 +435,41 @@ def add_rings_and_branches(atom, ringbonds, branches):
                 other_atom,
                 other_molecule
             )
-    for ringbond in ringbonds:
-        output.append_ring(ringbond.index, ringbond.bond)
+    for ringlink in ringlinks:
+        output.append_ring(ringlink.index, ringlink.bond)
     return output
 
 # branched_atom :: BranchedAtom.
-# branched_atom2 :: Atom, [Ringbond], [Branch].
-# ringed_atom :: Atom, [Ringbond], [Branch].
-@PG.production("branched_atom : branched_atom2")
+# middle_atom :: Atom, [Ringlink], [Branch].
+# ringed_atom :: Atom, [Ringlink], [Branch].
+@PG.production("branched_atom : middle_atom")
 def branched_to_branched2(p):
     " :: BranchedAtom"
-    atom, ringbonds, branches = p[0]
-    return add_rings_and_branches(atom, ringbonds, branches)
-## TODO I think this rule is unnecessary.
-# @PG.production("branched_atom : branched_atom2 unparenbranch") 
-# def branched_to_branched2_with_unparenbranch(p):
-#     " :: BranchedAtom"
-#     atom, ringbonds, branches = p[0]
-#     unparenbranch = p[1]
-#     branches = branches + [unparenbranch]
-#     return add_rings_and_branches(atom, ringbonds, branches)
-@PG.production("branched_atom2 : ringed_atom")
+    atom, ringlinks, branches = p[0]
+    return add_rings_and_branches(atom, ringlinks, branches)
+@PG.production("middle_atom : ringed_atom")
 def branched_to_ringed(p):
-    " :: Atom, [Ringbond], [Branch]"
+    " :: Atom, [Ringlink], [Branch]"
     return p[0]
-# @PG.production("branched_atom2 : atom")
-# def branched_to_plain_atom_maybe_this_will_work(p):
-#     " :: Atom, [Ringbond], [Branch]"
-#     atom = p[0]
-#     return atom, [], []
-@PG.production("branched_atom2 : branched_atom2 branch")
+@PG.production("middle_atom : middle_atom branch")
 def branched_to_branched(p):
-    " :: Atom, [Ringbond], [Branch]"
-    atom, ringbonds, branches = p[0]
-    return atom, ringbonds, branches+[p[1]]
-@PG.production("ringed_atom : ringed_atom ringbond")
+    " :: Atom, [Ringlink], [Branch]"
+    atom, ringlinks, branches = p[0]
+    return atom, ringlinks, branches+[p[1]]
+@PG.production("ringed_atom : ringed_atom ringlink")
 def ringed_to_ringed(p):
-    " :: Atom, [Ringbond], [Branch]"
-    atom, ringbonds, branches = p[0]
-    return atom, ringbonds+[p[1]], branches
+    " :: Atom, [Ringlink], [Branch]"
+    atom, ringlinks, branches = p[0]
+    return atom, ringlinks+[p[1]], branches
 @PG.production("ringed_atom : atom")
 def ringed_to_atom(p):
-    " :: Atom, [Ringbond], [Branch]"
+    " :: Atom, [Ringlink], [Branch]"
     atom = p[0]
     return atom, [], []
 
 
-class Ringbond(BaseBox):
-    "An AST node to store data for the variable `ringbond`."
+class Ringlink(BaseBox):
+    "An AST node to store data for the variable `ringlink`."
     def __init__(self, index, bond):
         assert_isinstance(index, int)
         assert_isinstance(bond, basestring)
@@ -515,7 +486,7 @@ class Branch(BaseBox):
 # branch :: Branch.
 # unparenbranch :: Branch.
 @PG.production("branch : ( unparenbranch )")
-def unbranch_production(p):
+def branch_production_unparen(p):
     "Extract a branch from within parentheses, and return as-is."
     assert p[0].getstr() == '(' and p[2].getstr() == ')', \
         "Not enclosed in parentheses: %s" % str(p)
@@ -542,30 +513,31 @@ def branch_dot(p):
     assert_isinstance(chain, Chain)
     return Branch(dot, chain)
 
-# ringbond ::= bond? DIGIT | bond? '%' DIGIT DIGIT
-# ringbond :: Ringbond
-@PG.production("ringbond : ringbond2")  ## TODO aaaughh
-def ringbond_to_ringbond2(p):
-    "Allow a ringbond to become a ringbond2, which allows specifying the bond."
+# ringlink ::= bond? DIGIT | bond? '%' DIGIT DIGIT
+# ringlink :: Ringlink
+@PG.production("ringlink : ringlinkbond")
+def ringlink_to_ringlinkbond(p):
+    "Allow a ringlink to become a ringlinkbond, which allows specifying a bond."
     return p[0]
-@PG.production("ringbond : DIGIT")
-def ringbond_prod_1(p):
+@PG.production("ringlink : DIGIT")
+def ringlink_prod_1(p):
     "e.g. CC1CCCCC1"
-    return ringbond_prod_2([DEFAULT_BOND] + p)
-@PG.production("ringbond2 : bond DIGIT")
-def ringbond_prod_2(p):
+    return ringlink_prod_2([DEFAULT_BOND] + p)
+@PG.production("ringlinkbond : bond DIGIT")
+def ringlink_prod_2(p):
     "e.g. CCC=1CCC=1"
     bond = p[0]
     index = int(p[1].getstr())
-    return Ringbond(index, bond)
-@PG.production("ringbond : percentdigit")
-def ringbond_prod_3(p):
+    return Ringlink(index, bond)
+@PG.production("ringlink : percentdigit")
+def ringlink_prod_3(p):
     "e.g. C%11CCCC%10CC"
-    return Ringbond(p[0], DEFAULT_BOND)
-# @PG.production("ringbond2 : bond percentdigit")  ## TODO uncomment
-# def ringbond_prod_4(p):
-#     bond = p[0]
-#     return Ringbond(p[1], bond)
+    return Ringlink(p[0], DEFAULT_BOND)
+@PG.production("ringlinkbond : bond percentdigit")
+def ringlink_prod_4(p):
+    "e.g. C=%10CCC%10"
+    bond = p[0]
+    return Ringlink(p[1], bond)
 
 # percentdigit : int
 @PG.production("percentdigit : % DIGIT DIGIT")
@@ -573,79 +545,227 @@ def percentdigit(p):
     "Convert e.g. '%99' to e.g. int(99)."
     first = p[0]
     assert first.getstr() == '%', "Problem: %s instead of %s?"%(first, '%')
-    index_1 = int(p[1].getstr())
-    index_2 = int(p[2].getstr())
+    index_1 = int_from_digit(p[1])
+    index_2 = int_from_digit(p[2])
     index = 10*index_1 + index_2
     return index
 
 ##### ATOMS #####
 
 # atom ::= bracket_atom | aliphatic_organic | aromatic_organic | '*'
-@PG.production("atom : C")
-@PG.production("atom : N")
-@PG.production("atom : F")
-@PG.production("atom : O") ## TODO: atoms better
+# atom :: Atom.
+@PG.production("atom : bracket_atom")
+@PG.production("atom : aliphatic_organic")
+@PG.production("atom : aromatic_organic")
 def atom_production(p):
-    'Return an Atom object!'
-    ## TODO -- Temporary
-    return Atom(p[0].getstr())
+    "return :: Atom."
+    return p[0]
+@PG.production("atom : *")
+def atom_production_wildcard(p):
+    "return :: Atom. * is the wildcard."
+    return Atom("*")
 
 ##### ORGANIC SUBSET ATOMS #####
 
 # aliphatic_organic ::= 'B'| 'C'| 'N'| 'O'| 'S'| 'P'| 'F'| 'Cl'| 'Br'| 'I'
+# aliphatic_organic :: Atom.
+ALIPHATIC_ORGANIC = ['B', 'C', 'N', 'O', 'S', 'P', 'F', 'Cl', 'Br', 'I']
+def make_aliphatic_organic_production(aliphatic):
+    @PG.production("aliphatic_organic : %s" % (' '.join(aliphatic)))
+    def _(p):
+        "return :: Atom."
+        return Atom(''.join(i.getstr() for i in p))
+for aliphatic in ALIPHATIC_ORGANIC:
+    make_aliphatic_organic_production(aliphatic)
 
 # aromatic_organic ::= 'b' | 'c' | 'n' | 'o' | 's' | 'p'
+# aromatic_organic :: Atom.
+AROMATIC_ORGANIC = ['b', 'c', 'n', 'o', 's', 'p']
+def make_aromatic_organic_production(aromatic):
+    @PG.production("aromatic_organic : %s" % (' '.join(aromatic)))
+    def _(p):
+        "return :: Atom. Also sets is_aromatic to True for future processing."
+        assert_isinstance(p[0].getstr(), basestring)
+        output = Atom(p[0].getstr().upper())
+        output.is_aromatic = True
+        return output
+for aromatic in AROMATIC_ORGANIC:
+    make_aromatic_organic_production(aromatic)
 
 ##### BRACKET ATOMS #####
 
-# bracket_atom ::= '[' isotope? symbol chiral? hcount? charge? class? ']'
+bracket_atom_production_formula = "bracket_atom : [ %s symbol %s %s %s %s ]"
+bracket_atom_parts = ["isotope", "chiral", "hcount", "charge", "class"]
+
+def make_bracket_production(five_bools):
+    formats = [bracket_atom_parts[i] if five_bools[i] else "" for i in range(5)]
+    @PG.production(bracket_atom_production_formula % tuple(formats))
+    def _(p):
+        "Produce a bracket_atom from some maybe-present parameters."
+        six_bools = five_bools[:1] + (True,) + five_bools[1:]
+        k = 1 ## start AFTER the [
+        args = []
+        for j in range(6):
+            if six_bools[j]:
+                args.append(p[k])
+                k += 1
+            else:
+                args.append(None)
+        return bracket_atom_full(*args)
+for five_bools in itertools.product((True, False), repeat=5):
+    make_bracket_production(five_bools)
+
+def bracket_atom_full(isot, symb, chir, hcou, chge, clss):
+    """
+    Produce an Atom from various parameters.
+    isot :: int.
+    symb :: str.
+    chir :: Chirality.
+    hcou :: int.
+    chge :: int.
+    clss :: int.
+    return :: Atom.
+    """
+    output = Atom(symb)
+    output.isotope = isot
+    output.chirality = chir
+    output.hcount = 0 if (hcou is None) else hcou
+    output.charge = 0 if (chge is None) else chge
+    # output.atom_class = clss   ## "Atom class" is throwaway information.
+
+    ## TODO: Check if aromatic. Flag is_aromatic if so.
+    return output
+
 
 # symbol ::= element_symbols | aromatic_symbols | '*'
+# symbol :: str.
+@PG.production("symbol : *")
+def symbol_production_from_wildcard(p):
+    "return :: str. * is the wildcard."
+    return "*"
+@PG.production("symbol : element_symbols")
+@PG.production("symbol : aromatic_symbols")
+def symbol_production_from_element(p):
+    "return :: str."
+    return p[0]
 
 # isotope ::= NUMBER
+# isotope :: int.
+@PG.production("isotope : NUMBER")
+def isotope_production(p):
+    "return :: int."
+    return p[0]
 
-# element_symbols ::= 'H' | 'He' | 'Li' | 'Be' | 'B' | 'C' | 'N' | 'O' |
-# 'F' | 'Ne' | 'Na' | 'Mg' | 'Al' | 'Si' | 'P' | 'S' | 'Cl' | 'Ar' | 'K' 
-#| 'Ca' | 'Sc' | 'Ti' | 'V' | 'Cr' | 'Mn' | 'Fe' | 'Co' | 'Ni' | 'Cu' | 
-#'Zn' | 'Ga' | 'Ge' | 'As' | 'Se' | 'Br' | 'Kr' | 'Rb' | 'Sr' | 'Y' | 
-#'Zr' | 'Nb' | 'Mo' | 'Tc' | 'Ru' | 'Rh' | 'Pd' | 'Ag' | 'Cd' | 'In' | 
-#'Sn' | 'Sb' | 'Te' | 'I' | 'Xe' | 'Cs' | 'Ba' | 'Hf' | 'Ta' | 'W' | 'Re' 
-#| 'Os' | 'Ir' | 'Pt' | 'Au' | 'Hg' | 'Tl' | 'Pb' | 'Bi' | 'Po' | 'At' | 
-#'Rn' | 'Fr' | 'Ra' | 'Rf' | 'Db' | 'Sg' | 'Bh' | 'Hs' | 'Mt' | 'Ds' | 
-#'Rg' | 'Cn' | 'Fl' | 'Lv' | 'La' | 'Ce' | 'Pr' | 'Nd' | 'Pm' | 'Sm' | 
-#'Eu' | 'Gd' | 'Tb' | 'Dy' | 'Ho' | 'Er' | 'Tm' | 'Yb' | 'Lu' | 'Ac' | 
-#'Th' | 'Pa' | 'U' | 'Np' | 'Pu' | 'Am' | 'Cm' | 'Bk' | 'Cf' | 'Es' | 
-#'Fm' | 'Md' | 'No' | 'Lr'
+# NUMBER :: int.
+@PG.production("NUMBER : NUMBER DIGIT")
+def number_recursive_production(p):
+    "return :: int."
+    return p[0] * 10 + int_from_digit(p[1])
+@PG.production("NUMBER : DIGIT")
+def number_base_production(p):
+    "return :: int."
+    num = int_from_digit(p[0])
+    return num
+
+# element_symbols ::= [THE ENTIRE PERIODIC TABLE]
+# element_symbols :: str.
+ELEMENT_SYMBOLS = [
+    'H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', 'Na', 'Mg',
+    'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr', 'Mn',
+    'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Br', 'Kr', 'Rb',
+    'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd', 'In',
+    'Sn', 'Sb', 'Te', 'I', 'Xe', 'Cs', 'Ba', 'Hf', 'Ta', 'W', 'Re', 'Os',
+    'Ir', 'Pt', 'Au', 'Hg', 'Tl', 'Pb', 'Bi', 'Po', 'At', 'Rn', 'Fr', 'Ra',
+    'Rf', 'Db', 'Sg', 'Bh', 'Hs', 'Mt', 'Ds', 'Rg', 'Cn', 'Fl', 'Lv', 'La',
+    'Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er', 'Tm',
+    'Yb', 'Lu', 'Ac', 'Th', 'Pa', 'U', 'Np', 'Pu', 'Am', 'Cm', 'Bk', 'Cf',
+    'Es', 'Fm', 'Md', 'No', 'Lr']
+def make_element_production(element):
+    @PG.production("element_symbols : %s" % (' '.join(element)))
+    def _(p):
+        "return :: str."
+        return ''.join(i.getstr() for i in p)
+for element in ELEMENT_SYMBOLS:
+    make_element_production(element)
 
 # aromatic_symbols ::= 'b' | 'c' | 'n' | 'o' | 'p' | 's' | 'se' | 'as'
+# aromatic_symbols :: str.
+AROMATIC_SYMBOLS = ['b', 'c', 'n', 'o', 'p', 's', 'se', 'as']
+def make_aromatic_production(aromatic):
+    @PG.production("aromatic_symbols : %s" % (' '.join(aromatic)))
+    def _(p):
+        "return :: str."
+        return ''.join(i.getstr() for i in p)
+for aromatic in AROMATIC_SYMBOLS:
+    make_aromatic_production(aromatic)
 
 ##### CHIRALITY #####
 
 # chiral ::= '@' | '@@' | '@TH1' | '@TH2' | '@AL1' | '@AL2' | '@SP1' | 
 #'@SP2' | '@SP3' | '@TB1' | '@TB2' | '@TB3' | ... | '@TB20' | '@OH1' | 
 #'@OH2' | '@OH3' | ... | '@OH30' | '@TB' DIGIT DIGIT | '@OH' DIGIT DIGIT
+# chiral :: Chirality
+## TODO other productions besides @
+@PG.production("chiral : @")
+@PG.production("chiral : @ @")
+def chiral_production(p):
+    "return :: Chirality."
+    return Chirality(''.join([i.getstr() for i in p]))
+
+class Chirality(BaseBox):
+    """
+    Stores chirality information.
+    Currently useless.
+    """
+    def __init__(self, string):
+        self.string = string
 
 ##### HYDROGENS #####
 
 # hcount ::= 'H' | 'H' DIGIT
+# hcount :: int
+@PG.production("hcount : H")
+def hcount_production_single(p):
+    "return :: int"
+    return 1
+@PG.production("hcount : H DIGIT")
+def hcount_production_many(p):
+    "return :: int"
+    return int_from_digit(p[1])
 
 ##### CHARGES #####
 
 # charge ::= '-' | '-' DIGIT? DIGIT | '+' | '+' DIGIT? DIGIT | '--' 
 #deprecated | '++' deprecated
+# charge :: int
+@PG.production("charge : -")
+def charge_production_single_minus(p):
+    return -1
+@PG.production("charge : +")
+def charge_production_single_plus(p):
+    return +1
+@PG.production("charge : - -")
+def charge_production_double_minus(p):
+    return -2
+@PG.production("charge : + +")
+def charge_production_double_plus(p):
+    return +2
+@PG.production("charge : - DIGIT")
+def charge_production_minus_many(p):
+    return -int_from_digit(p[1])
+@PG.production("charge : + DIGIT")
+def charge_production_plus_many(p):
+    return +int_from_digit(p[1])
+
 
 ##### ATOM CLASS #####
 
 # class ::= ':' NUMBER
-
-
-
-def dictof(thing):
-    "Printable `thing.__dict__` if possible, else just `thing`"
-    try:
-        return str(thing.__dict__)
-    except AttributeError:
-        return str(thing)
+# class :: int
+@PG.production("class : colon NUMBER")
+def class_production(p):
+    "return :: int."
+    return p[1]
 
 @PG.error
 def error_handler(token, expected=None):
@@ -655,31 +775,17 @@ def error_handler(token, expected=None):
         repr(token.value), dictof(token.source_pos), repr(expected)))
 
 
-
 LEXER = LG.build()
 PARSER = PG.build()
 
 
 
-def moleculify(smiles):
-    """
-    smiles :: str or [str]. SMILES string(s) e.g. "CC(CN)CCC(O)O"
-    return :: [Molecule].
 
-    Raises a StandardError if the SMILES string contains
-    as-yet-unsupported features (like delocalization).
-    """
-    #return example_molecule()
-    if isinstance(smiles, list):
-        return [moleculify(i) for i in smiles]
-    else:
-        try:
-            smiles = preprocess(smiles)
-            lexed = LEXER.lex(smiles)
-            return PARSER.parse(lexed)
-        except ParsingError as e:
-            raise StandardError(e.getsourcepos())
 
+
+######################
+##### UNIT TESTS #####
+######################
 
 def example_molecule():
     """
@@ -713,10 +819,22 @@ example_smiles_easy = [
     r"N1CCN(CC1)C(C(F)=C2)=CC(=C2C4=O)N(C3CC3)C=C4C(=O)O",
     r"C12C3(CO)C4C1(CC(=O)O)C5(N)C2(CC(=O)C)C3(C=CC=C)C45",
     r"C(C=C2)C1C(=O)C(C(C)(C)C)C(CN)CC21",
+    r"N1CCN(CC1)C(C(F)=C2)=CC(=C2C4=O)N(C3CC3)C=C4(=O)O",
+    r"C(C(C(C(C(C(C(C(C(C(C(C(C(C(C(C(C(C(C(C(C))))))))))))))))))))C",
 ]
 example_smiles_atoms = [
+    r"OC(=O)CC(P)C(SBr)C(CB)C(F)(Cl)C(I)Br",
+    r"CC[*]CCC[*]CC",
     r"[2H]C(Cl)(Cl)Cl",  ## deuterochloroform (hydrogen-2)
     r"[Cu+2].[O-]S(=O)(=O)[O-]" ## copper(ii) sulfate
+    r"C(CC[Se]C)C(CC(O)CC)Br",
+    r"[Rh-](Cl)(Cl)(Cl)(Cl)$[Rh-](Cl)(Cl)(Cl)Cl",
+    r'C(CCC)C([NH7])Br',
+    r'P(=O)([O-])([O-])[O-]',
+    r'C(=O)([O-])[O-]',
+    r'C12346F5O1Cl2Br3I4S65',
+    r'[Cl-].[Na+]',
+    r'C#[C-]',
 ]
 example_smiles_cistrans = [
     r"C(/F)(\Cl)=C(/Br)\I",  ## cis/trans test
@@ -745,32 +863,60 @@ example_smiles_hard = [
         "@@]%13(C)CO", ## Cephalostatin-1 without aromaticity. Note 
                        ## the % before ring closure labels above 9.
 ]
+example_smiles_hard_no_chirality = [
+    r"CCC[CH](O)CCC=CC=CC#CC#CC=CCO", ## enanthotoxin
+    r"COC(=O)C(C)=CC1C(C)(C)[CH]1C(=O)O[CH]2C(C)=C(C(=O)C2)CC=CC=C",
+    r"CC(=O)OCCC(C)=CC[CH](C(C)=C)CCC=C", ## some pheromone 
+    r"C[C](C)(O1)C[CH](O)[C]1(O2)[CH](C)[CH]3CC=C4[C]3(C"+\
+        "2)C(=O)C[CH]5[CH]4CC[CH](C6)[C]5(C)CC(N7)C6NC(C[C]"+\
+        "89(C))C7C[CH]8CC[CH]%10[CH]9C[CH](O)[C]%11(C)C%"+\
+        "10=C[CH](O%12)[C]%11(O)[CH](C)[C]%12(O%13)[CH](O)C[C"+\
+        "]%13(C)CO", ## Cephalostatin-1 without aromaticity. Note 
+                       ## the % before ring closure labels above 9.
+]
 
 example_smiles = example_smiles_easy + example_smiles_cistrans +\
     example_smiles_chiral + example_smiles_hard + example_smiles_atoms
 
 
-
-##### UNIT TESTS #####
-
 class TestToMolecule(unittest.TestCase):
     "Test ALL the features!"
 
-    def assertOkay(self, smi):
-        "Assert that a single smiles is OK."
+    def tryAssertEqual(self, one, two):
         try:
-            self.assertEqual(set([to_canonical(smi)]),
-                             set(smilesify(moleculify(smi))))
+            self.assertEqual(one, two)
         except AssertionError:
             if DEBUG:
-                print "\nFailed on %s with bad output %s" % \
-                    (smi, smilesify(moleculify(smi)))
+                print "\n%s does not match %s" % (one, two)
                 raise
+
+    def assertOne(self, smi):
+        "Assert that a single smiles is OK."
+        self.tryAssertEqual(
+            to_canonical(smi),
+            smilesify(moleculify(smi), canonical=True)
+        )
 
     def assertMany(self, smileses):
         "Assert that each in a list of smiles are OK."
         for smi in smileses:
-            self.assertOkay(smi)
+            self.assertOne(smi)
+
+    def assertSame(self, smiles1, smiles2):
+        "Assert that two smiles produce the same output."
+        self.tryAssertEqual(
+            smilesify(moleculify(smiles1), canonical=True),
+            smilesify(moleculify(smiles2), canonical=True)
+        )
+        self.tryAssertEqual(
+            to_canonical(smiles1),
+            smilesify(moleculify(smiles1), canonical=True)
+        )
+
+    def assertSameMany(self, smileses):
+        "Assert that each in a list of smiles are identical."
+        for combo in itertools.combinations(smileses, 2):
+            self.assertSame(combo[0], combo[1])
 
     def test_carbons(self):
         "Test some basic strings of carbon."
@@ -804,7 +950,7 @@ class TestToMolecule(unittest.TestCase):
             except RuntimeError:
                 print "Warning: adjust termination_probability"
                 smi = "CC(CC(CCC))(CC)CC"
-            self.assertOkay(smi)
+            self.assertOne(smi)
 
     def test_bonds(self):
         "Test that all four types of basic bond work in a simple string."
@@ -818,10 +964,20 @@ class TestToMolecule(unittest.TestCase):
         smileses = [smi % bondsym for bondsym in BASIC_BONDS.keys()]
         self.assertMany(smileses)
 
-    def test_rings(self):
-        "Test that basic usage of ringbonds is functional."
+    def test_dots(self):
         smileses = [
-            r"C1CCCC1",  #TODO uncomment
+            r"CC(.CC)CCCC",
+            r"CC(C.CC)CCCC",
+            r"C(C(C(C(C.CCCC)C)C)C)CC",
+            r"C(C(C(C(.CCCC)C)C)C)CC",
+            r"CCCC.CCCCC",
+        ]
+        self.assertMany(smileses)
+
+    def test_rings(self):
+        "Test that basic usage of ringlinks is functional."
+        smileses = [
+            r"C1CCCC1",
             r"CCC2CC(CC(CC)(C2)CC)CC",
             r"CCC(CC)(CC1)CCCC1",
             r"C1(C1)",
@@ -829,7 +985,7 @@ class TestToMolecule(unittest.TestCase):
         self.assertMany(smileses)
 
     def test_rings_many(self):
-        "Test that multiple ringbonds can be used at the same time."
+        "Test that multiple ringlinks can be used at the same time."
         smileses = [
             r"CCCC1CC2CCCC1C2",
             r"CCC1CC2CCCC2C1",
@@ -841,20 +997,23 @@ class TestToMolecule(unittest.TestCase):
         self.assertMany(smileses)
 
     def test_rings_percent(self):
-        "Test that percent-escaping ringbonds works."
+        "Test that percent-escaping ringlinks works."
         smileses = [
             r"CCC%10CCCC%10",
             r"CCC%99CCC%22CCC%22CCCC%99",
             r"CCC1CC%12CCC1CC%12CCC",
+            r"CCC1CC=%12CCC=1CC%12CCC",
         ]
         self.assertMany(smileses)
 
     def test_rings_with_bonds(self):
-        "Test that prefacing ringbonds with bonds works."
+        "Test that prefacing ringlinks with bonds works."
         smileses = [
             r"CCC=1CCC1",
             r"CCC=1CCCC=1",
             r"C1CCCC#2CCC1C2C",
+            r"C1CCCC#%88CCC1C%88C",
+            r"C1CCCC=%88CCC1C=%88C",
         ]
         self.assertMany(smileses)
 
@@ -867,8 +1026,8 @@ class TestToMolecule(unittest.TestCase):
             (r"C(CC.CCC)CCC.CCCC", [r"CCC", r"C(CC)CCC", r"CCCC"])
         ]
         for (dotted, split) in smiles_groups:
-            first = set([to_canonical(i) for i in split])
-            second = set(smilesify(moleculify(dotted)))
+            first = to_canonical('.'.join([to_canonical(i) for i in split]))
+            second = smilesify(moleculify(dotted))
             self.assertEqual(first, second)                             
 
     def test_all_carbon(self):
@@ -901,11 +1060,92 @@ class TestToMolecule(unittest.TestCase):
         smileses = example_smiles_hard
         self.assertMany(smileses)
 
-    @unittest.skip("Not implemented yet")
+    def test_examples_hard_no_chirality(self):
+        "Test all the advanced example smiles."
+        smileses = example_smiles_hard_no_chirality
+        self.assertMany(smileses)
+
     def test_examples_atoms(self):
         "Test all the advanced example smiles."
         smileses = example_smiles_atoms
         self.assertMany(smileses)
+
+    def test_wacky_hydrogens(self):
+        self.assertSameMany([
+            r'C',
+            r'[CH4]',
+            r'[H][C]([H])([H])[H]',
+            r'[C]([H])([H])([H])[H]',
+        ])
+        self.assertSameMany([
+            r'[C][H]',
+            r'[CH]',
+            r'[CH1]',
+            r'[H][C]',
+        ])
+        self.assertSameMany([
+            r'[C]([H])[H]',
+            r'[H][C][H]',
+            r'[CH2]',
+        ])
+        self.assertSameMany([
+            r'[C]([H])([H])[H]',
+            r'[H][C]([H])[H]',
+            r'[CH3]',
+        ])
+        self.assertSameMany([
+            r'[C]([H])([H])([H])([H])[H]',
+            r'[H][C]([H])([H])([H])[H]',
+            r'[CH5]',
+        ])
+        self.assertSameMany([
+            r'[H][C]([H])([H])([H])([H])[H]',
+            r'[CH6]',
+        ])
+        self.assertMany([
+            r'[C]',
+            r'[CH7]',
+            r'[CH8]',
+            r'[CH9]',
+        ])
+        self.assertSameMany([
+            r'[SeH]O',
+            r'O[Se][H]',
+        ])
+        self.assertSameMany([
+            r'[ClH]N',
+            r'N[Cl][H]',
+        ])
+        self.assertSameMany([
+            r'[Br][F]',
+            r'FBr',
+        ])
+        self.assertSameMany([
+            r'PI',
+            r'P[I]',
+        ])
+        self.assertSameMany([
+            r'OO',
+            r'[OH]O',
+            r'[OH1][OH]',
+            r'[H][O][O][H]',
+            r'[O]([H])[O][H]',
+        ])
+
+    @unittest.skip("Not implemented yet")
+    def test_chirality_equivalence(self):
+        self.assertSameMany([
+            r'N[C@](Br)(O)C',
+            r'Br[C@](O)(N)C',
+            r'O[C@](Br)(C)N',
+            r'Br[C@](C)(O)N',
+            r'C[C@](Br)(N)O',
+            r'Br[C@](N)(C)O',
+            r'C[C@@](Br)(O)N',
+            r'Br[C@@](N)(O)C',
+            r'[C@@](C)(Br)(O)N',
+            r'[C@@](Br)(N)(O)C',
+        ])
 
 
 ## TODO temporary

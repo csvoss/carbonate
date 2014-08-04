@@ -1,16 +1,22 @@
+"""
+api/urls
+
+URLs for the API views.
+"""
+
 from django.conf.urls import patterns, url
 
 from api import views
 
 SMILESREGEX = r'(?P<smiles>.*)'
-IDREGEX = r'(?P<id>.*)'
+IDREGEX = r'(?P<pk>.*)'
 
 urlpatterns = patterns(
     '',
     # ex: /api/
     url(r'^$', views.index, name='index'),
-    ## /api/test/CCCCCC/test_smiles_to_molecule_and_back
-    url(r'^test/'+SMILESREGEX+r'/$', views.test_smiles_to_molecule_and_back, name='test_smiles_to_molecule_and_back'),
+    ## /api/test/CCCCCC/
+    url(r'^test/'+SMILESREGEX+r'/$', views.test_parsers, name='test_parsers'),
     ## /api/reactions
     url(r'^reactions/$', views.all_reactions, name='all_reactions'),
     ## /api/reaction/123 
@@ -36,6 +42,3 @@ urlpatterns = patterns(
     #/api/randomGenSVG
     url(r'^randomGenSVG/$', views.random_gen_SVG, name='random_gen_SVG'),
 )
-
-## SMILES testcases
-## N1CCN(CC1)C(C(F)=C2)=CC(=C2C4=O)N(C3CC3)C=C4(=O)O

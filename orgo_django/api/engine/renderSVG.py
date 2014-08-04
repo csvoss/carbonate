@@ -16,17 +16,14 @@ def render(smiles, hydrogens=False):
     """
     smiles :: str. In SMILES format.
     hydrogens :: True if implicit hydrogens should all be displayed. Usually False.
+    Currently, the hydrogens option does nothing.
 
     return :: str. In SVG format.
     """
-    smiles = re.sub("\#", "#", smiles)
-    smiles = re.sub("\@", "@", smiles)
     obConversion = openbabel.OBConversion()
     obConversion.SetInAndOutFormats("smi", "svg")
     outMol = openbabel.OBMol()
     obConversion.ReadString(outMol, str(smiles))
-    if hydrogens==True or hydrogens=='True' or hydrogens=='true':
-        outMol.AddHydrogens()
     ans = obConversion.WriteString(outMol)
     
     #Make the svg background transparent: replace fill="rgb(255,255,255)" with fill-opacity="0"
