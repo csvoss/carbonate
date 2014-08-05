@@ -3,18 +3,9 @@ molecularStructure.py
 Contains class Molecule and class Atom.
 """
 import copy
-##from toMolecule import *
 
 #Testing - replace "H" with "Br" to visualize all hydrogens
-hydrogen = "H"
-
-class AlleneError(Exception):
-    """
-    Raised when we try to make an allene.  Tells higher functions that
-    the reaction we just attempted should not be allowed.  (Even if it
-    is technically chemically feasible.)
-    """
-    pass
+HYDROGEN = "H"
 
 class Molecule(object):
     """
@@ -99,6 +90,9 @@ class Molecule(object):
         newBondOrder :: int. 0, 1, 2, 3, or 4.
         Note that newBondOrder=0 breaks the bond.
         """
+        assert atom1 in self.atoms, "Not in molecule: %s" % str(atom1)
+        assert atom2 in self.atoms, "Not in molecule: %s" % str(atom2)
+
         if newBondOrder == 0:
             del atom1.neighbors[atom2]
             del atom2.neighbors[atom1]
@@ -109,7 +103,6 @@ class Molecule(object):
     def addHydrogens(self):
         """
         Adds a full complement of hydrogens to every atom.
-        As a side-effect, also checks for over-valence.
         """
         for atom in self.atoms:
             if atom.hcount == None:
@@ -126,11 +119,6 @@ class Molecule(object):
                 val = 0
                 for neighbor in atom.neighbors:
                     val += atom.neighbors[neighbor]
-                # if val > maxval:
-                    # raise StandardError("%s has too many bonds! %s" % \
-                    #     (str(atom), [str(i) for i in atom.neighbors]))
-                    # print "Warning: %s has too many bonds! %s" % \
-                    #     (str(atom), [str(i) for i in atom.neighbors])
                 diff = maxval - val
             else:
                 hydrogen_already_added = 0
@@ -139,7 +127,7 @@ class Molecule(object):
                         hydrogen_already_added += 1
                 diff = atom.hcount - hydrogen_already_added
             for _ in xrange(diff):
-                H = Atom(hydrogen)
+                H = Atom(HYDROGEN)
                 self.addAtom(H, atom, 1)
 
     def countElement(self, element):
@@ -168,32 +156,9 @@ class Molecule(object):
         Return a version of this molecule in which explicit hydrogens have 
         been added to all molecules for which we can infer the number to add.
         """
-        BOND_ORDERS = {
-            "B": 3,
-            "C": 4,
-            "N": 3,
-            "O": 2,
-            "P": 5,
-            "S": 2,
-            "F": 1,
-            "Cl": 1,
-            "Br": 1,
-            "I": 1,
-        }
-
-        out = copy.deepcopy(self)
-        for atom in out.atoms:
-            elem = atom.element
-            bond_order = atom.totalBondOrder()
-            charge = atom.charge
-            if elem in BOND_ORDERS:
-                ideal_bond_order = BOND_ORDERS[elem]
-                hydrogens_to_add = ideal_bond_order - bond_order + charge
-                for _ in xrange(hydrogens_to_add):
-                    new_hydrogen = Atom("H")
-                    out.addAtom(new_hydrogen, atom, 1)
-        return out
-
+        output = copy.deepcopy(self)
+        output.addHydrogens()
+        return output
 
 
 class Atom(object):
@@ -237,7 +202,8 @@ class Atom(object):
 
         output = self.element
 
-        if self.hcount is None and not ('H' in [i.element for i in self.neighbors]) and not self.element == 'H': 
+        if self.hcount is None and not self.element == 'H' and \
+            not ('H' in [i.element for i in self.neighbors]):
             brackets = False
         else:
             brackets = True
@@ -290,17 +256,28 @@ class Atom(object):
 
         # Temporary values which should only be meaningful within smiles()
         # and subsmiles(), for traversing.
-        self._flag = 0
+        self.flag = 0
         #for ring-finding
-        self._rflag = [] #empty if not part of a ring bond
-        self._n_read = 0 #neighbors already read
-        self._parent_atom = 0 #atom right before this one
-        self._non_h_neighbors = []
+        self.rflag = [] #empty if not part of a ring bond
+        self.n_read = 0 #neighbors already read
+        self.parent_atom = 0 #atom right before this one
+        self.non_h_neighbors = []
 
         self.is_aromatic = False
         self.isotope = None
         self.chirality = None
         self.hcount = None
+
+        self.is_chiral = False
+        self.chiralA = None
+        self.chiralB = None
+        self.chiralC = None
+        self.chiralD = None
+
+        self.is_cistrans = False
+        self.CTotherC = None
+        self.CTa = None
+        self.CTb = None
 
     def newChiralCenter(self, reference, clockwiseList):
         """
@@ -308,6 +285,9 @@ class Atom(object):
         reference :: Atom.
         clockwiseList :: a list of 3 Atoms.
         """
+        if self.is_chiral:
+            print "Warning: Adding redundant chirality"
+        self.is_chiral = True
         self.chiralA = reference
         self.chiralB, self.chiralC, self.chiralD = clockwiseList
 
@@ -320,6 +300,8 @@ class Atom(object):
         reference :: Atom.
         return :: a list of 3 Atoms.
         """
+        if not self.is_chiral:
+            raise StandardError("%s atom is not chiral" % (str(self)))
         if reference == self.chiralA:
             return [self.chiralB, self.chiralC, self.chiralD]
         elif reference == self.chiralB:
@@ -346,39 +328,41 @@ class Atom(object):
 
         **DEPRECATED**. Please stick to using chiralCWlist.
         """
+        if not self.is_chiral:
+            raise StandardError("%s atom is not chiral" % (str(self)))
         if inport == self.chiralA:
             if outport == self.chiralB:
-                return                  (self.chiralC, self.chiralD)
+                return (self.chiralC, self.chiralD)
             if outport == self.chiralC:
-                return                  (self.chiralD, self.chiralB)
+                return (self.chiralD, self.chiralB)
             if outport == self.chiralD:
-                return                  (self.chiralB, self.chiralC)
+                return (self.chiralB, self.chiralC)
         elif inport == self.chiralB:
             if outport == self.chiralA:
-                return                  (self.chiralD, self.chiralC)
+                return (self.chiralD, self.chiralC)
             if outport == self.chiralC:
-                return                  (self.chiralA, self.chiralD)
+                return (self.chiralA, self.chiralD)
             if outport == self.chiralD:
-                return                  (self.chiralC, self.chiralA)
+                return (self.chiralC, self.chiralA)
         elif inport == self.chiralC:
             if outport == self.chiralA:
-                return                  (self.chiralB, self.chiralD)
+                return (self.chiralB, self.chiralD)
             if outport == self.chiralB:
-                return                  (self.chiralD, self.chiralA)
+                return (self.chiralD, self.chiralA)
             if outport == self.chiralD:
-                return                  (self.chiralA, self.chiralB)
+                return (self.chiralA, self.chiralB)
         elif inport == self.chiralD:
             if outport == self.chiralA:
-                return                  (self.chiralC, self.chiralB)
+                return (self.chiralC, self.chiralB)
             if outport == self.chiralB:
-                return                  (self.chiralA, self.chiralC)
+                return (self.chiralA, self.chiralC)
             if outport == self.chiralC:
-                return                  (self.chiralB, self.chiralA)
+                return (self.chiralB, self.chiralA)
                 
         msg = "Error in chiralCWlist: no such inport and outport: %s, %s\n" %\
-              (inport.element, outport.element)
-        msg += ", ".join[self.chiralA.element, self.chiralB.element,
-                         self.chiralC.element, self.chiralD.element]
+              (str(inport), str(outport))
+        msg += ", ".join[str(self.chiralA), str(self.chiralB),
+                         str(self.chiralC), str(self.chiralD)]
         raise StandardError(msg)
         
     def newCTCenter(self, otherC, a, b):
@@ -395,11 +379,11 @@ class Atom(object):
 
         Raises AlleneError if newCTCenter has already been applied to this atom.
         """
-        if hasattr(self, 'CTa'):
+        if self.is_cistrans:
             ## That would make this carbon the center of an allene!
             ## Keeping track of stereochem for allenes is Hard.
             ## TODO: Make it so that we can in fact handle allenes?
-            raise AlleneError
+            raise AlleneError("Attempt to add extra CTcenter to %s" % str(self))
         self.CTotherC = otherC
         self.CTa = a
         self.CTb = b
@@ -412,20 +396,25 @@ class Atom(object):
         Destroys the chirality information.
         Don't worry, the atoms are still there.
         """
-        if hasattr(self, 'chiralA'):
-            del self.chiralA
-            del self.chiralB
-            del self.chiralC
-            del self.chiralD
+        if not self.is_chiral:
+            print "Warning: Eliminating nonexistent chirality"
+        self.chiralA = None
+        self.chiralB = None
+        self.chiralC = None
+        self.chiralD = None
+        self.is_chiral = False
 
     def eliminateCT(self):
         """
         Destroys the cis-trans information.
         Don't worry, the atoms are still there.
         """
-        del self.CTotherC
-        del self.CTa
-        del self.CTb
+        if not self.is_cistrans:
+            print "Warning: Eliminating nonexistent cistrans"
+        self.CTotherC = None
+        self.CTa = None
+        self.CTb = None
+        self.is_cistrans = False
 
     def totalBondOrder(self):
         """
@@ -449,3 +438,11 @@ class Atom(object):
             if self.neighbors[neighbor] == 2 and neighbor.element == 'C':
                 return neighbor
         return None
+
+class AlleneError(Exception):
+    """
+    Raised when we try to make an allene.  Tells higher functions that
+    the reaction we just attempted should not be allowed.  (Even if it
+    is technically chemically feasible.)
+    """
+    pass

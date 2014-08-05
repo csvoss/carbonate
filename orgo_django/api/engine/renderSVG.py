@@ -1,13 +1,13 @@
 """
 renderSVG.py
 
-Contains the function render(smiles), which takes in a string in SMILES format and outputs a SVG representation
-(as a string) of that molecule. Uses the OpenBabel Python library:
+Contains the function render(smiles), which takes in a string in SMILES format
+and outputs a SVG representation (as a string) of that molecule. Uses the
+OpenBabel Python library:
 http://openbabel.org/wiki/Python
 """
 
 import openbabel
-import pybel
 import re
 
 #Set up input and output formats
@@ -15,9 +15,7 @@ import re
 def render(smiles, hydrogens=False):
     """
     smiles :: str. In SMILES format.
-    hydrogens :: True if implicit hydrogens should all be displayed. Usually False.
-    Currently, the hydrogens option does nothing.
-
+    hydrogens :: bool. Currently, the hydrogens option does nothing.
     return :: str. In SVG format.
     """
     obConversion = openbabel.OBConversion()
@@ -26,8 +24,8 @@ def render(smiles, hydrogens=False):
     obConversion.ReadString(outMol, str(smiles))
     ans = obConversion.WriteString(outMol)
     
-    #Make the svg background transparent: replace fill="rgb(255,255,255)" with fill-opacity="0"
+    ## Make the svg background transparent:
+    ## replace fill="rgb(255,255,255)" with fill-opacity="0"
     ans = re.sub("fill=\"white\"", "fill-opacity=\"0\"", ans)
-    #ans = re.sub("<svg ", "<svg preserveAspectRatio=none viewBox=\"0 0 100 100\" ", ans)
 
     return ans

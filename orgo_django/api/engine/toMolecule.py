@@ -18,18 +18,14 @@ Refer to:
     https://pypi.python.org/pypi/rply/0.5.1
     http://www.opensmiles.org/opensmiles.html
 """
-from random import random, randrange
 import itertools
 import re
-import unittest
 
 from rply import ParserGenerator, LexerGenerator, ParsingError
 from rply.token import BaseBox
 
 from molecularStructure import Molecule, Atom
-from toSmiles import smilesify, to_canonical
 
-DEBUG = True
 
 ############################
 ##### PUBLIC FUNCTIONS #####
@@ -133,20 +129,27 @@ def int_from_digit(digit):
 LG = LexerGenerator()
 LG.ignore(r"\s+")
 
-SYMBOLS_DICT = {
-    '@': '@', '%': '%', '*': r'\*', '(': r'\(', ')': r'\)',
-    '[': r'\[', ']': r'\]', '+': r'\+', '.': r'\.'
+SYMBOLS = { ## key (name of token)
+    '@': r'@',   ##  : value (regex for lexer to search)
+    '%': r'%',
+    '*': r'\*',
+    '(': r'\(',
+    ')': r'\)',
+    '[': r'\[',
+    ']': r'\]',
+    '+': r'\+',
+    '.': r'\.',
 }
-SYMBOLS = SYMBOLS_DICT.keys()
-for sym in SYMBOLS:
-    LG.add(sym, SYMBOLS_DICT[sym])
+for token_name, regex in SYMBOLS.iteritems():
+    LG.add(token_name, regex)
 
-LETTERS = [letter for letter in "ABCDEFGHIKLMNOPRSTUVWXYZabcdefghiklmnoprstuvy"]
-for sym in LETTERS:
-    LG.add(sym, sym)
+ATOM_MATCHER = r'ABCDEFGHIKLMNOPRSTUVWXYZabcdefghiklmnoprstuvy'
+LETTERS = [letter for letter in ATOM_MATCHER]
+for token_name in LETTERS:
+    LG.add(token_name, token_name)
 
-BOND_SYMBOLS_DICT = {
-    '-': r'\-',
+BOND_SYMBOLS = { ## key (name of token)
+    '-': r'\-',       ##  : value (regex for lexer to search)
     '=': r'=',
     '#': r'#',
     '$': r'\$',
@@ -154,12 +157,11 @@ BOND_SYMBOLS_DICT = {
     '/': r'/',
     '\\': r'\\',
 }
-for sym in BOND_SYMBOLS_DICT:
-    LG.add(sym, BOND_SYMBOLS_DICT[sym])
-BOND_SYMBOLS = BOND_SYMBOLS_DICT.keys()
+for token_name, regex in BOND_SYMBOLS.iteritems():
+    LG.add(token_name, regex)
 
-BOND_SYMBOLS_TILDE_DICT = {
-    '~-~': r'~\-~',
+BOND_SYMBOLS_TILDE = { ## key (name of token)
+    '~-~': r'~\-~',         ##  : value (regex for lexer to search)
     '~=~': r'~=~',
     '~#~': r'~#~',
     '~$~': r'~\$~',
@@ -167,17 +169,14 @@ BOND_SYMBOLS_TILDE_DICT = {
     '~/~': r'~/~',
     '~\\~': r'~\\~',
 }
-for sym in BOND_SYMBOLS_TILDE_DICT:
-    LG.add(sym, BOND_SYMBOLS_TILDE_DICT[sym])
-BOND_SYMBOLS_TILDE = BOND_SYMBOLS_TILDE_DICT.keys()
-
+for token_name, regex in BOND_SYMBOLS_TILDE.iteritems():
+    LG.add(token_name, regex)
 
 LG.add('DIGIT', r'[0-9]')
 LG.add('TERMINATOR', r'[ \t\r\n]')
-# LG.add('BOND', r'[\-=#\$:/\\]')
 
-FOR_PREPROCESSOR = {
-    r'\-': '~-~',
+FOR_PREPROCESSOR = { ## key (regex for preprocessor to search)
+    r'\-': '~-~',    ##  : value (text to replace it with)
     r'=': '~=~',
     r'#': '~#~',
     r'\$': '~$~',
@@ -185,7 +184,7 @@ FOR_PREPROCESSOR = {
     r'/': '~/~',
     r'\\': '~\\~',
 }
-ATOM_MATCHER = r'\[ABCDEFGHIKLMNOPRSTUVWXYZabcdefghiklmnoprstuvy'
+
 
 def preprocess(smiles):
     """
@@ -194,12 +193,12 @@ def preprocess(smiles):
     all double bonds (or single bonds, or / bonds, or ...) which precede
     a letter shall be replaced with a SPECIAL UNIQUE SEQUENCE.
     For now, that unique sequence is "the same thing, but surrounded by
-    tildes".
+    tildes". See the BOND_SYMBOLS_TILDE and FOR_PREPROCESSOR stuff above.
     """
     output = smiles
     for key, val in FOR_PREPROCESSOR.items():
         output = re.sub(
-            key + r'([' + ATOM_MATCHER + r'])',
+            key + r'([\[' + ATOM_MATCHER + r'])',
             val + r'\1',
             output
         )
@@ -211,7 +210,8 @@ def preprocess(smiles):
 ##################
 
 PG = ParserGenerator(
-    SYMBOLS+LETTERS+['DIGIT', 'TERMINATOR']+BOND_SYMBOLS+BOND_SYMBOLS_TILDE,
+    SYMBOLS.keys() + LETTERS + ['DIGIT', 'TERMINATOR'] + BOND_SYMBOLS.keys() \
+        + BOND_SYMBOLS_TILDE.keys(),
     precedence=[],
     cache_id='molparser',
 )
@@ -571,6 +571,7 @@ def atom_production_wildcard(p):
 # aliphatic_organic :: Atom.
 ALIPHATIC_ORGANIC = ['B', 'C', 'N', 'O', 'S', 'P', 'F', 'Cl', 'Br', 'I']
 def make_aliphatic_organic_production(aliphatic):
+    "Create several productions, one for each aliphatic-organic."
     @PG.production("aliphatic_organic : %s" % (' '.join(aliphatic)))
     def _(p):
         "return :: Atom."
@@ -582,6 +583,7 @@ for aliphatic in ALIPHATIC_ORGANIC:
 # aromatic_organic :: Atom.
 AROMATIC_ORGANIC = ['b', 'c', 'n', 'o', 's', 'p']
 def make_aromatic_organic_production(aromatic):
+    "Create several production rules, one for each aromatic-organic."
     @PG.production("aromatic_organic : %s" % (' '.join(aromatic)))
     def _(p):
         "return :: Atom. Also sets is_aromatic to True for future processing."
@@ -598,6 +600,11 @@ bracket_atom_production_formula = "bracket_atom : [ %s symbol %s %s %s %s ]"
 bracket_atom_parts = ["isotope", "chiral", "hcount", "charge", "class"]
 
 def make_bracket_production(five_bools):
+    """
+    Create several production rules, one for each combination of bracket atom
+    parts. Each one may be present or absent. five_bools is a tuple of booleans
+    describing the particular conditions to make a production for.
+    """
     formats = [bracket_atom_parts[i] if five_bools[i] else "" for i in range(5)]
     @PG.production(bracket_atom_production_formula % tuple(formats))
     def _(p):
@@ -612,42 +619,44 @@ def make_bracket_production(five_bools):
             else:
                 args.append(None)
         return bracket_atom_full(*args)
-for five_bools in itertools.product((True, False), repeat=5):
-    make_bracket_production(five_bools)
+for bools in itertools.product((True, False), repeat=5):
+    make_bracket_production(bools)
 
 def bracket_atom_full(isot, symb, chir, hcou, chge, clss):
     """
     Produce an Atom from various parameters.
     isot :: int.
-    symb :: str.
+    symb :: str symbol, bool is_aromatic.
     chir :: Chirality.
     hcou :: int.
     chge :: int.
     clss :: int.
     return :: Atom.
     """
-    output = Atom(symb)
+    output = Atom(symb[0])
     output.isotope = isot
     output.chirality = chir
     output.hcount = 0 if (hcou is None) else hcou
     output.charge = 0 if (chge is None) else chge
     # output.atom_class = clss   ## "Atom class" is throwaway information.
-
-    ## TODO: Check if aromatic. Flag is_aromatic if so.
+    output.is_aromatic = symb[1]
     return output
 
 
 # symbol ::= element_symbols | aromatic_symbols | '*'
-# symbol :: str.
+# symbol :: str symbol, bool is_aromatic.
 @PG.production("symbol : *")
 def symbol_production_from_wildcard(p):
-    "return :: str. * is the wildcard."
-    return "*"
+    "return :: str, bool. * is the wildcard."
+    return "*", False
 @PG.production("symbol : element_symbols")
-@PG.production("symbol : aromatic_symbols")
 def symbol_production_from_element(p):
-    "return :: str."
-    return p[0]
+    "return :: str, bool. (False for not aromatic)"
+    return p[0], False
+@PG.production("symbol : aromatic_symbols")
+def symbol_production_from_aromatic(p):
+    "return :: str, bool. (True for aromaticity)"
+    return p[0], True
 
 # isotope ::= NUMBER
 # isotope :: int.
@@ -680,8 +689,9 @@ ELEMENT_SYMBOLS = [
     'Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er', 'Tm',
     'Yb', 'Lu', 'Ac', 'Th', 'Pa', 'U', 'Np', 'Pu', 'Am', 'Cm', 'Bk', 'Cf',
     'Es', 'Fm', 'Md', 'No', 'Lr']
-def make_element_production(element):
-    @PG.production("element_symbols : %s" % (' '.join(element)))
+def make_element_production(element_symbol):
+    "Create several productions, one for each element."
+    @PG.production("element_symbols : %s" % (' '.join(element_symbol)))
     def _(p):
         "return :: str."
         return ''.join(i.getstr() for i in p)
@@ -691,8 +701,9 @@ for element in ELEMENT_SYMBOLS:
 # aromatic_symbols ::= 'b' | 'c' | 'n' | 'o' | 'p' | 's' | 'se' | 'as'
 # aromatic_symbols :: str.
 AROMATIC_SYMBOLS = ['b', 'c', 'n', 'o', 'p', 's', 'se', 'as']
-def make_aromatic_production(aromatic):
-    @PG.production("aromatic_symbols : %s" % (' '.join(aromatic)))
+def make_aromatic_production(aromatic_symbol):
+    "Create several productions, one for each aromatic symbol."
+    @PG.production("aromatic_symbols : %s" % (' '.join(aromatic_symbol)))
     def _(p):
         "return :: str."
         return ''.join(i.getstr() for i in p)
@@ -700,7 +711,6 @@ for aromatic in AROMATIC_SYMBOLS:
     make_aromatic_production(aromatic)
 
 ##### CHIRALITY #####
-
 # chiral ::= '@' | '@@' | '@TH1' | '@TH2' | '@AL1' | '@AL2' | '@SP1' | 
 #'@SP2' | '@SP3' | '@TB1' | '@TB2' | '@TB3' | ... | '@TB20' | '@OH1' | 
 #'@OH2' | '@OH3' | ... | '@OH30' | '@TB' DIGIT DIGIT | '@OH' DIGIT DIGIT
@@ -728,10 +738,11 @@ class Chirality(BaseBox):
 def hcount_production_single(p):
     "return :: int"
     return 1
-@PG.production("hcount : H DIGIT")
+@PG.production("hcount : H NUMBER") ##TODO: spec says DIGIT, but Babel does NUM
 def hcount_production_many(p):
     "return :: int"
-    return int_from_digit(p[1])
+    # return int_from_digit(p[1])
+    return p[1]
 
 ##### CHARGES #####
 
@@ -740,21 +751,27 @@ def hcount_production_many(p):
 # charge :: int
 @PG.production("charge : -")
 def charge_production_single_minus(p):
+    "-"
     return -1
 @PG.production("charge : +")
 def charge_production_single_plus(p):
+    "+"
     return +1
 @PG.production("charge : - -")
 def charge_production_double_minus(p):
+    "--"
     return -2
 @PG.production("charge : + +")
 def charge_production_double_plus(p):
+    "++"
     return +2
 @PG.production("charge : - DIGIT")
 def charge_production_minus_many(p):
+    "-D"
     return -int_from_digit(p[1])
 @PG.production("charge : + DIGIT")
 def charge_production_plus_many(p):
+    "+D"
     return +int_from_digit(p[1])
 
 
@@ -777,377 +794,3 @@ def error_handler(token, expected=None):
 
 LEXER = LG.build()
 PARSER = PG.build()
-
-
-
-
-
-
-######################
-##### UNIT TESTS #####
-######################
-
-def example_molecule():
-    """
-    This method intended as a code example of how to create and return
-    a molecule.
-    This is useful to reference while writing the parser.
-    return :: Molecule.
-    """
-    c40 = Atom("C")
-    c41 = Atom("C")
-    mol4 = Molecule(c40)
-    mol4.addAtom(c41, c40, 2)
-    c42 = Atom("C")
-    c43 = Atom("C")
-    mol4.addAtom(c42, c40, 1)
-    mol4.addAtom(c43, c41, 1)
-    cl1 = Atom("Cl")
-    cl2 = Atom("Cl")
-    mol4.addAtom(cl1, c40, 1)
-    mol4.addAtom(cl2, c41, 1)
-    c40.newCTCenter(c41, c42, cl1)
-    c41.newCTCenter(c40, c43, cl2)
-    mol4.addBond(c42, c43, 1)
-
-    return mol4.withHydrogens()
-
-example_smiles_easy = [
-    r"C1CCCCC1",         ## cyclohexane
-    r"N#N",              ## dinitrogen
-    r"CN=C=O",           ## methyl isocyanate
-    r"N1CCN(CC1)C(C(F)=C2)=CC(=C2C4=O)N(C3CC3)C=C4C(=O)O",
-    r"C12C3(CO)C4C1(CC(=O)O)C5(N)C2(CC(=O)C)C3(C=CC=C)C45",
-    r"C(C=C2)C1C(=O)C(C(C)(C)C)C(CN)CC21",
-    r"N1CCN(CC1)C(C(F)=C2)=CC(=C2C4=O)N(C3CC3)C=C4(=O)O",
-    r"C(C(C(C(C(C(C(C(C(C(C(C(C(C(C(C(C(C(C(C(C))))))))))))))))))))C",
-]
-example_smiles_atoms = [
-    r"OC(=O)CC(P)C(SBr)C(CB)C(F)(Cl)C(I)Br",
-    r"CC[*]CCC[*]CC",
-    r"[2H]C(Cl)(Cl)Cl",  ## deuterochloroform (hydrogen-2)
-    r"[Cu+2].[O-]S(=O)(=O)[O-]" ## copper(ii) sulfate
-    r"C(CC[Se]C)C(CC(O)CC)Br",
-    r"[Rh-](Cl)(Cl)(Cl)(Cl)$[Rh-](Cl)(Cl)(Cl)Cl",
-    r'C(CCC)C([NH7])Br',
-    r'P(=O)([O-])([O-])[O-]',
-    r'C(=O)([O-])[O-]',
-    r'C12346F5O1Cl2Br3I4S65',
-    r'[Cl-].[Na+]',
-    r'C#[C-]',
-]
-example_smiles_cistrans = [
-    r"C(/F)(\Cl)=C(/Br)\I",  ## cis/trans test
-    r"F\C=C(/Br)\I",     ## more cis/trans
-    r"F\C=C/Br",         ## more cis/trans
-    r"F/C=C/F",          ## trans-difluoroethene
-    r"F/C=C\F",          ## cis-difluoroethene
-]
-example_smiles_chiral = [
-    r"N[C@@H](C)C(=O)O", ## L-alanine
-    r"N[C@H](C(=O)O)C",  ## also L-alanine
-    r"N[C@H](C)C(=O)O",  ## D-alanine (less common)
-    r"OC[C@@H](O1)[C@@H](O)[C@H](O)[C@@H](O)[C@@H](O)1", ## glucose
-    r"CC[C@H](O1)CC[C@@]12CCCO2", ## another pheromone
-    r"CC(C)[C@@]12C[C@@H]1[C@@H](C)C(=O)C2", ## alpha-thujone
-]
-example_smiles_hard = [
-    r"CCC[C@@H](O)CC\C=C\C=C\C#CC#C\C=C\CO", ## enanthotoxin
-    r"COC(=O)C(\C)=C\C1C(C)(C)[C@H]1C(=O)O[C@@H]2C(C)=C(C(=O)C2)CC="+\
-        r"CC=C", ## pyrethrin II
-    r"CC(=O)OCCC(/C)=C\C[C@H](C(C)=C)CCC=C", ## some pheromone 
-    r"C[C@@](C)(O1)C[C@@H](O)[C@@]1(O2)[C@@H](C)[C@@H]3CC=C4[C@]3(C"+\
-        "2)C(=O)C[C@H]5[C@H]4CC[C@@H](C6)[C@]5(C)CC(N7)C6NC(C[C@@]"+\
-        "89(C))C7C[C@@H]8CC[C@@H]%10[C@@H]9C[C@@H](O)[C@@]%11(C)C%"+\
-        "10=C[C@H](O%12)[C@]%11(O)[C@H](C)[C@]%12(O%13)[C@H](O)C[C"+\
-        "@@]%13(C)CO", ## Cephalostatin-1 without aromaticity. Note 
-                       ## the % before ring closure labels above 9.
-]
-example_smiles_hard_no_chirality = [
-    r"CCC[CH](O)CCC=CC=CC#CC#CC=CCO", ## enanthotoxin
-    r"COC(=O)C(C)=CC1C(C)(C)[CH]1C(=O)O[CH]2C(C)=C(C(=O)C2)CC=CC=C",
-    r"CC(=O)OCCC(C)=CC[CH](C(C)=C)CCC=C", ## some pheromone 
-    r"C[C](C)(O1)C[CH](O)[C]1(O2)[CH](C)[CH]3CC=C4[C]3(C"+\
-        "2)C(=O)C[CH]5[CH]4CC[CH](C6)[C]5(C)CC(N7)C6NC(C[C]"+\
-        "89(C))C7C[CH]8CC[CH]%10[CH]9C[CH](O)[C]%11(C)C%"+\
-        "10=C[CH](O%12)[C]%11(O)[CH](C)[C]%12(O%13)[CH](O)C[C"+\
-        "]%13(C)CO", ## Cephalostatin-1 without aromaticity. Note 
-                       ## the % before ring closure labels above 9.
-]
-
-example_smiles = example_smiles_easy + example_smiles_cistrans +\
-    example_smiles_chiral + example_smiles_hard + example_smiles_atoms
-
-
-class TestToMolecule(unittest.TestCase):
-    "Test ALL the features!"
-
-    def tryAssertEqual(self, one, two):
-        try:
-            self.assertEqual(one, two)
-        except AssertionError:
-            if DEBUG:
-                print "\n%s does not match %s" % (one, two)
-                raise
-
-    def assertOne(self, smi):
-        "Assert that a single smiles is OK."
-        self.tryAssertEqual(
-            to_canonical(smi),
-            smilesify(moleculify(smi), canonical=True)
-        )
-
-    def assertMany(self, smileses):
-        "Assert that each in a list of smiles are OK."
-        for smi in smileses:
-            self.assertOne(smi)
-
-    def assertSame(self, smiles1, smiles2):
-        "Assert that two smiles produce the same output."
-        self.tryAssertEqual(
-            smilesify(moleculify(smiles1), canonical=True),
-            smilesify(moleculify(smiles2), canonical=True)
-        )
-        self.tryAssertEqual(
-            to_canonical(smiles1),
-            smilesify(moleculify(smiles1), canonical=True)
-        )
-
-    def assertSameMany(self, smileses):
-        "Assert that each in a list of smiles are identical."
-        for combo in itertools.combinations(smileses, 2):
-            self.assertSame(combo[0], combo[1])
-
-    def test_carbons(self):
-        "Test some basic strings of carbon."
-        smileses = ["C"*num for num in range(1, 21)]
-        self.assertMany(smileses)
-
-    def test_branches(self):
-        "Test basic tree-branching carbon strings. Randomly-generated."
-        termination_probability = 0.90
-        max_run_length = 5
-        def random_branching_carbons():
-            "Create a randomly-branching carbon string."
-            def end_or_branch():
-                "Terminate or branch further."
-                if random() < termination_probability:
-                    return "C" * (1 + randrange(max_run_length))
-                else:
-                    return random_branching_carbons()
-            a = end_or_branch()
-            b = end_or_branch()
-            c = end_or_branch()
-            d = end_or_branch()
-            if random() < 0.5:
-                return a + "(" + b + ")(" + c + ")" + d
-            else:
-                return a + "(" + b + ")" + c
-
-        for _ in range(1, 20):
-            try:
-                smi = random_branching_carbons()
-            except RuntimeError:
-                print "Warning: adjust termination_probability"
-                smi = "CC(CC(CCC))(CC)CC"
-            self.assertOne(smi)
-
-    def test_bonds(self):
-        "Test that all four types of basic bond work in a simple string."
-        smi = "CCC%sCCCC"
-        smileses = [smi % bondsym for bondsym in BASIC_BONDS.keys()]
-        self.assertMany(smileses)
-
-    def test_bonds_tiny(self):
-        "Test that all four types of basic bond work in a tiny string."
-        smi = "C%sC"
-        smileses = [smi % bondsym for bondsym in BASIC_BONDS.keys()]
-        self.assertMany(smileses)
-
-    def test_dots(self):
-        smileses = [
-            r"CC(.CC)CCCC",
-            r"CC(C.CC)CCCC",
-            r"C(C(C(C(C.CCCC)C)C)C)CC",
-            r"C(C(C(C(.CCCC)C)C)C)CC",
-            r"CCCC.CCCCC",
-        ]
-        self.assertMany(smileses)
-
-    def test_rings(self):
-        "Test that basic usage of ringlinks is functional."
-        smileses = [
-            r"C1CCCC1",
-            r"CCC2CC(CC(CC)(C2)CC)CC",
-            r"CCC(CC)(CC1)CCCC1",
-            r"C1(C1)",
-        ]
-        self.assertMany(smileses)
-
-    def test_rings_many(self):
-        "Test that multiple ringlinks can be used at the same time."
-        smileses = [
-            r"CCCC1CC2CCCC1C2",
-            r"CCC1CC2CCCC2C1",
-            r"CCC1CC2CC3CC1CC2CC3",
-            r"CC2CCCCC3CCCC1CC2C3C1CC",
-            r"C1C2C3C4C5C6C7C8C9C%10C%11CCC%11C%10C9C8C7C6C5C4C3C2C1",
-            r"C123CCC1C2C3",
-        ]
-        self.assertMany(smileses)
-
-    def test_rings_percent(self):
-        "Test that percent-escaping ringlinks works."
-        smileses = [
-            r"CCC%10CCCC%10",
-            r"CCC%99CCC%22CCC%22CCCC%99",
-            r"CCC1CC%12CCC1CC%12CCC",
-            r"CCC1CC=%12CCC=1CC%12CCC",
-        ]
-        self.assertMany(smileses)
-
-    def test_rings_with_bonds(self):
-        "Test that prefacing ringlinks with bonds works."
-        smileses = [
-            r"CCC=1CCC1",
-            r"CCC=1CCCC=1",
-            r"C1CCCC#2CCC1C2C",
-            r"C1CCCC#%88CCC1C%88C",
-            r"C1CCCC=%88CCC1C=%88C",
-        ]
-        self.assertMany(smileses)
-
-    def test_dotteds(self):
-        "Test that dots work correctly."
-        smiles_groups = [
-            (r"CCC.CCCC", [r"CCC", r"CCCC"]),
-            (r"C.CC", [r"C", r"CC"]),
-            (r"C.CC.CCC", [r"C", r"CC", r"CCC"]),
-            (r"C(CC.CCC)CCC.CCCC", [r"CCC", r"C(CC)CCC", r"CCCC"])
-        ]
-        for (dotted, split) in smiles_groups:
-            first = to_canonical('.'.join([to_canonical(i) for i in split]))
-            second = smilesify(moleculify(dotted))
-            self.assertEqual(first, second)                             
-
-    def test_all_carbon(self):
-        "Summatively test that rings, bonds, and branching all work."
-        smileses = [
-            "C1C(C(C(C)(C)C)C=C(C#C)C2)C2C(C)(C)C=1",
-        ]
-        self.assertMany(smileses)
-
-    def test_examples_easy(self):
-        "Test all the advanced example smiles."
-        smileses = example_smiles_easy
-        self.assertMany(smileses)
-
-    @unittest.skip("Not implemented yet")
-    def test_examples_cistrans(self):
-        "Test all the advanced example smiles."
-        smileses = example_smiles_cistrans
-        self.assertMany(smileses)
-
-    @unittest.skip("Not implemented yet")
-    def test_examples_chiral(self):
-        "Test all the advanced example smiles."
-        smileses = example_smiles_chiral
-        self.assertMany(smileses)
-
-    @unittest.skip("Not implemented yet")
-    def test_examples_hard(self):
-        "Test all the advanced example smiles."
-        smileses = example_smiles_hard
-        self.assertMany(smileses)
-
-    def test_examples_hard_no_chirality(self):
-        "Test all the advanced example smiles."
-        smileses = example_smiles_hard_no_chirality
-        self.assertMany(smileses)
-
-    def test_examples_atoms(self):
-        "Test all the advanced example smiles."
-        smileses = example_smiles_atoms
-        self.assertMany(smileses)
-
-    def test_wacky_hydrogens(self):
-        self.assertSameMany([
-            r'C',
-            r'[CH4]',
-            r'[H][C]([H])([H])[H]',
-            r'[C]([H])([H])([H])[H]',
-        ])
-        self.assertSameMany([
-            r'[C][H]',
-            r'[CH]',
-            r'[CH1]',
-            r'[H][C]',
-        ])
-        self.assertSameMany([
-            r'[C]([H])[H]',
-            r'[H][C][H]',
-            r'[CH2]',
-        ])
-        self.assertSameMany([
-            r'[C]([H])([H])[H]',
-            r'[H][C]([H])[H]',
-            r'[CH3]',
-        ])
-        self.assertSameMany([
-            r'[C]([H])([H])([H])([H])[H]',
-            r'[H][C]([H])([H])([H])[H]',
-            r'[CH5]',
-        ])
-        self.assertSameMany([
-            r'[H][C]([H])([H])([H])([H])[H]',
-            r'[CH6]',
-        ])
-        self.assertMany([
-            r'[C]',
-            r'[CH7]',
-            r'[CH8]',
-            r'[CH9]',
-        ])
-        self.assertSameMany([
-            r'[SeH]O',
-            r'O[Se][H]',
-        ])
-        self.assertSameMany([
-            r'[ClH]N',
-            r'N[Cl][H]',
-        ])
-        self.assertSameMany([
-            r'[Br][F]',
-            r'FBr',
-        ])
-        self.assertSameMany([
-            r'PI',
-            r'P[I]',
-        ])
-        self.assertSameMany([
-            r'OO',
-            r'[OH]O',
-            r'[OH1][OH]',
-            r'[H][O][O][H]',
-            r'[O]([H])[O][H]',
-        ])
-
-    @unittest.skip("Not implemented yet")
-    def test_chirality_equivalence(self):
-        self.assertSameMany([
-            r'N[C@](Br)(O)C',
-            r'Br[C@](O)(N)C',
-            r'O[C@](Br)(C)N',
-            r'Br[C@](C)(O)N',
-            r'C[C@](Br)(N)O',
-            r'Br[C@](N)(C)O',
-            r'C[C@@](Br)(O)N',
-            r'Br[C@@](N)(O)C',
-            r'[C@@](C)(Br)(O)N',
-            r'[C@@](Br)(N)(O)C',
-        ])
-
-
-## TODO temporary
-m = moleculify
-s = smilesify

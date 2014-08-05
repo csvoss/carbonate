@@ -1,13 +1,16 @@
 """
 toSmiles.py
 
-This code contains the function smilesify(molecule), which converts a Molecule object to a canonical SMILES string:
+This code contains the function smilesify(molecule), which converts a Molecule
+object to a canonical SMILES string:
 http://en.wikipedia.org/wiki/SMILES
-Once a Molecule has been converted to a SMILES string, we can render it as an SVG using renderSVG.py.
-
-Also contains the function to_canonical(smiles), which converts a SMILES string to a canonical SMILES string.
+Once a Molecule has been converted to a SMILES string, we can render it as an
+SVG using renderSVG.py.
 
 PROCEED CAUTIOUSLY -- THIS CODE IS FINICKY
+
+Public-facing methods:
+    `smilesify`
 
 Does not yet support:
 - charge :( :( 
@@ -15,31 +18,9 @@ Does not yet support:
 - isotopes
 """
 from molecularStructure import Molecule
-import openbabel
 import copy
+from toCanonical import to_canonical
 
-
-def to_canonical(smiles):
-    """
-    Uses OpenBabel.
-    Converts a SMILES string to a canonical SMILES string.
-    smiles :: str.
-    return :: str.
-    """
-    obConversion = openbabel.OBConversion()
-    obConversion.SetInAndOutFormats("smi", "can")
-    outMol = openbabel.OBMol()
-    obConversion.ReadString(outMol, str(smiles))
-    ans = obConversion.WriteString(outMol)
-    return ans.strip()
-
-def assertMolecule(molecule):
-    "Assert that molecule is a Molecule."
-    try:
-        assert isinstance(molecule, Molecule)
-    except AssertionError:
-        raise StandardError("Not a molecule: %s is a %s, not %s" % \
-            (repr(molecule), type(molecule), Molecule))
 
 def smilesify(molecule, canonical=True):
     """
@@ -48,14 +29,14 @@ def smilesify(molecule, canonical=True):
 
     Converts Molecule objects to SMILES strings. Traverses the molecule to
     detect and mark rings or cycles. Uses a convoluted system of flags to 
-    do this. Then, passes it on to subsmiles, which operates on a molecule 
+    do this. Then, passes it on to _subsmiles, which operates on a molecule
     with rings already flagged, and performs tree traversal.
 
     return :: str.
     """
     if isinstance(molecule, list):
         try:
-            assertMolecule(molecule[0])
+            _assertMolecule(molecule[0])
         except IndexError:
             return ""
         output = '.'.join(
@@ -69,11 +50,11 @@ def smilesify(molecule, canonical=True):
     if len(molecule.atoms) == 0:
         return ""
 
-    initialize_nonHNeighbors(molecule)
-    flag_rings(molecule)
+    _initialize_nonHNeighbors(molecule)
+    _flag_rings(molecule)
     
-    output = get_generated_smiles(molecule)
-    reset_flags(molecule)
+    output = _get_generated_smiles(molecule)
+    _resetflags(molecule)
 
     if canonical:
         return to_canonical(output)
@@ -82,11 +63,11 @@ def smilesify(molecule, canonical=True):
 
 bond_symbols = ['0', '-', '=', '#', '$']
 
-def subsmiles(molecule, start_atom, parent_atom):
+def _subsmiles(molecule, start_atom, parent_atom):
     """
     Precondition: molecule has been flagged for ring positioning (some rflag 
         values on atoms might != 0). This is done by smilesify().
-    Creates and returns a SMILES string for unflagged (!atom._flag==2) atoms
+    Creates and returns a SMILES string for unflagged (!atom.flag==2) atoms
         within a molecule, starting with the given atom.
 
     molecule :: Molecule.
@@ -102,20 +83,20 @@ def subsmiles(molecule, start_atom, parent_atom):
     """
     
     #Flag the current atom.
-    start_atom._flag = 2
+    start_atom.flag = 2
     
     output = str(start_atom)
 
-    if hasattr(start_atom, 'CTotherC'):
-        return get_subsmiles_cis_trans(output, molecule, start_atom, parent_atom)
+    if start_atom.is_cistrans:
+        return _get_subsmiles_ct(output, molecule, start_atom, parent_atom)
     
 
     ###Put a ring marker on the atom, if its ring partner is not flagged yet.
-    ##if (start_atom._rflag != 0) and (start_atom.rAtom._flag != 2):
-    ##    output += str(start_atom._rflag)
+    ##if (start_atom.rflag != 0) and (start_atom.rAtom.flag != 2):
+    ##    output += str(start_atom.rflag)
 
     #Check if the atom is a chiral center. If so:
-    if hasattr(start_atom, 'chiralA'):
+    if start_atom.is_chiral:
         hasP = (parent_atom != 0)
         hasH = (True in \
                     [a.element.lower() == "h" \
@@ -161,54 +142,58 @@ def subsmiles(molecule, start_atom, parent_atom):
     # Prepare to add new groups for all neighbor atoms which are not the parent
     # atom and not the rAtom.
     else:
-        to_add = [atom for atom in list(start_atom._non_h_neighbors) if not (atom == parent_atom or atom == None)]
+        to_add = [atom for atom in list(start_atom.non_h_neighbors) if not \
+            (atom == parent_atom or atom == None)]
 
     # if to_add == None:
-    #     to_add = [atom for atom in list(start_atom._non_h_neighbors) if not \
+    #     to_add = [atom for atom in list(start_atom.non_h_neighbors) if not \
     #           (atom==parent_atom or atom==None)]
     for atom in to_add:
-        add = get_next_subsmiles(atom, start_atom, molecule)
-        output += "(" +bond_symbols[start_atom._non_h_neighbors[atom]] + add + ")"
+        add = _get_next_subsmiles(atom, start_atom, molecule)
+        output += "("+bond_symbols[start_atom.non_h_neighbors[atom]]+add+")"
 
     return output
 
 
 
-def initialize_nonHNeighbors(molecule):
+def _initialize_nonHNeighbors(molecule):
     "Create the dictionary nonHNeighbors for each atom."
     for atom in molecule.atoms:
-        # atom._non_h_neighbors = dict((a, b) for (a, b)in atom.neighbors.items() if a.element.lower() != "h")
+        # atom.non_h_neighbors=dict((a,b) for (a,b)
+        #       in atom.neighbors.items() if a.element.lower()!="h")
         ## TODO? Ignoring hydrogens is lame.
-        atom._non_h_neighbors = copy.copy(atom.neighbors)
+        atom.non_h_neighbors = copy.copy(atom.neighbors)
 
-def flag_rings(molecule):
+def _flag_rings(molecule):
     "Traverse the molecule once, to hunt down and flag rings."
     ringsfound = 0
-    cur_atom = molecule.atoms[0]
-    home_atom = molecule.atoms[0]
+    atom = molecule.atoms[0] ## current atom
+    home = molecule.atoms[0] ## home atom
 
     #Each iteration: (...while we aren't back to the home atom, or if we are,
                     #while the home atom still has neighbors to read)
-    while ((cur_atom != home_atom) or (home_atom._n_read < len(home_atom._non_h_neighbors))):
+    while atom != home or home.n_read < len(home.non_h_neighbors):
     
         #flag current atom as "read" (flag = 1)
-        cur_atom._flag = 1
+        atom.flag = 1
         
         #if there are neighbors left to read from this atom:
-        if cur_atom._n_read < len(cur_atom._non_h_neighbors):
+        if atom.n_read < len(atom.non_h_neighbors):
             
+            neighbors = list(atom.non_h_neighbors)
+
             #if the next atom is the parent atom:
-            if list(cur_atom._non_h_neighbors)[cur_atom._n_read] == cur_atom._parent_atom:
+            if neighbors[atom.n_read] == atom.parent_atom:
                 #don't do anything but incrementing nRead
-                cur_atom._n_read += 1
+                atom.n_read += 1
                 
             #else,
             else:
-                if list(cur_atom._non_h_neighbors)[cur_atom._n_read]._n_read == 0:
+                if neighbors[atom.n_read].n_read == 0:
                 #if the next atom has not been traversed already:
-                    cur_atom._n_read += 1
-                    list(cur_atom._non_h_neighbors)[cur_atom._n_read - 1]._parent_atom = cur_atom
-                    cur_atom = list(cur_atom._non_h_neighbors)[cur_atom._n_read - 1]
+                    atom.n_read += 1
+                    neighbors[atom.n_read - 1].parent_atom = atom
+                    atom = neighbors[atom.n_read - 1]
                     #increment current atom's nRead counter
                     #make the next atom the current atom:
                     #make the old atom the next atom's parent
@@ -217,41 +202,46 @@ def flag_rings(molecule):
                 #if the next atom has been traversed already:
                     #it's a ring!
                     ringsfound += 1
-                    cur_atom._rflag += [(ringsfound, list(cur_atom._non_h_neighbors)[cur_atom._n_read])]
-                    list(cur_atom._non_h_neighbors)[cur_atom._n_read]._rflag += [(ringsfound, cur_atom)]
-                    cur_atom._n_read += 1
+                    atom.rflag.append((
+                        ringsfound,
+                        neighbors[atom.n_read]
+                    ))
+                    neighbors[atom.n_read].rflag.append((
+                        ringsfound, atom
+                    ))
+                    atom.n_read += 1
                     #increment ringsfound
                     #set rflag on both atoms to ringsfound
                     #increment current atom's nRead counter
                     #make sure the atoms know who each other is
                 
         #if not:
-            #go backwards to parent atom:
-            #set cur_atom to its parent atom
         else:
-            cur_atom = cur_atom._parent_atom
+            #go backwards to parent atom:
+            #set atom to its parent atom
+            atom = atom.parent_atom
 
-def get_generated_smiles(molecule):
+def _get_generated_smiles(molecule):
     """Precondition: Molecule has been flagged for rings already,
-    using flag_rings. Traverses a second time to generate SMILES."""
+    using _flag_rings. Traverses a second time to generate SMILES."""
     start_atom = molecule.atoms[0]
     ## TODO: This is for debugging, and is temporary
     for atom in molecule.atoms:
         if atom.element == 'N':
             start_atom = atom
-    return subsmiles(molecule, start_atom, 0)
+    return _subsmiles(molecule, start_atom, 0)
 
-def reset_flags(molecule):
+def _resetflags(molecule):
     "Reset all old flags."
     for atom in molecule.atoms:
-        atom._flag = 0
-        atom._rflag = []
-        atom._n_read = 0
-        atom._parent_atom = 0
-        atom._non_h_neighbors = []
+        atom.flag = 0
+        atom.rflag = []
+        atom.n_read = 0
+        atom.parent_atom = 0
+        atom.non_h_neighbors = []
 
 
-def rflag_to_str(rflag):
+def _rflag_to_str(rflag):
     """
     Convert 3 to 3 and 45 to %45. For ring bonds.
     rflag :: int
@@ -268,41 +258,62 @@ def rflag_to_str(rflag):
         raise StandardError("Too many rings in molecule. 100 is too many.")
 
 
-def get_subsmiles_cis_trans(outp, molecule, start_atom, parent_atom):
+def _get_subsmiles_ct(output, molecule, start_atom, parent_atom):
     """
     Check if the atom is a cis-trans center. Output correctly if so.
-    Remember to worry about cis-trans centers that might be part of a ring system.
+    Remember to worry about cis-trans centers that might be in a ring system.
     Remember to worry about whether or not an atom has a parent atom.
     Adds ring labels.
     """
     atomsToLink = [start_atom.CTotherC, start_atom.CTa, start_atom.CTb]
     begin = ["", "/", "\\"]
-    if start_atom.CTotherC._flag == 2:
+    if start_atom.CTotherC.flag == 2:
         begin = ["", "\\", "/"]
     if start_atom.CTa == parent_atom:
-        outp = begin[2] + outp
+        output = begin[2] + output
     if start_atom.CTb == parent_atom:
-        outp = begin[1] + outp
+        output = begin[1] + output
     for ind in range(3):
         atom = atomsToLink[ind]
         if (atom != None) and (atom != parent_atom):
-            if atom in [rf[1] for rf in start_atom._rflag]:
-                outp += "(" + begin[ind] + bond_symbols[start_atom._non_h_neighbors[atom]] + rflag_to_str(start_atom._rflag[[rf[1] for rf in start_atom._rflag].index(atom)][0]) + ")"
-            elif atom._flag == 1:
-                outp += "(" + begin[ind] + bond_symbols[start_atom._non_h_neighbors[atom]] + subsmiles(molecule, atom, start_atom) + ")"
-    return outp
+            if atom in [rf[1] for rf in start_atom.rflag]:
+                output += ''.join([
+                    "(",
+                    begin[ind],
+                    bond_symbols[start_atom.non_h_neighbors[atom]],
+                    _rflag_to_str(start_atom.rflag[
+                        [rf[1] for rf in start_atom.rflag].index(atom)][0]),
+                    ")",
+                ])
+            elif atom.flag == 1:
+                output += ''.join([
+                    "(",
+                    begin[ind],
+                    bond_symbols[start_atom.non_h_neighbors[atom]],
+                    _subsmiles(molecule, atom, start_atom),
+                    ")",
+                ])
+    return output
 
 
-def get_next_subsmiles(atom, start_atom, molecule):
+def _get_next_subsmiles(atom, start_atom, molecule):
     """
     Recursion is your friend.
-    Be sure to specify the base case (when zero non-parent non-ring atoms are available to bond to)
+    Be sure to specify the base case (when zero non-parent non-ring atoms are 
+        available to bond to).
     In the base case, this loop won't even be entered.
     """
-    if (start_atom._rflag != []) and (atom in [rf[1] for rf in start_atom._rflag]):
-        return rflag_to_str(start_atom._rflag[[rf[1] for rf in start_atom._rflag].index(atom)][0])
-    #elif atom._flag == 2:
-        #You *really* don't want to enter subsmiles to this atom
-        #pass
+    if (start_atom.rflag != []) and (atom in [r[1] for r in start_atom.rflag]):
+        return _rflag_to_str(start_atom.rflag[
+            [r[1] for r in start_atom.rflag].index(atom)][0])
     else:
-        return subsmiles(molecule, atom, start_atom)
+        return _subsmiles(molecule, atom, start_atom)
+
+
+def _assertMolecule(molecule):
+    "Assert that molecule is a Molecule."
+    try:
+        assert isinstance(molecule, Molecule)
+    except AssertionError:
+        raise StandardError("Not a molecule: %s is a %s, not %s" % \
+            (repr(molecule), type(molecule), Molecule))
