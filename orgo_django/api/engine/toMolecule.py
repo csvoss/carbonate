@@ -24,9 +24,8 @@ import re
 from rply import ParserGenerator, LexerGenerator, ParsingError
 from rply.token import BaseBox
 
-from molecularStructure import Molecule, Atom
-
-
+from molecularStructure import Molecule, Atom, DEBUG
+from toCanonical import to_canonical
 
 #### TODO ----
 # Tetrahedral Allene-like Systems
@@ -50,14 +49,19 @@ def moleculify(smiles):
     """
     #return example_molecule()
     if isinstance(smiles, list):
-        return [moleculify(i) for i in smiles]
+        return [m for i in smiles for m in moleculify(i)]
     else:
         try:
+            if not DEBUG:
+                smiles = to_canonical(smiles)
             smiles = preprocess(smiles)
             lexed = LEXER.lex(smiles)
             return PARSER.parse(lexed)
         except ParsingError as e:
-            raise StandardError(e.getsourcepos())
+            if DEBUG:
+                raise StandardError(e.getsourcepos())
+            else:
+                return Molecule(Atom("*"))
 
 
 ############################
@@ -92,7 +96,10 @@ def bond_at(bond, mol1, atom1, atom2, mol2):
     return :: None. Works via side effects.
     """
     if bond == '.':
-        raise StandardError("bond_at called with '.' as bond")
+        if DEBUG:
+            raise StandardError("bond_at called with '.' as bond")
+        else:
+            return bond_at(DEFAULT_BOND, mol1, atom1, atom2, mol2)
     elif bond == DEFAULT_BOND:
         ## TODO: support aromaticity!!!
         ## If the two atoms in question are aromatic, this is an aromatic bond
@@ -107,10 +114,13 @@ def bond_at(bond, mol1, atom1, atom2, mol2):
         ## This is always an aromatic bond.
         mol1.addMolecule(mol2, atom2, atom1, AROMATIC_BOND)
     else:
-        raise NotImplementedError("/ and \\ are not yet implemented.")
         ## TODO.
         ## Idea: Implement / and \\ by adding them as relevant flags,
         ## then postprocessing molecules to add cis/trans centers
+        if DEBUG:
+            raise NotImplementedError("/ and \\ are not yet implemented.")
+        else:
+            return bond_at(DEFAULT_BOND, mol1, atom1, atom2, mol2)
 
 def dictof(thing):
     "Printable `thing.__dict__` if possible, else just `thing`"
@@ -222,6 +232,7 @@ def preprocess(smiles):
             val + r'\1',
             output
         )
+
     return output
 
 
@@ -461,6 +472,8 @@ def add_rings_and_branches(atom, ringlinks, branches):
     assert_isinstance(ringlinks, list)
     assert_isinstance(branches, list)
     output = BranchedAtom(Molecule(atom), atom)
+    for ringlink in ringlinks:
+        output.append_ring(ringlink.index, ringlink.bond)
     for branch in branches:
         output.append_dotteds(branch.chain.dotted_molecules)
         output.append_rings(branch.chain.ring_data_list)
@@ -476,13 +489,11 @@ def add_rings_and_branches(atom, ringlinks, branches):
                 other_atom,
                 other_molecule
             )
-    for ringlink in ringlinks:
-        output.append_ring(ringlink.index, ringlink.bond)
     return output
 
 # branched_atom :: BranchedAtom.
 # middle_atom :: Atom, [Ringlink], [Branch].
-# ringed_atom :: Atom, [Ringlink], [Branch].
+# ringed_atom :: Atom, [Ringlink].
 @PG.production("branched_atom : middle_atom")
 def branched_to_branched2(p):
     " :: BranchedAtom"
@@ -491,12 +502,17 @@ def branched_to_branched2(p):
 @PG.production("middle_atom : ringed_atom")
 def branched_to_ringed(p):
     " :: Atom, [Ringlink], [Branch]"
-    return p[0]
+    atoms, ringlinks = p[0]
+    branches = []
+    return atoms, ringlinks, branches
 @PG.production("middle_atom : middle_atom branch")
 def branched_to_branched(p):
     " :: Atom, [Ringlink], [Branch]"
     atom, ringlinks, branches = p[0]
     branch = p[1]
+    assert_isinstance(atom, Atom)
+    assert_isinstance(ringlinks, list)
+    assert_isinstance(branches, list)
     assert_isinstance(branch, Branch)
 
     ## Tetrahedral Chirality
@@ -505,12 +521,19 @@ def branched_to_branched(p):
     if atom.chirality is not None:
         atom.chirality.append(branch.chain.first_atom)
 
+    ## case: first_atom in branch is chiral
+    ##       and it needs to know about middle_atom
+    if branch.chain.first_atom.chirality is not None:
+        branch.chain.first_atom.chirality.prepend(atom)
+
     return atom, ringlinks, branches+[branch]
 @PG.production("ringed_atom : ringed_atom ringlink")
 def ringed_to_ringed(p):
-    " :: Atom, [Ringlink], [Branch]"
-    atom, ringlinks, branches = p[0]
+    " :: Atom, [Ringlink]"
+    atom, ringlinks = p[0]
     ringlink = p[1]
+    assert_isinstance(atom, Atom)
+    assert_isinstance(ringlinks, list)
     assert_isinstance(ringlink, Ringlink)
 
     ## Tetrahedral Chirality
@@ -519,12 +542,13 @@ def ringed_to_ringed(p):
     if atom.chirality is not None:
         atom.chirality.append(ringlink.index)
 
-    return atom, ringlinks+[ringlink], branches
+    return atom, ringlinks+[ringlink]
 @PG.production("ringed_atom : atom")
 def ringed_to_atom(p):
-    " :: Atom, [Ringlink], [Branch]"
+    " :: Atom, [Ringlink]"
     atom = p[0]
-    return atom, [], []
+    assert_isinstance(atom, Atom)
+    return atom, []
 
 
 class Ringlink(BaseBox):
@@ -690,7 +714,10 @@ def bracket_atom_hydrogen_isotopes(p):
     elif p[0].getstr() == 'T':
         isotope = 3
     else:
-        raise StandardError
+        if DEBUG:
+            raise StandardError("Neither D nor T. How did you get here??")
+        else:
+            isotope = 1
     return bracket_atom_full(isotope, ('H', False), None, None, None, None)
 
 def bracket_atom_full(isot, symb, chir, hcou, chge, clss):
@@ -720,7 +747,8 @@ def bracket_atom_full(isot, symb, chir, hcou, chge, clss):
             output.chirality.append_hydrogen()
         else:
             output.chirality = None
-            raise StandardError("No more than 1 hydrogen with a chiral atom")
+            if DEBUG:
+                raise StandardError("No more than 1 H for a single chiral atom")
 
 
 
@@ -852,7 +880,10 @@ class Chirality(BaseBox):
             elif self.string == '@@': ## clockwise
                 self.central_atom.newChiralCenter(ref, cwlist)
             else:
-                raise NotImplementedError("TODO: other forms of chirality")
+                if DEBUG:
+                    raise NotImplementedError("TODO: other forms of chirality")
+                else:
+                    pass
 
 ##### HYDROGENS #####
 
@@ -911,9 +942,12 @@ def class_production(p):
 @PG.error
 def error_handler(token, expected=None):
     "Handle parser errors."
-    raise ValueError(("Ran into a %s (%s) where it wasn't expected."+\
-        "At %s. Instead expected: %s.") % (repr(token.name), \
-        repr(token.value), dictof(token.source_pos), repr(expected)))
+    if DEBUG:
+        raise ValueError(("Ran into a %s (%s) where it wasn't expected."+\
+            "At %s. Instead expected: %s.") % (repr(token.name), \
+            repr(token.value), dictof(token.source_pos), repr(expected)))
+    else:
+        print "Warning: parser error"
 
 
 LEXER = LG.build()

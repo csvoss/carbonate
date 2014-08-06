@@ -10,6 +10,8 @@ http://openbabel.org/wiki/Python
 import openbabel
 import re
 
+VERBOSE = False
+
 #Set up input and output formats
 
 def render(smiles, hydrogens=False):
@@ -21,6 +23,8 @@ def render(smiles, hydrogens=False):
     obConversion = openbabel.OBConversion()
     obConversion.SetInAndOutFormats("smi", "svg")
     outMol = openbabel.OBMol()
+    if VERBOSE:
+        print "SVGing: %s" % str(smiles)
     obConversion.ReadString(outMol, str(smiles))
     ans = obConversion.WriteString(outMol)
     

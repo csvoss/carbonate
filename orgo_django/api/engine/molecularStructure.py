@@ -7,6 +7,8 @@ import copy
 #Testing - replace "H" with "Br" to visualize all hydrogens
 HYDROGEN = "H"
 
+DEBUG = True
+
 class Molecule(object):
     """
     This class represents the structure of a molecule.
@@ -33,9 +35,11 @@ class Molecule(object):
         if bondOrder == 0:
             return
         if bondOrder not in [1, 2, 3, 4]:
-            raise StandardError("Invalid bond order: %s" % str(bondOrder))
+            if DEBUG:
+                raise StandardError("Invalid bond order: %s" % str(bondOrder))
         if targetAtom not in self.atoms:
-            raise StandardError("Target atom not already in molecule.")
+            if DEBUG:
+                raise StandardError("Target atom not already in molecule.")
         if newAtom in self.atoms:
             print "WARNING: new atom already in molecule. Using addBond."
             return self.addBond(targetAtom, newAtom, bondOrder)
@@ -50,11 +54,13 @@ class Molecule(object):
         bondOrder :: int. 1, 2, 3, or 4.
         """
         if atom1 not in self.atoms:
+            if DEBUG:
+                raise StandardError("Improper use of addBond")
             self.atoms.append(atom1)
-            # raise StandardError("atom1 not in molecule. %s" % atom1.element)
         if atom2 not in self.atoms:
+            if DEBUG:
+                raise StandardError("Improper use of addBond")
             self.atoms.append(atom2)
-            # raise StandardError("atom2 not in molecule. %s" % atom2.element)
         atom1.neighbors[atom2] = bondOrder
         atom2.neighbors[atom1] = bondOrder
 
@@ -92,8 +98,9 @@ class Molecule(object):
         newBondOrder :: int. 0, 1, 2, 3, or 4.
         Note that newBondOrder=0 breaks the bond.
         """
-        assert atom1 in self.atoms, "Not in molecule: %s" % str(atom1)
-        assert atom2 in self.atoms, "Not in molecule: %s" % str(atom2)
+        if DEBUG:
+            assert atom1 in self.atoms, "Not in molecule: %s" % str(atom1)
+            assert atom2 in self.atoms, "Not in molecule: %s" % str(atom2)
 
         if newBondOrder == 0:
             del atom1.neighbors[atom2]
@@ -120,26 +127,39 @@ class Molecule(object):
                     continue
                 val = 0
                 for neighbor in atom.neighbors:
+                    if DEBUG:
+                        assert neighbor in self.atoms
                     val += atom.neighbors[neighbor]
                 diff = maxval - val
+
             else:
                 hydrogen_already_added = 0
                 for neighbor in atom.neighbors:
                     if neighbor.element == 'H':
                         hydrogen_already_added += 1
                 diff = atom.hcount - hydrogen_already_added
-            assert int(diff) == diff, "Non-integer bond order %s" % str(atom)
+
             for _ in xrange(int(diff)):
                 H = Atom(HYDROGEN)
                 self.addAtom(H, atom, 1)
 
+            # if atom.element != "U":
+            #     self.addAtom(Atom("U"), atom, 1)
+
             ## TODO: If the atom is chiral, replace its chiral None with
             ## the relevant hydrogen
+
+            ## TODO: This causes my tests to fail !?!?!?
+            # for atom in atom.neighbors:
+            #     if atom is None:
+            #         raise StandardError("None")                
 
             if atom.chirality is not None:
                 if atom.is_chiral and atom.chirality.hydrogen:
                     hydrogens = [a for a in atom.neighbors if a.element == 'H']
-                    assert len(hydrogens) == 1, "Weird [C@H] misbehaviour"
+                    if DEBUG:
+                        assert len(hydrogens) == 1, "Weird [C@H] misbehaviour"+\
+                            " %s has %s h's" % (str(atom), str(len(hydrogens)))
                     hydrogen = hydrogens[0]
                     if atom.chiralA == None:
                         atom.chiralA = hydrogen
@@ -150,7 +170,8 @@ class Molecule(object):
                     elif atom.chiralD == None:
                         atom.chiralD = hydrogen
                     else:
-                        raise StandardError("[C@H] weirdness: why no H?")
+                        if DEBUG:
+                            raise StandardError("[C@H] weirdness: why no H?")
 
 
     def countElement(self, element):
@@ -231,6 +252,9 @@ class Atom(object):
         else:
             brackets = True
 
+        if not self.element in ['C','N','O','F','S','P','Cl','Br','I','B']:
+            brackets = True
+
         ## Isotope
         if self.isotope is not None:
             brackets = True
@@ -262,7 +286,8 @@ class Atom(object):
 
     def charge_string(self):
         "return :: str."
-        assert isinstance(self.charge, int)
+        if DEBUG:
+            assert isinstance(self.charge, int)
         if self.charge == -1:
             return '-'
         elif self.charge < 0:
@@ -332,7 +357,8 @@ class Atom(object):
         return :: a list of 3 Atoms.
         """
         if not self.is_chiral:
-            raise StandardError("%s atom is not chiral" % (str(self)))
+            if DEBUG:
+                raise StandardError("%s atom is not chiral" % (str(self)))
         if reference == self.chiralA:
             return [self.chiralB, self.chiralC, self.chiralD]
         elif reference == self.chiralB:
@@ -346,56 +372,63 @@ class Atom(object):
                 % str(reference)
             msg += ", ".join([str(self.chiralA), str(self.chiralB),
                               str(self.chiralC), str(self.chiralD)])
-            raise StandardError(msg)
+            if DEBUG:
+                raise StandardError(msg)
+            else:
+                return [atom for atom in self.neighbors if not atom == reference]
     
-    def chiralRingList(self, inport, outport):
+    def chiralRingList(self, inport, outpt):
         """
         Returns which substituent is up, followed by which one is down,
         in a ring context. Assume that the ring veers left (ccw).
 
         inport :: Atom.
-        outport :: Atom.
+        outpt :: Atom.
         return :: a tuple of 2 Atoms.
 
         **DEPRECATED**. Please stick to using chiralCWlist.
         """
         if not self.is_chiral:
-            raise StandardError("%s atom is not chiral" % (str(self)))
+            if DEBUG:
+                raise StandardError("%s atom is not chiral" % (str(self)))
         if inport == self.chiralA:
-            if outport == self.chiralB:
+            if outpt == self.chiralB:
                 return (self.chiralC, self.chiralD)
-            if outport == self.chiralC:
+            if outpt == self.chiralC:
                 return (self.chiralD, self.chiralB)
-            if outport == self.chiralD:
+            if outpt == self.chiralD:
                 return (self.chiralB, self.chiralC)
         elif inport == self.chiralB:
-            if outport == self.chiralA:
+            if outpt == self.chiralA:
                 return (self.chiralD, self.chiralC)
-            if outport == self.chiralC:
+            if outpt == self.chiralC:
                 return (self.chiralA, self.chiralD)
-            if outport == self.chiralD:
+            if outpt == self.chiralD:
                 return (self.chiralC, self.chiralA)
         elif inport == self.chiralC:
-            if outport == self.chiralA:
+            if outpt == self.chiralA:
                 return (self.chiralB, self.chiralD)
-            if outport == self.chiralB:
+            if outpt == self.chiralB:
                 return (self.chiralD, self.chiralA)
-            if outport == self.chiralD:
+            if outpt == self.chiralD:
                 return (self.chiralA, self.chiralB)
         elif inport == self.chiralD:
-            if outport == self.chiralA:
+            if outpt == self.chiralA:
                 return (self.chiralC, self.chiralB)
-            if outport == self.chiralB:
+            if outpt == self.chiralB:
                 return (self.chiralA, self.chiralC)
-            if outport == self.chiralC:
+            if outpt == self.chiralC:
                 return (self.chiralB, self.chiralA)
                 
-        msg = "Error in chiralCWlist: no such inport and outport: %s, %s\n" %\
-              (str(inport), str(outport))
+        msg = "Error in chiralCWlist: no such inport and outpt: %s, %s\n" %\
+              (str(inport), str(outpt))
         msg += ", ".join[str(self.chiralA), str(self.chiralB),
                          str(self.chiralC), str(self.chiralD)]
-        raise StandardError(msg)
-        
+        if DEBUG:
+            raise StandardError(msg)
+        else:
+            return [a for a in self.neighbors if not a == inport or a == outpt]
+    
     def newCTCenter(self, otherC, a, b):
         """
         CTCenters (cis-trans centers) must come in pairs.  Both of the
@@ -410,17 +443,19 @@ class Atom(object):
 
         Raises AlleneError if newCTCenter has already been applied to this atom.
         """
-        if self.is_cistrans:
+        if self.is_cistrans and DEBUG:
             ## That would make this carbon the center of an allene!
             ## Keeping track of stereochem for allenes is Hard.
             ## TODO: Make it so that we can in fact handle allenes?
             raise AlleneError("Attempt to add extra CTcenter to %s" % str(self))
+        if not (self.neighbors[otherC] == 2 and otherC.neighbors[self] == 2):
+            if DEBUG:
+                raise StandardError("cis-trans center without double bond")
+            else:
+                return
         self.CTotherC = otherC
         self.CTa = a
         self.CTb = b
-
-        if not (self.neighbors[otherC] == 2 and otherC.neighbors[self] == 2):
-            raise StandardError("cis-trans center without double bond")
     
     def eliminateChiral(self):
         """

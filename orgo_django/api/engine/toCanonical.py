@@ -10,6 +10,8 @@ Public-facing methods:
 
 import openbabel
 
+VERBOSE = False
+
 def to_canonical(smiles):
     """
     Uses OpenBabel.
@@ -20,6 +22,8 @@ def to_canonical(smiles):
     obConversion = openbabel.OBConversion()
     obConversion.SetInAndOutFormats("smi", "can")
     outMol = openbabel.OBMol()
+    if VERBOSE:
+        print "Canonizing: %s" % str(smiles)
     obConversion.ReadString(outMol, str(smiles))
     ans = obConversion.WriteString(outMol)
     return ans.strip()

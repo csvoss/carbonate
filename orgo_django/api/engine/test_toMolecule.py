@@ -80,6 +80,8 @@ example_smiles_chiral = [
     r"C([C@@H]1[C@H]([C@@H]([C@H](C(O1)O)O)O)O)O", ## glucose
     r"CC[C@H](O1)CC[C@@]12CCCO2", ## another pheromone
     r"CC(C)[C@@]12C[C@@H]1[C@@H](C)C(=O)C2", ## alpha-thujone
+    r"CC([C@H](C)Cl)Br",
+    r"C([C@H](F)Cl)",
 ]
 example_smiles_hard = [
     r"CCC[C@@H](O)CC\C=C\C=C\C#CC#C\C=C\CO", ## enanthotoxin
@@ -109,13 +111,10 @@ example_smiles_hard_no_chirality_or_cistrans = [
     r"CCC[CH](O)CCC=CC=CC#CC#CC=CCO", ## enanthotoxin
     r"COC(=O)C(C)=CC1C(C)(C)[CH]1C(=O)O[CH]2C(C)=C(C(=O)C2)CC=CC=C",
     r"CC(=O)OCCC(C)=CC[CH](C(C)=C)CCC=C", ## some pheromone
-    r"C[C](C)(O1)C[CH](O)[C]1(O2)[CH](C)[CH]3CC=C4[C]3(C"+\
-        "2)C(=O)C[CH]5[CH]4CC[CH](C6)[C]5(C)CC(N7)C6NC(C[C]"+\
-        "89(C))C7C[CH]8CC[CH]%10[CH]9C[CH](O)[C]%11(C)C%"+\
-        "10=C[CH](O%12)[C]%11(O)[CH](C)[C]%12(O%13)[CH](O)C[C"+\
-        "]%13(C)CO", ## Cephalostatin-1 without aromaticity. Note
-                     ## the % before ring closure labels above 9.
+    r"C[C](C)(O1)C[CH](O)[C]1(O2)[CH](C)[CH]3CC=C4[C]3(C2)C(=O)C[CH]5[CH]4CC[CH](C6)[C]5(C)CC(N7)C6NC(C[C]89(C))C7C[CH]8CC[CH]%10[CH]9C[CH](O)[C]%11(C)C%10=C[CH](O%12)[C]%11(O)[CH](C)[C]%12(O%13)[CH](O)C[C]%13(C)CO", ## Cephalostatin-1 without aromaticity. Note the % before ring closure labels above 9.
 ]
+# C[C](C)(O1)C[CH](O)[C]1(O2)[CH](C)[CH]3CC=C4[C]3(C2)C(=O)C[CH]5[CH]4CC[CH](C6)[C]5(C)CC(N7)C6NC(C[C]89(C))C7C[CH]8CC[CH]%2510[CH]9C[CH](O)[C]%2511(C)C%2510=C[CH](O%2512)[C]%2511(O)[CH](C)[C]%2512(O%2513)[CH](O)C[C]%2513(C)CO
+# OCC1(C)CC(C2(O1)OC1C(C2C)(O)C2(C(=C1)C1CCC3C(C1CC2O)(C)CC1C(C3)NC2C(N1)CC1C(C2)(C)C2CC(=O)C34C(=CCC4C(C4(OC3)OC(CC4O)(C)C)C)C2CC1)C)O
 
 example_smiles = example_smiles_easy + example_smiles_cistrans +\
     example_smiles_chiral + example_smiles_hard + example_smiles_atoms
@@ -124,28 +123,21 @@ example_smiles = example_smiles_easy + example_smiles_cistrans +\
 class TestToMolecule(unittest.TestCase):
     "Test ALL the features!"
 
-    def tryAssertEqual(self, one, two):
-        "Assert that one = two, but print error messages (also reraise them)."
-        try:
-            self.assertEqual(one, two)
-        except AssertionError:
-            if DEBUG:
-                print "\n%s does not match %s\n" % (one, two)
-                raise
-
     def assertOne(self, smi):
         "Assert that a single smiles is OK."
-        self.tryAssertEqual(
-            to_canonical(smi),
-            smilesify(moleculify(smi), canonical=True)
-        )
         try:
-            self.tryAssertEqual(
+            self.assertEqual(
+                to_canonical(smi),
+                smilesify(moleculify(smi), canonical=True)
+            )
+            self.assertEqual(
                 to_canonical(smi),
                 smilesify(moleculify(to_canonical(smi)), canonical=True)
             )
-        except:
-            print to_canonical(smi)
+        except AssertionError, StandardError:
+            if DEBUG:
+                print "\n%s\n" % smi
+                raise
 
     def assertMany(self, smileses):
         "Assert that each in a list of smiles are OK."
@@ -154,11 +146,11 @@ class TestToMolecule(unittest.TestCase):
 
     def assertSame(self, smiles1, smiles2):
         "Assert that two smiles produce the same output."
-        self.tryAssertEqual(
+        self.assertEqual(
             smilesify(moleculify(smiles1), canonical=True),
             smilesify(moleculify(smiles2), canonical=True)
         )
-        self.tryAssertEqual(
+        self.assertEqual(
             to_canonical(smiles1),
             smilesify(moleculify(smiles1), canonical=True)
         )
@@ -244,6 +236,8 @@ class TestToMolecule(unittest.TestCase):
             r"CC2CCCCC3CCCC1CC2C3C1CC",
             r"C1C2C3C4C5C6C7C8C9C%10C%11CCC%11C%10C9C8C7C6C5C4C3C2C1",
             r"C123CCC1C2C3",
+            r"CC2(CC(CC2)C2CCC2C)C",
+            r"C2(CCC2CCC2CCC2)",
         ]
         self.assertMany(smileses)
 
@@ -467,7 +461,6 @@ class TestToMolecule(unittest.TestCase):
         #     r'c1ccc1',
         #     r'C1=CC=C1',
         # ])
-
 
     def test_truly_evil_molecule(self):
         "Why must I hold my code to these standards..."
