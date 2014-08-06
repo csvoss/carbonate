@@ -7,10 +7,10 @@ Contains API views.
 from django.shortcuts import render
 from django.http import HttpResponse
 from engine.renderSVG import render as svg_render
-from engine.randomGenerator import randomStart
+from engine.randomGenerator import random_molecule
 from engine.toMolecule import moleculify
 from engine.toSmiles import smilesify, to_canonical
-import api.engine.reactions
+import api.engine.reaction_functions
 
 from api.models import Reagent, Reaction, ReagentSet
 import json
@@ -163,33 +163,36 @@ def get_reagent(request, pk):
     return HttpResponse(json.dumps(reagent_data))
 
 #use to get a valid reagent by name. throws error otherwise
-def get_valid_reagent(request):
-    name = request.GET.get("name", '')
-    name = name.strip('"').strip("'")
-    if len(name) == 0:
-        raise StandardError("No name provided")
-    reagent = Reagent.objects.get(name__iexact=name)
-    return HttpResponse(reagent.name)
+# def get_valid_reagent(request):
+#     name = request.GET.get("name", '')
+#     name = name.strip('"').strip("'")
+#     if len(name) == 0:
+#         raise StandardError("No name provided")
+#     reagent = Reagent.objects.get(name__iexact=name)
+#     return HttpResponse(reagent.name)
 
 #If the user enters in name=input or properties=input, what reagent(s) do I get?
 def find_reagents(request):
     if request.method == "GET":
         reagent_name = request.GET.get('name', '')
         reagent_name = reagent_name.strip('"').strip("'")
-
-        reagent_props = parse_input(request.GET.get('properties',''))
-
+        reagent_props = parse_input(request.GET.get('properties', ''))
         reagents = Reagent.objects.all()
 
         if reagent_name is not '':
-            reagents = reagents.filter(name__istartswith=reagent_name) #TODO: Change once name is changed to StringListField
+            reagents = reagents.filter(name__istartswith=reagent_name)
+                # ^ TODO: Change once name is changed to StringListField
         
         #Recursively filterto get only reagents that have ALL the properties
         for prop_name in reagent_props:
             #iexact for case-insensitive (eg Aprotic = aprotic = apROtiC)
             reagents = reagents.filter(properties__name__iexact=prop_name)
 
-        reagents = reagents.select_related('name', 'id', 'diagram_name', 'smiles', 'is_solvent').prefetch_related('properties')
+        reagents = reagents.select_related(
+            'name', 'id', 'diagram_name',
+            'smiles', 'is_solvent'
+        ).prefetch_related('properties')
+        
         reagent_data = []
         for reagent in reagents:
             reagent_data.append(get_reagent_data(reagent))
@@ -213,25 +216,30 @@ def react(request):
     #pseudocode/almost code but it wouldn't actually work
     # TODO: Make this work!
     reactionID = request.GET.get('reaction', None)
-    reactants = moleculify(request.GET.get('reactants', None))
+    reactants = json.loads(request.GET.get('reactants', None))
+    if reactants == None:
+        return ""
+    reactants = moleculify(reactants)
     function_name = Reaction.objects.get(id=reactionID).process_function
-    #raise StandardError(function_name)
-    reaction = getattr(api.engine.reactions, function_name)
+    reaction = getattr(api.engine.reaction_functions, function_name)
     products = reaction(reactants)
     return HttpResponse(smilesify(products))
 
 #Render a molecule (convert SMILES to SVG)
 def render_SVG(request):
     smiles = request.GET.get('molecule', None) # change to error raise later
-    hydrogens = request.GET.get('hydrogens', False) # hydrogens default to false
-    return HttpResponse(svg_render(smiles, hydrogens))
+    if smiles == None:
+        smiles = request.GET.get('mol', None)
+    return HttpResponse(svg_render(smiles))
 
 #Return a randomly-generated molecule (output a SMILES)
 def random_gen_smiles(request):
-    mol, _, _ = randomStart()
+    mol = random_molecule()
+    print "Made! Smilesifying..."
     return HttpResponse(smilesify(mol))
 
 #Render a randomly-generated molecule (output a SVG)
 def random_gen_SVG(request):
-    mol, _, _ = randomStart()
+    mol = random_molecule()
+
     return HttpResponse(svg_render(smilesify(mol)))

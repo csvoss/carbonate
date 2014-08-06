@@ -160,7 +160,7 @@ def tripleAdd(molecule, target1, target2, add1, add2, cisOrTrans,
         if cisOrTrans.lower() == 'trans':
             thisTarget.newCTCenter(otherTarget, otherAttached, CTthing)
         else:
-            if hasattr(otherTarget, "CTotherC"):
+            if otherTarget.is_cistrans:
                 thisTarget.newCTCenter(otherTarget, otherAttached, CTthing)
             else:
                 thisTarget.newCTCenter(otherTarget, CTthing, otherAttached)
@@ -216,8 +216,7 @@ def moleculeCompare(a, b, checkChiral = True):
             for atom in b.atoms:
                 if atom.element == a.atoms[0].element:
                     oldCompareDict = {a.atoms[0]:atom, None:None}
-                    newCompareDicts = neighborCompare(a.atoms[0], atom,
-                                    oldCompareDict)
+                    newCompareDicts = neighborCompare(a.atoms[0], atom, oldCompareDict)
                     if newCompareDicts == None:
                         continue
                     for newCompareDict in newCompareDicts:
@@ -234,8 +233,7 @@ def moleculeCompare(a, b, checkChiral = True):
             if newDictSectors == None:
                 return False
             for newDictSector in newDictSectors:
-                if insideCompare(a, b, dict(compareDict.items() + newDictSector.items()),
-                                   expanded + [aAtom]):
+                if insideCompare(a, b, dict(compareDict.items() + newDictSector.items()), expanded + [aAtom]):
                     return True
             return False
                 
@@ -251,17 +249,17 @@ def moleculeCompare(a, b, checkChiral = True):
         #If the elements don't match, obviously there are no pairings.
         if sorted(aN) != sorted(bN):
             return None
-        if hasattr(a, "chiralA") != hasattr(b, "chiralA"):
+        if a.is_chiral != b.is_chiral:
             #One atom has chirality, where the other doesn't.  Obviously no pairings.
             return None
-        if hasattr(a, "chiralA"):
+        if a.is_chiral:
             chiralFlag = True
         else:
             chiralFlag = False
-        if hasattr(a, "CTotherC") != hasattr(b, "CTotherC"):
+        if a.is_cistrans != b.is_cistrans:
             #One atom has a cis-trans center, where the other doesn't.  Obviously no pairings.
             return None
-        if hasattr(a, "CTotherC"):
+        if a.is_cistrans:
             CTFlag = True
         else:
             CTFlag = False
@@ -302,6 +300,7 @@ def moleculeCompare(a, b, checkChiral = True):
                 #hypothesized pairing follows the correct chirality.
                 aCW = []
                 bCW = []
+                raise StandardError(aNeighborSet)
                 for neighbor in a.chiralCWlist(aNeighborSet[0]):
                     if neighbor == None:
                         #Hydrogen.
@@ -633,7 +632,7 @@ def splice(molecules):
 def verify(molecule):
     #Checks to make sure that the linkage and stereochem of each atom match.
     for atom in molecule.atoms:
-        if hasattr(atom, 'chiralA'):
+        if atom.is_chiral:
             for neighbor in (atom.chiralA, atom.chiralB, atom.chiralC, atom.chiralD):
                 if neighbor == None:
                     continue
@@ -642,7 +641,7 @@ def verify(molecule):
             for neighbor in atom.neighbors.keys():
                 if neighbor not in (atom.chiralA, atom.chiralB, atom.chiralC, atom.chiralD):
                     print "-----Error - chirality broken B!-----"
-        if hasattr(atom, 'CTa'):
+        if atom.is_cistrans:
             for neighbor in (atom.CTotherC, atom.CTa, atom.CTb):
                 if neighbor == None:
                     continue

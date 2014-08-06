@@ -523,7 +523,6 @@ KOCCH33=35
     #a function of two variables, which takes in a list of molecules (x) and another list of molecules (o) and returns them reacted
 #These are listed roughly by precedence: earlier-listed reactions which qualify take precedence over later-listed ones.
 REACTIONS = (
-(((H2SO4,), (H2O,), (HGSO4,)), (lambda x: lambda o: acidhydrate(x+o, Molecule(Atom("O")), True)), ('10B Alkenes: other',)),
 (((H2,),(PDC,),(ETOH,)), (lambda x: lambda o: hydrogenate(x+o)), ('10A Alkenes: halide addition',)),
 (((HBR,), (ROOR,), (HEAT, LIGHT)), (lambda x: lambda o: radicalhydrohalogenate(x+o, "Br")), ('10A Alkenes: halide addition',)),
 (((HBR,),(CH2CL2,), (EQV1,)), (lambda x: lambda o: hydrohalogenate1eq(x+o, "Br")), ('10A Alkenes: halide addition',)),

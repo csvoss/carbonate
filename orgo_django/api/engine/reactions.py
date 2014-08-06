@@ -43,7 +43,7 @@ def reduceChirality(molList):
             #a and b are linked in the same way.
             for Acenter in compareDict.keys():
                 Bcenter = compareDict[Acenter]
-                if hasattr(Acenter, "chiralA") and hasattr(Bcenter, "chiralA"):
+                if Acenter.is_chiral and Bcenter.is_chiral:
                     #Let's see if the chiralities are different.  We already know that the linkages
                     #around Acenter and Bcenter are the same.
                     Batoms1 = [compareDict[atom] for atom in Acenter.chiralCWlist(Acenter.chiralA)]
@@ -501,7 +501,7 @@ def tertButoxide(molecules):
             if stop:
                 continue
             #Test for chirality.
-            if hasattr(HCarbon, "chiralA") and hasattr(ClCarbon, "chiralA"):
+            if HCarbon.is_chiral and ClCarbon.is_chiral:
                 #Chiral.  We need to consider anti-periplanar.
                 #Looking down from the Cl to the other carbon,
                 ClsubA, ClsubB = ClCarbon.chiralRingList(Cl, HCarbon)
@@ -682,10 +682,9 @@ For alkynes to react, usually also mention "HgSO4 accels."
 
 def acidhydrate(molecules, others, alkynesOk = False):
 
-
     def findPlaces1(molecule):
         if alkynesOk:
-            return findAlkynes(molecule)
+            return findAlkenesAndAlkynes(molecule)
         else:
             return findAlkenes(molecule)
     def findPlaces2(molecule):
@@ -769,10 +768,11 @@ def twoReact(molecules, others, findPlaces1, findPlaces2, reactAtPlaces):
                     for item in sublist]
 
         if len(candidates1) != 0:
-            molecules1 += [molecule]
+            molecules1.append(molecule)
 
         if len(candidates2) != 0:
-            molecules2 += [molecule]
+            molecules2.append(molecule)
+
 
     #If this is true, then no molecule reacted with itself. You may proceed to reacting the molecules in molecules1 and molecules2 with each other.
     if len(output) == 0:
@@ -781,7 +781,7 @@ def twoReact(molecules, others, findPlaces1, findPlaces2, reactAtPlaces):
     if debug:
         print "Results: "
         print smilesify(output)
-        
+    
     return removeDuplicates(output)
 
 

@@ -1,1 +1,45 @@
-This was a triumph.
+<html>
+    <head>
+        <title>Api Views</title>
+        <style>
+            body {
+                font-family: Arial, Verdana, sans-serif;
+                margin:20px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Api</h1>
+        <ul>
+            <li><a href="test/CCC">Test that the parser is working</a></li>
+            <li><a href="reactions/">View all reactions</a></li>
+            <li><a href="reagents/">View all reagents</a></li>
+            <li><a href="reaction/1">View an individual reaction</a></li>
+            <li><a href="reagent/1">View an individual reagent</a></li>
+            <li><a href="findReactions?reagents=[0]">
+                    Find reactions matching some reagents
+            </a></li>
+            <li><a href="findReagents?name=HBr">
+                Find reagents matching a query
+            </a></li>
+            <li><a href="checkIfEqual?mol1=CCC&mol2=CC">
+                Check if two (SMILES) molecules are equivalent
+            </a></li>
+            <li><a href="toCanonical?mol=C(C(C))">
+                Fetch the canonical SMILES for a (SMILES) molecule
+            </a></li>
+            <li><a href="react/?reaction=1&reactants=[\"CCC=CC\"]">
+                React a (SMILES) molecule and fetch the (SMILES) product
+            </a></li>
+            <li><a href="renderSVG/?mol=C1CCCC1">
+                Fetch the SVG representation for a (SMILES) molecule
+            </a></li>
+            <li><a href="randomGenSmiles/">
+                Generate a random (SMILES) molecule
+            </a></li>
+            <li><a href="randomGenSVG">
+                Generate a random (SVG) molecule
+            </a></li>
+        </ul>
+    </body>
+</html>
