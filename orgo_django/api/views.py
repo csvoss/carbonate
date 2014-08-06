@@ -32,7 +32,7 @@ def test_parsers(request, smiles):
     smiles = smiles.replace('~', '#')
     molecule = moleculify(smiles)
     smiles2 = smilesify(molecule, canonical=False)
-    print "Smiles produced: { %s }" % smiles2
+    # print "Smiles produced: { %s }" % smiles2
     return HttpResponse('<br />'.join([
         "<h2>Smiles-to-Molecule Testing Viewer</h2>",
         "<b>Original:</b> %s" % smiles,

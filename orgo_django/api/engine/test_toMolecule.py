@@ -77,7 +77,7 @@ example_smiles_chiral = [
     r"N[C@@H](C)C(=O)O", ## L-alanine
     r"N[C@H](C(=O)O)C",  ## also L-alanine
     r"N[C@H](C)C(=O)O",  ## D-alanine (less common)
-    r"OC[C@@H](O1)[C@@H](O)[C@H](O)[C@@H](O)[C@@H](O)1", ## glucose
+    r"C([C@@H]1[C@H]([C@@H]([C@H](C(O1)O)O)O)O)O", ## glucose
     r"CC[C@H](O1)CC[C@@]12CCCO2", ## another pheromone
     r"CC(C)[C@@]12C[C@@H]1[C@@H](C)C(=O)C2", ## alpha-thujone
 ]
@@ -93,7 +93,19 @@ example_smiles_hard = [
         "@@]%13(C)CO", ## Cephalostatin-1 without aromaticity. Note
                        ## the % before ring closure labels above 9.
 ]
-example_smiles_hard_no_chirality = [
+example_smiles_hard_no_cistrans = [
+    r"CCC[C@@H](O)CCC=CC=CC#CC#CC=CCO", ## enanthotoxin
+    r"COC(=O)C(C)=CC1C(C)(C)[C@H]1C(=O)O[C@@H]2C(C)=C(C(=O)C2)CC=CC=C",
+    r"CC(=O)OCCC(C)=CC[C@H](C(C)=C)CCC=C", ## some pheromone
+    r"C[C@@](C)(O1)C[C@@H](O)[C@@]1(O2)[C@@H](C)[C@@H]3CC=C4[C@]3(C"+\
+        "2)C(=O)C[C@H]5[C@H]4CC[C@@H](C6)[C@]5(C)CC(N7)C6NC(C[C@@]"+\
+        "89(C))C7C[C@@H]8CC[C@@H]%10[C@@H]9C[C@@H](O)[C@@]%11(C)C%"+\
+        "10=C[C@H](O%12)[C@]%11(O)[C@H](C)[C@]%12(O%13)[C@H](O)C[C"+\
+        "@@]%13(C)CO", ## Cephalostatin-1 without aromaticity. Note
+                       ## the % before ring closure labels above 9.
+]
+
+example_smiles_hard_no_chirality_or_cistrans = [
     r"CCC[CH](O)CCC=CC=CC#CC#CC=CCO", ## enanthotoxin
     r"COC(=O)C(C)=CC1C(C)(C)[CH]1C(=O)O[CH]2C(C)=C(C(=O)C2)CC=CC=C",
     r"CC(=O)OCCC(C)=CC[CH](C(C)=C)CCC=C", ## some pheromone
@@ -118,7 +130,7 @@ class TestToMolecule(unittest.TestCase):
             self.assertEqual(one, two)
         except AssertionError:
             if DEBUG:
-                print "\n%s does not match %s" % (one, two)
+                print "\n%s does not match %s\n" % (one, two)
                 raise
 
     def assertOne(self, smi):
@@ -127,6 +139,13 @@ class TestToMolecule(unittest.TestCase):
             to_canonical(smi),
             smilesify(moleculify(smi), canonical=True)
         )
+        try:
+            self.tryAssertEqual(
+                to_canonical(smi),
+                smilesify(moleculify(to_canonical(smi)), canonical=True)
+            )
+        except:
+            print to_canonical(smi)
 
     def assertMany(self, smileses):
         "Assert that each in a list of smiles are OK."
@@ -280,7 +299,6 @@ class TestToMolecule(unittest.TestCase):
         smileses = example_smiles_cistrans
         self.assertMany(smileses)
 
-    @unittest.skip("Not implemented yet")
     def test_examples_chiral(self):
         "Test all the advanced example smiles."
         smileses = example_smiles_chiral
@@ -292,9 +310,14 @@ class TestToMolecule(unittest.TestCase):
         smileses = example_smiles_hard
         self.assertMany(smileses)
 
-    def test_examples_hard_no_chirality(self):
+    def test_examples_hard_no_chirality_or_cistrans(self):
         "Test all the advanced example smiles."
-        smileses = example_smiles_hard_no_chirality
+        smileses = example_smiles_hard_no_chirality_or_cistrans
+        self.assertMany(smileses)
+
+    def test_examples_hard_no_cistrans(self):
+        "Test all the advanced example smiles."
+        smileses = example_smiles_hard_no_cistrans
         self.assertMany(smileses)
 
     def test_examples_atoms(self):
@@ -365,7 +388,6 @@ class TestToMolecule(unittest.TestCase):
             r'[O]([H])[O][H]',
         ])
 
-    @unittest.skip("Not implemented yet")
     def test_chirality_equivalence(self):
         """
         Test that chirality works PERFECTLY.
@@ -395,3 +417,69 @@ class TestToMolecule(unittest.TestCase):
             r'[C@@](C)(Br)(O)N',
             r'[C@@](Br)(N)(O)C',
         ])
+
+
+    def test_ethanol(self):
+        "All of these are equivalent to ethanol, C2H5OH."
+        self.assertSameMany([
+            r'CCO'
+            r'OCC'
+            r'C(O)C'
+            r'[CH3][CH2][OH]'
+            r'[H][C]([H])([H])C([H])([H])[O][H]'
+        ])
+
+    def test_benzene(self):
+        "All of these are equivalent to benzene, C6H6."
+        self.assertSameMany([
+            r'c1ccccc1',
+            r'c:1:c:c:c:c:c1',
+            r'c1:c:c:c:c:c:1',
+            r'c1:cc:c:cc:1',
+            r'C:1:C:C:C:C:C1',
+            r'C1:C:C:C:C:C:1',
+            r'C:1:C:C:C:C:C:1',
+            r'C1=CC=CC=C1',
+            r'C=1C=CC=CC1',
+            r'C=1C=CC=CC=1',
+        ])
+
+    def test_phenol(self):
+        "All of these are equivalent to phenol, C6H5OH."
+        self.assertSameMany([
+            r'Oc1ccccc1',
+            r'c1ccccc1O',
+            r'c1(O)ccccc1',
+            r'c1(ccccc1)O',
+        ])
+
+    def test_aromaticity(self):
+        "Some diverse tests of aromaticity notation."
+        self.assertMany([
+            r'c1ccccc1-c2ccccc2',
+            r'c1cc(F)c(CC)cc1',
+        ])
+        self.assertSame(r'C1=CC=CC(CCC2)=C12', r'c1ccc2CCCc2c1')
+        self.assertSame(r'c1occc1', r'C1OC=CC=1')
+        ## cyclobutadiene does not canonicalize correctly
+        ## https://sourceforge.net/p/openbabel/bugs/940/
+        # self.assertSameMany([
+        #     r'c1ccc1',
+        #     r'C1=CC=C1',
+        # ])
+
+
+    def test_truly_evil_molecule(self):
+        "Why must I hold my code to these standards..."
+        self.assertOne("O1CCN[C@]11(CCCO1)")
+
+    # def test_nonstandard(self):
+    #     "Nonstandard forms of SMILES that we could encounter."
+    #     self.assertSame("C((C))O", "C(C)O")
+    #     self.assertSame("(N1CCCC1)", "N1CCCCC1")
+    #     self.assertSame("[Na+]..[Cl-]", "[Na+].[Cl-]")
+    #     self.assertSame(".CCO", "CCO")
+    #     self.assertSame("CCO.", "CCO")
+    #     self.assertSame("C1CCC", "CCCC")
+    #     self.assertSame("D[CH3]", "[2H][CH3]")
+    #     self.assertSame("T[CH3]", "[3H][CH3]")

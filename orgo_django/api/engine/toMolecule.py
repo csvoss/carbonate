@@ -27,6 +27,15 @@ from rply.token import BaseBox
 from molecularStructure import Molecule, Atom
 
 
+
+#### TODO ----
+# Tetrahedral Allene-like Systems
+# Extended tetrahedral configurations can be specified for conjugated
+# allenes with an even number of double bonds. The normal tetrahedral
+# rules using '@' and '@@' apply, but the "neighbor" atoms to which the
+# chirality refers are at the ends of the allenal system. For example:
+
+
 ############################
 ##### PUBLIC FUNCTIONS #####
 ############################
@@ -59,6 +68,10 @@ BASIC_BONDS = {'-':1, '=':2, '#':3, '$':4}
 
 DEFAULT_BOND = 'default'
 
+## TODO: This is really sketchy and won't work for everything.
+## But it works well enough for benzene.
+AROMATIC_BOND = 1.5
+
 def assert_isinstance(instance, some_type):
     """
     Raise an error if type(instance) is not some_type.
@@ -82,12 +95,19 @@ def bond_at(bond, mol1, atom1, atom2, mol2):
         raise StandardError("bond_at called with '.' as bond")
     elif bond == DEFAULT_BOND:
         ## TODO: support aromaticity!!!
-        mol1.addMolecule(mol2, atom2, atom1, 1)
+        ## If the two atoms in question are aromatic, this is an aromatic bond
+        if atom1.is_aromatic and atom2.is_aromatic:
+            mol1.addMolecule(mol2, atom2, atom1, AROMATIC_BOND)
+        else:
+            mol1.addMolecule(mol2, atom2, atom1, 1)
     elif bond in BASIC_BONDS.keys():
         ## connect them together
         mol1.addMolecule(mol2, atom2, atom1, BASIC_BONDS[bond])
+    elif bond == ':':
+        ## This is always an aromatic bond.
+        mol1.addMolecule(mol2, atom2, atom1, AROMATIC_BOND)
     else:
-        raise NotImplementedError(":, /, and \\ are not yet implemented.")
+        raise NotImplementedError("/ and \\ are not yet implemented.")
         ## TODO.
         ## Idea: Implement / and \\ by adding them as relevant flags,
         ## then postprocessing molecules to add cis/trans centers
@@ -247,15 +267,22 @@ def smiles_production(p):
                 "Unequal ringlinks used: %s, %s" % (other_bond, bond)
             bond_to_use = other_bond if bond == DEFAULT_BOND else bond
             bond_at(bond_to_use, molecule, other_atom, atom, molecule)
+
+            ## Fix the temporary ring indices present in the chirality info
+            if atom.chirality is not None:
+                ind = atom.chirality.connected_atoms.index(ring_index)
+                atom.chirality.connected_atoms[ind] = other_atom
+                atom.chirality.update()
+            if other_atom.chirality is not None:
+                ind = other_atom.chirality.connected_atoms.index(ring_index)
+                other_atom.chirality.connected_atoms[ind] = atom
+                other_atom.chirality.update()
+
         else:
             pending_rings[ring_index] = (atom, bond)
 
     assert len(pending_rings.keys()) == 0, \
         "Invalid! Unfinished ring bonds! %s" % repr(pending_rings.keys())
-
-    ## TODO: Post-processing of aromaticity
-
-    ## TODO: Post-processing of chirality
 
     chain.molecule.addHydrogens()
     for mol in chain.dotted_molecules:
@@ -333,6 +360,20 @@ def chain_unparenbranch_production(p):
     assert_isinstance(mol1, Molecule)
     assert_isinstance(atom1, Atom)
     assert_isinstance(mol2, Molecule)
+
+    ## Tetrahedral Chirality
+    ## case: last_atom in chain is chiral
+    ##       and it needs to know about first_atom in unparenbranch
+    ## TODO
+    if chain.last_atom.chirality is not None:
+        chain.last_atom.chirality.append(branch.chain.first_atom)
+
+    ## case: first_atom in unparenbranch is chiral
+    ##       and it needs to know about last_atom in chain
+    ## TODO
+    if branch.chain.first_atom.chirality is not None:
+        branch.chain.first_atom.chirality.prepend(chain.last_atom)
+
     assert_isinstance(atom2, Atom)
     if is_dot:
         chain.append_dotteds([mol2])
@@ -455,12 +496,30 @@ def branched_to_ringed(p):
 def branched_to_branched(p):
     " :: Atom, [Ringlink], [Branch]"
     atom, ringlinks, branches = p[0]
-    return atom, ringlinks, branches+[p[1]]
+    branch = p[1]
+    assert_isinstance(branch, Branch)
+
+    ## Tetrahedral Chirality
+    ## case: middle_atom is chiral
+    ##       and it needs to know about first_atom in branch
+    if atom.chirality is not None:
+        atom.chirality.append(branch.chain.first_atom)
+
+    return atom, ringlinks, branches+[branch]
 @PG.production("ringed_atom : ringed_atom ringlink")
 def ringed_to_ringed(p):
     " :: Atom, [Ringlink], [Branch]"
     atom, ringlinks, branches = p[0]
-    return atom, ringlinks+[p[1]], branches
+    ringlink = p[1]
+    assert_isinstance(ringlink, Ringlink)
+
+    ## Tetrahedral Chirality
+    ## case: ringed_atom is chiral
+    ##       and it needs to know about the ringlink
+    if atom.chirality is not None:
+        atom.chirality.append(ringlink.index)
+
+    return atom, ringlinks+[ringlink], branches
 @PG.production("ringed_atom : atom")
 def ringed_to_atom(p):
     " :: Atom, [Ringlink], [Branch]"
@@ -576,8 +635,8 @@ def make_aliphatic_organic_production(aliphatic):
     def _(p):
         "return :: Atom."
         return Atom(''.join(i.getstr() for i in p))
-for aliphatic in ALIPHATIC_ORGANIC:
-    make_aliphatic_organic_production(aliphatic)
+for a in ALIPHATIC_ORGANIC:
+    make_aliphatic_organic_production(a)
 
 # aromatic_organic ::= 'b' | 'c' | 'n' | 'o' | 's' | 'p'
 # aromatic_organic :: Atom.
@@ -591,8 +650,8 @@ def make_aromatic_organic_production(aromatic):
         output = Atom(p[0].getstr().upper())
         output.is_aromatic = True
         return output
-for aromatic in AROMATIC_ORGANIC:
-    make_aromatic_organic_production(aromatic)
+for a in AROMATIC_ORGANIC:
+    make_aromatic_organic_production(a)
 
 ##### BRACKET ATOMS #####
 
@@ -622,24 +681,50 @@ def make_bracket_production(five_bools):
 for bools in itertools.product((True, False), repeat=5):
     make_bracket_production(bools)
 
+@PG.production("bracket_atom : D")
+@PG.production("bracket_atom : T")
+def bracket_atom_hydrogen_isotopes(p):
+    "Deuterium and tritium."
+    if p[0].getstr() == 'D':
+        isotope = 2
+    elif p[0].getstr() == 'T':
+        isotope = 3
+    else:
+        raise StandardError
+    return bracket_atom_full(isotope, ('H', False), None, None, None, None)
+
 def bracket_atom_full(isot, symb, chir, hcou, chge, clss):
     """
     Produce an Atom from various parameters.
-    isot :: int.
+    isot :: int or None.
     symb :: str symbol, bool is_aromatic.
-    chir :: Chirality.
-    hcou :: int.
-    chge :: int.
-    clss :: int.
+    chir :: Chirality or None.
+    hcou :: int or None.
+    chge :: int or None.
+    clss :: int or None.
     return :: Atom.
     """
     output = Atom(symb[0])
+    
     output.isotope = isot
-    output.chirality = chir
     output.hcount = 0 if (hcou is None) else hcou
     output.charge = 0 if (chge is None) else chge
-    # output.atom_class = clss   ## "Atom class" is throwaway information.
     output.is_aromatic = symb[1]
+    
+    output.chirality = chir
+    if chir is not None:
+        output.chirality.central_atom = output
+        if hcou == 0 or hcou is None:
+            pass # intentional
+        elif hcou == 1:
+            output.chirality.append_hydrogen()
+        else:
+            output.chirality = None
+            raise StandardError("No more than 1 hydrogen with a chiral atom")
+
+
+
+    # output.atom_class = clss   ## "Atom class" is throwaway information.
     return output
 
 
@@ -701,14 +786,14 @@ for element in ELEMENT_SYMBOLS:
 # aromatic_symbols ::= 'b' | 'c' | 'n' | 'o' | 'p' | 's' | 'se' | 'as'
 # aromatic_symbols :: str.
 AROMATIC_SYMBOLS = ['b', 'c', 'n', 'o', 'p', 's', 'se', 'as']
-def make_aromatic_production(aromatic_symbol):
+def make_aromatic_production(aromatic):
     "Create several productions, one for each aromatic symbol."
-    @PG.production("aromatic_symbols : %s" % (' '.join(aromatic_symbol)))
+    @PG.production("aromatic_symbols : %s" % (' '.join(aromatic)))
     def _(p):
         "return :: str."
         return ''.join(i.getstr() for i in p)
-for aromatic in AROMATIC_SYMBOLS:
-    make_aromatic_production(aromatic)
+for a in AROMATIC_SYMBOLS:
+    make_aromatic_production(a)
 
 ##### CHIRALITY #####
 # chiral ::= '@' | '@@' | '@TH1' | '@TH2' | '@AL1' | '@AL2' | '@SP1' | 
@@ -725,10 +810,49 @@ def chiral_production(p):
 class Chirality(BaseBox):
     """
     Stores chirality information.
-    Currently useless.
     """
-    def __init__(self, string):
+    def __init__(self, string, central_atom=None):
         self.string = string
+        self.central_atom = central_atom
+        self.connected_atoms = []
+        self.hydrogen = False
+
+    def append_hydrogen(self):
+        "For [C@H] or [C@@H] situations."
+        self.connected_atoms.append(None) ## placeholder
+        self.hydrogen = True
+        self.update()
+
+    def append(self, atom):
+        """
+        atom :: Atom or int.
+        Add atom as a connected element lexically after this chiral-atom.
+        """
+        # assert_isinstance(atom, Atom)
+        self.connected_atoms.append(atom)
+        self.update()
+
+    def prepend(self, atom):
+        """
+        atom :: Atom or int.
+        Add atom as a connected element lexically before this chiral-atom.
+        """
+        # assert_isinstance(atom, Atom)
+        self.connected_atoms.insert(0, atom)
+        self.update()
+
+    def update(self):
+        "Uses known information to update the chirality of central_atom."
+        if len(self.connected_atoms) >= 4:
+            ref = self.connected_atoms[0]
+            cwlist = self.connected_atoms[1:4]
+            if self.string == '@': ## counterclockwise
+                ccwlist = reversed(cwlist)
+                self.central_atom.newChiralCenter(ref, ccwlist)
+            elif self.string == '@@': ## clockwise
+                self.central_atom.newChiralCenter(ref, cwlist)
+            else:
+                raise NotImplementedError("TODO: other forms of chirality")
 
 ##### HYDROGENS #####
 

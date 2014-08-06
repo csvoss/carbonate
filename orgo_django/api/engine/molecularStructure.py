@@ -50,9 +50,11 @@ class Molecule(object):
         bondOrder :: int. 1, 2, 3, or 4.
         """
         if atom1 not in self.atoms:
-            raise StandardError("atom1 not in molecule. %s" % atom1.element)
+            self.atoms.append(atom1)
+            # raise StandardError("atom1 not in molecule. %s" % atom1.element)
         if atom2 not in self.atoms:
-            raise StandardError("atom2 not in molecule. %s" % atom2.element)
+            self.atoms.append(atom2)
+            # raise StandardError("atom2 not in molecule. %s" % atom2.element)
         atom1.neighbors[atom2] = bondOrder
         atom2.neighbors[atom1] = bondOrder
 
@@ -126,9 +128,30 @@ class Molecule(object):
                     if neighbor.element == 'H':
                         hydrogen_already_added += 1
                 diff = atom.hcount - hydrogen_already_added
-            for _ in xrange(diff):
+            assert int(diff) == diff, "Non-integer bond order %s" % str(atom)
+            for _ in xrange(int(diff)):
                 H = Atom(HYDROGEN)
                 self.addAtom(H, atom, 1)
+
+            ## TODO: If the atom is chiral, replace its chiral None with
+            ## the relevant hydrogen
+
+            if atom.chirality is not None:
+                if atom.is_chiral and atom.chirality.hydrogen:
+                    hydrogens = [a for a in atom.neighbors if a.element == 'H']
+                    assert len(hydrogens) == 1, "Weird [C@H] misbehaviour"
+                    hydrogen = hydrogens[0]
+                    if atom.chiralA == None:
+                        atom.chiralA = hydrogen
+                    elif atom.chiralB == None:
+                        atom.chiralB = hydrogen
+                    elif atom.chiralC == None:
+                        atom.chiralC = hydrogen
+                    elif atom.chiralD == None:
+                        atom.chiralD = hydrogen
+                    else:
+                        raise StandardError("[C@H] weirdness: why no H?")
+
 
     def countElement(self, element):
         """
@@ -213,6 +236,14 @@ class Atom(object):
             brackets = True
             output = str(self.isotope) + output
 
+        ## Chirality
+        if self.is_chiral:
+            brackets = True
+            output = output + "@@"
+
+            if self.hcount == 1:
+                output += 'H'
+
         ## Hydrogens
         ## TODO ~~ ~~
         ## Hm. If we represent hydrogens explicitly, as atoms OUTSIDE of this
@@ -285,8 +316,8 @@ class Atom(object):
         reference :: Atom.
         clockwiseList :: a list of 3 Atoms.
         """
-        if self.is_chiral:
-            print "Warning: Adding redundant chirality"
+        # if self.is_chiral:
+        #     print "Warning: Adding redundant chirality"
         self.is_chiral = True
         self.chiralA = reference
         self.chiralB, self.chiralC, self.chiralD = clockwiseList
@@ -312,9 +343,9 @@ class Atom(object):
             return [self.chiralA, self.chiralC, self.chiralB]
         else:
             msg = "Error in chiralCWlist: no such reference atom: %s\n" \
-                % reference.element
-            msg += ", ".join[self.chiralA.element, self.chiralB.element,
-                             self.chiralC.element, self.chiralD.element]
+                % str(reference)
+            msg += ", ".join([str(self.chiralA), str(self.chiralB),
+                              str(self.chiralC), str(self.chiralD)])
             raise StandardError(msg)
     
     def chiralRingList(self, inport, outport):

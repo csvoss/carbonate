@@ -17,7 +17,7 @@ Does not yet support:
 - radicals :( :( 
 - isotopes
 """
-from molecularStructure import Molecule
+from molecularStructure import Molecule, Atom
 import copy
 from toCanonical import to_canonical
 
@@ -61,7 +61,7 @@ def smilesify(molecule, canonical=True):
     else:
         return output
 
-bond_symbols = ['0', '-', '=', '#', '$']
+BOND_SYMBOLS = {0: '0', 1: '-', 2: '=', 3: '#', 4: '$', 1.5: ':'}
 
 def _subsmiles(molecule, start_atom, parent_atom):
     """
@@ -72,7 +72,7 @@ def _subsmiles(molecule, start_atom, parent_atom):
 
     molecule :: Molecule.
     start_atom :: Atom.
-    parent_atom :: Atom.
+    parent_atom :: Atom or 0.
 
     Traverses the molecule from the given starting atom, returning the SMILES
      representation.
@@ -81,6 +81,16 @@ def _subsmiles(molecule, start_atom, parent_atom):
 
     return :: a SMILES substring
     """
+
+    assert isinstance(molecule, Molecule), \
+        "molecule invalid: %s" % str(molecule)
+    assert isinstance(start_atom, Atom), \
+        "start_atom invalid: %s" % str(start_atom)
+    try:
+        assert isinstance(parent_atom, Atom), "parent_atom invalid"
+    except AssertionError:
+        assert parent_atom == 0, \
+            "parent_atom invalid: %s" % str(parent_atom)
     
     #Flag the current atom.
     start_atom.flag = 2
@@ -112,11 +122,18 @@ def _subsmiles(molecule, start_atom, parent_atom):
         #Implement this by smart rearrangement of to_add.
         #Be mindful of: whether or not there is a parent atom; "" a hydrogen.
         if hasH:
-            output = "[" + output + "@@H]"
+            # output = "[" + output + "@@H]"
             if hasP:
                 #to_add should have two elements
                 l = start_atom.chiralCWlist(parent_atom) #list of three atoms
-                x = l.index(None) #index of hydrogen atom in list
+                if None in l:
+                    x = l.index(None) #index of hydrogen atom in list
+                else:
+                    x = 0
+                    while x < len(l):
+                        if l[x].element == 'H':
+                            break
+                        x += 1
                 to_add = [l[(x+1) %3], l[(x+2) %3]] #correct permutation
                 if None in to_add:
                     raise StandardError("%s is chiral, but has two hydrogens." \
@@ -128,7 +145,7 @@ def _subsmiles(molecule, start_atom, parent_atom):
                     raise StandardError("%s is chiral, but has two hydrogens." \
                         % start_atom.element)
         else:
-            output = "[" + output + "@@]"
+            # output = "[" + output + "@@]"
             if hasP:
                 #to_add should have three elements
                 to_add = start_atom.chiralCWlist(parent_atom)
@@ -149,8 +166,9 @@ def _subsmiles(molecule, start_atom, parent_atom):
     #     to_add = [atom for atom in list(start_atom.non_h_neighbors) if not \
     #           (atom==parent_atom or atom==None)]
     for atom in to_add:
+        assert isinstance(atom, Atom), "to_add has invalid: %s" % str(atom)
         add = _get_next_subsmiles(atom, start_atom, molecule)
-        output += "("+bond_symbols[start_atom.non_h_neighbors[atom]]+add+")"
+        output += "("+BOND_SYMBOLS[start_atom.non_h_neighbors[atom]]+add+")"
 
     return output
 
@@ -280,7 +298,7 @@ def _get_subsmiles_ct(output, molecule, start_atom, parent_atom):
                 output += ''.join([
                     "(",
                     begin[ind],
-                    bond_symbols[start_atom.non_h_neighbors[atom]],
+                    BOND_SYMBOLS[start_atom.non_h_neighbors[atom]],
                     _rflag_to_str(start_atom.rflag[
                         [rf[1] for rf in start_atom.rflag].index(atom)][0]),
                     ")",
@@ -289,7 +307,7 @@ def _get_subsmiles_ct(output, molecule, start_atom, parent_atom):
                 output += ''.join([
                     "(",
                     begin[ind],
-                    bond_symbols[start_atom.non_h_neighbors[atom]],
+                    BOND_SYMBOLS[start_atom.non_h_neighbors[atom]],
                     _subsmiles(molecule, atom, start_atom),
                     ")",
                 ])
