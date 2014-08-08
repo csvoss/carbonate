@@ -5,7 +5,7 @@ Contains API views.
 """
 
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from engine.renderSVG import render as svg_render
 from engine.randomGenerator import random_molecule
 from engine.toMolecule import moleculify
@@ -134,6 +134,8 @@ def get_reaction(request, pk):
 
 #If the user entered in [list of reagents, by id], what reaction(s) do I get?
 def find_reactions(request):
+    ##TODO
+    return HttpResponse("Currently buggy -- not yet fixed. TODO.")
     if request.method == "GET":
         reagent_ids = parse_input(request.GET.get('reagents', ''))
         reagent_sets = ReagentSet.objects.all()
@@ -220,14 +222,17 @@ def react(request):
     if reactants == None:
         return ""
     reactants = moleculify(reactants)
-    function_name = Reaction.objects.get(id=reactionID).process_function
+    try:
+        function_name = Reaction.objects.get(id=reactionID).process_function
+    except:
+        raise Http404
     reaction = getattr(api.engine.reaction_functions, function_name)
     products = reaction(reactants)
     return HttpResponse(smilesify(products))
 
 #Render a molecule (convert SMILES to SVG)
 def render_SVG(request):
-    smiles = request.GET.get('molecule', None) # change to error raise later
+    smiles = request.GET.get('molecule', None) # change to error raise later TODO
     if smiles == None:
         smiles = request.GET.get('mol', None)
     return HttpResponse(svg_render(smiles))
@@ -243,3 +248,9 @@ def random_gen_SVG(request):
     mol = random_molecule()
 
     return HttpResponse(svg_render(smilesify(mol)))
+
+def to_canonical_view(request):
+    smiles = request.GET.get('molecule', None) # change to error raise later TODO
+    if smiles == None:
+        smiles = request.GET.get('mol', None)
+    return HttpResponse(to_canonical(smiles))

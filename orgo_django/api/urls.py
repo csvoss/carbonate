@@ -35,6 +35,8 @@ urlpatterns = patterns(
     url(r'^react/$', views.react, name='react'),
     ## /api/renderSVG?molecule="SMILES"
     url(r'^renderSVG/$', views.render_SVG, name='render_SVG'),
+    ## /api/toCanonical?molecule="SMILES"
+    url(r'^toCanonical/$', views.to_canonical_view, name='to_canonical_view'),
     ## /api/randomGenSmiles/ 
     url(r'^randomGenSmiles/$', views.random_gen_smiles, name='random_gen_smiles'),
     #/api/randomGenSVG
