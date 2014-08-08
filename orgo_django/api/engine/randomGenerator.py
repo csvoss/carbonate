@@ -20,7 +20,7 @@ def random_start(end_prob=0.3, max_length=15, alkyne_prob=0.2,
     #Want more alkynes?  You need to make fewer substituents.
     print "random_start"
     for prob in (br_prob, cl_prob, oh_prob, branch_prob):
-        prob *= 1-2*alkyne_prob
+        prob *= 1 - 2*alkyne_prob
     last_atom = Atom("C")
     front_atom = last_atom
     mol = Molecule(last_atom)
@@ -99,13 +99,13 @@ def random_ring(number_of_carbons, br_prob, cl_prob, oh_prob):
     init_atom = Atom("C")
     mol = Molecule(init_atom)
     old_atom = init_atom
-    for i in xrange(number_of_carbons - 1):
+    for _ in xrange(number_of_carbons - 1):
         new_atom = Atom('C')
         mol.addAtom(new_atom, old_atom, 1)
         old_atom = new_atom
     #Now, close the loop!
     mol.addBond(init_atom, old_atom, 1)
-    out_atom = mol.atoms[random.randint(1,len(mol.atoms)-1)]
+    out_atom = mol.atoms[random.randint(1, len(mol.atoms)-1)]
     for atom in mol.atoms:
         #Don't interfere with the larger structure.
         if atom == init_atom or atom == out_atom:

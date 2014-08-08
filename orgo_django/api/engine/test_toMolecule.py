@@ -455,6 +455,7 @@ class TestToMolecule(unittest.TestCase):
         ])
         self.assertSame(r'C1=CC=CC(CCC2)=C12', r'c1ccc2CCCc2c1')
         self.assertSame(r'c1occc1', r'C1OC=CC=1')
+
         ## cyclobutadiene does not canonicalize correctly
         ## https://sourceforge.net/p/openbabel/bugs/940/
         # self.assertSameMany([
@@ -465,6 +466,9 @@ class TestToMolecule(unittest.TestCase):
     def test_truly_evil_molecule(self):
         "Why must I hold my code to these standards..."
         self.assertOne("O1CCN[C@]11(CCCO1)")
+
+    def test_chirality_frustration(self):
+        self.assertOne("[C@](Br)(F)(O)[H]")
 
     # def test_nonstandard(self):
     #     "Nonstandard forms of SMILES that we could encounter."

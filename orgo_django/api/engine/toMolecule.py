@@ -129,16 +129,23 @@ def dictof(thing):
     except AttributeError:
         return str(thing)
 
-def debug_decorator(func):
+def debug_decorator(custom_message):
     """
     Apply this decorator to a function to make that function print at you
     whenever it is called.
     """
-    def new_f(*args, **kwargs):
-        "The "
-        print "----- Calling %s with %s and %s" % (func, args, kwargs)
-        func(*args, **kwargs)
-    return new_f
+    def old_debug_decorator(func):
+        def new_f(*args, **kwargs):
+            "The function, plus a print statement"
+            print custom_message
+            print "----- Calling %s with %s and %s" % (func, args, kwargs)
+            return func(*args, **kwargs)
+        return new_f
+    return old_debug_decorator
+
+@debug_decorator("Hello!")
+def test(x, y):
+    print "%s plus %s is %s" % (x, y, str(x+y))
 
 def int_from_digit(digit):
     """

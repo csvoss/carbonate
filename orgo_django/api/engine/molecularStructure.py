@@ -143,16 +143,16 @@ class Molecule(object):
                 H = Atom(HYDROGEN)
                 self.addAtom(H, atom, 1)
 
+
             # if atom.element != "U":
             #     self.addAtom(Atom("U"), atom, 1)
 
             ## TODO: If the atom is chiral, replace its chiral None with
             ## the relevant hydrogen
 
-            ## TODO: This causes my tests to fail !?!?!?
-            # for atom in atom.neighbors:
-            #     if atom is None:
-            #         raise StandardError("None")                
+            for a in atom.neighbors:
+                if a is None:
+                    raise StandardError("None")
 
             if atom.chirality is not None:
                 if atom.is_chiral and atom.chirality.hydrogen:
@@ -359,6 +359,10 @@ class Atom(object):
         if not self.is_chiral:
             if DEBUG:
                 raise StandardError("%s atom is not chiral" % (str(self)))
+        if reference == None:
+            hydrogens = [atom for atom in self.neighbors if atom.element == 'H']
+            assert len(hydrogens) > 0, "No hydrogen connected to this atom"
+            reference = hydrogens[0]
         if reference == self.chiralA:
             return [self.chiralB, self.chiralC, self.chiralD]
         elif reference == self.chiralB:
