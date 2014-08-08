@@ -155,7 +155,7 @@ def fix_stereo(mol, atom, last_atom):
             if neighbor != atom:
                 tempN.append(neighbor)
         if len(tempN) == 2:
-            new_h = Atom("Rn")
+            new_h = Atom("H")
             mol.addAtom(new_h, last_atom, 1)
             tempN.append(new_h)
         #Do a coin flip to determine chirality.

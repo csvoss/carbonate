@@ -13,7 +13,7 @@ urlpatterns = patterns('',
     url(r'^api/', include('api.urls', namespace="api")),
     url(r'^app/', include('app.urls', namespace="app")),
 
-    url(r'^$', 'orgo.views.home', name='home'),
+    url(r'^$', 'orgo.views.index', name='index'),
     url(r'^orgo/$', 'orgo.views.home', name='home'),
 
     url(r'^orgo/api/signup/$', 'orgo.views.signUp', name='signUp'),

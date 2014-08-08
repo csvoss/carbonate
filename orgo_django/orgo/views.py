@@ -21,6 +21,9 @@ import orgo.models as models
 from api.engine.synthProblem import *
 TIMEOUT = 10 #seconds
 
+def index(request):
+    return render(request, 'orgo/index.html')
+
 def home(request, debug = ""):
     #Home page.
     if request.user.is_authenticated():
