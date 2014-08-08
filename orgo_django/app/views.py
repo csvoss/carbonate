@@ -88,8 +88,7 @@ def single_step_hard(request, id):
     context = {
         'reactant': problem.reactant_smiles,
         'product' : problem.product_smiles,
-        'reagents': json.dumps([reagent.name for reagent in problem.answer.reagents.all()]),
-        # 'solvent' : solvent,
+        'reagent_sets': json.dumps([reagent_set.id for reagent_set in problem.answers.all()]),
     }
     return render(request, 'app/SingleStepHard.html', context)
 

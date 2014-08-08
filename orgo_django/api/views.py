@@ -12,7 +12,7 @@ from engine.toMolecule import moleculify
 from engine.toSmiles import smilesify, to_canonical
 import api.engine.reaction_functions
 
-from api.models import Reagent, Reaction, ReagentSet
+from api.models import Property, ReagentName, Reagent, Reaction, ReagentSet
 import json
 # Create your views here.
 
@@ -61,9 +61,7 @@ def get_reaction_data(reaction):
         "process_function": reaction.process_function,
         "reagents": [r.id for r in reaction.reagent_set.reagents.all()],
         "solvent": solvent,
-        "solvent_properties": [
-            prop.name for prop in reaction.reagent_set.solvent_properties.all()
-        ],
+        "solvent_properties": [prop.name for prop in reaction.reagent_set.solvent_properties.all()],
     }
     return data
 
@@ -71,7 +69,7 @@ def get_reagent_data(reagent):
     """Helper function that extracts data from a Reagent query object"""
     data = {
         "id": reagent.id,
-        "name": reagent.name, #TODO: Change if name becomes a StringListField
+        "names": [reagent_name.name for reagent_name in reagent.names.all()],
         "is_solvent": reagent.is_solvent,
         "diagram_name": reagent.diagram_name,
         "smiles": reagent.smiles,
@@ -164,6 +162,22 @@ def get_reagent(request, pk):
     reagent_data = get_reagent_data(reagent)
     return HttpResponse(json.dumps(reagent_data))
 
+def all_reagent_names(request):
+    reagent_data = []
+    for rname in ReagentName.objects.all():
+        other_names = "Aka: "
+        for rn in rname.reagent.names.all():
+            if rn.name != rname.name:
+                other_names += rn.name + ", "
+        other_names = other_names.rstrip(", ")
+        name_data = {
+            "name": rname.name,
+            "reagent": rname.reagent.id,
+            "description": other_names
+        }
+        reagent_data.append(name_data)
+    return HTTPResponse(json.dumps(reagent_data))
+
 #use to get a valid reagent by name. throws error otherwise
 # def get_valid_reagent(request):
 #     name = request.GET.get("name", '')
@@ -254,3 +268,21 @@ def to_canonical_view(request):
     if smiles == None:
         smiles = request.GET.get('mol', None)
     return HttpResponse(to_canonical(smiles))
+
+def is_correct_reagent_set(request):
+    submitted_reagent_names = request.GET.get('submitted_reagents', [])
+    submitted_solvent_id = request.GET.get('solvent_id', None)
+    solution_set_ids = request.GET.get('solution_ids', [])
+
+    submitted_reagent_ids = sorted( [ReagentName.objects.get(name=rname).reagent.id for rname in submitted_reagent_names] )
+
+    correct = False
+    for set_id in solution_set_ids:
+        valid_set = ReagentSet.objects.get(id=set_id)
+        reagent_ids = sorted( [r.id for r in valid_set.reagents.all()] )
+
+        solvent_id = valid_set.solvent.id
+        if reagent_ids == submitted_reagent_ids and submitted_solvent_id == solvent_id:
+            correct = True
+
+    return HTTPResponse(correct)

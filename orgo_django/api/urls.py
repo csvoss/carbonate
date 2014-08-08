@@ -25,12 +25,16 @@ urlpatterns = patterns(
     url(r'^findReactions/$', views.find_reactions, name='find_reactions'),
     ## /api/reagents 
     url(r'^reagents/$', views.all_reagents, name='all_reagents'),
+    ## /api/allReagentNames/
+    url(r'^allReagentNames/$', views.all_reagent_names, name='all_reagent_names'),
     ## /api/reagent/123
     url(r'^reagent/'+IDREGEX+r'/$', views.get_reagent, name='get_reagent'),
     ## /api/findReagents?name=HBr&properties=["aprotic"]
     url(r'^findReagents/$', views.find_reagents, name='find_reagents'),
     ##/api/checkIfEqual?mol1=ABC&mol2=DEF
     url(r'^checkIfEqual/$', views.check_if_equal, name='check_if_equal'),
+    ## /api/isCorrectReagentSet?submitted_reagents=['HBr','HI']&solvent_id=[2]&solution_ids=[2,3]
+    url(r'^isCorrectReagentSet$', views.is_correct_reagent_set, name='is_correct_reagent_set'),
     ## /api/react?reaction=123&reactants=["SM1","SM2"]
     url(r'^react/$', views.react, name='react'),
     ## /api/renderSVG?molecule="SMILES"
