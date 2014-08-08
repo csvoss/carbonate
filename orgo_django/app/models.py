@@ -38,8 +38,7 @@ class SingleStepHardProblem(models.Model):
     product_smiles = models.TextField(
         help_text = "Product's SMILES string",
     )
-    #TODO: change to ManyToManyField to allow multiple solutions if we want to later
-    answer = models.ForeignKey(ReagentSet, help_text="Contains all reagents and solvent for one valid solution")
+    answers = models.ManyToManyField(ReagentSet, help_text="Contains all reagents and solvent for one valid solution")
 
     def __unicode__(self):
         return "SingleStepHardProblem #%s" % str(self.id)

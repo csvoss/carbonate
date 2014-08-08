@@ -52,36 +52,43 @@
         }
 
         function right_answer_for_edx() {
-            var solList = {{reagents|safe}};
+            var solList = {{reagent_sets|safe}};
             return solList.sort(); //order makes list unique
         }
 
         $(document).ready(function() {
 
             var finalReagents = [];
-            var solutionReagents = {{ reagents|safe }}; //list of Strings with reagent names
+            // var solutionReagents = {{ reagents|safe }}; //list of Strings with reagent names
+
+            var reagentNames = []; //list of objects with "name","reagent" = reagent id, "description" = other names 
+            $.ajax({ url:"/api/allReagentNames", success: function(data, st, x) {
+                console.log(data);
+                console.log(JSON.parse(data));
+                reagentNames = JSON.parse(data);
+            } });
 
             function displayMolecule(smiles, location) {
                 $.ajax({ url:"/api/renderSVG", data: {"molecule": smiles}, success: function(data, st, x) {location.append(data);} }); //what is st and x?
             }
 
-            function updateValidReagents(rgStart) {
-                $.ajax({ url:"/api/findReagents", data:{"name": rgStart}, success:function(data, st, x) {
-                    var menu = $('#valid-reagents');
-                    menu.children().remove();
-                    data = JSON.parse(data);
-                    for (iRg = 0; iRg < data.length; iRg++) {
-                        var new_reagent = $('<option>', {
-                            "value": data[iRg]["name"]
-                        });
-                        if (data[iRg]["is_solvent"]) {
-                            new_reagent.text("Solvent");
-                        }
-                        menu.append(new_reagent);
-                    }
+            // function updateValidReagents(rgStart) {
+            //     $.ajax({ url:"/api/findReagents", data:{"name": rgStart}, success:function(data, st, x) {
+            //         var menu = $('#valid-reagents');
+            //         menu.children().remove();
+            //         data = JSON.parse(data);
+            //         for (iRg = 0; iRg < data.length; iRg++) {
+            //             var new_reagent = $('<option>', {
+            //                 "value": data[iRg]["name"]
+            //             });
+            //             if (data[iRg]["is_solvent"]) {
+            //                 new_reagent.text("Solvent");
+            //             }
+            //             menu.append(new_reagent);
+            //         }
 
-                } });
-            }
+            //     } });
+            // }
 
             function createSubmittedReagent(value) {
                 var reagent = $('<span>', {
@@ -89,7 +96,7 @@
                     'title' : "Remove" 
                 });
                 reagent.text(value);
-                return reagent;
+                $('.submitted-reagents-box').append(reagent);
             }
 
             displayMolecule('{{reactant}}', $('.reactants') );
@@ -108,41 +115,57 @@
                 }*/
             });
 
-            // Update dropdown when value is entered
-            $('#reagent-menu').keyup(function(e) {
+            // // Update dropdown when value is entered
+            // $('#reagent-menu').keyup(function(e) {
 
-                var rgStart = this.value;
-                if (rgStart.length > 0) {
-                    updateValidReagents(rgStart);
-                } else {
-                    $('#valid-reagents').children().remove();
-                }
-            });
+            //     var rgStart = this.value;
+            //     if (rgStart.length > 0) {
+            //         updateValidReagents(rgStart);
+            //     } else {
+            //         $('#valid-reagents').children().remove();
+            //     }
+            // });
+
+
+            // TODO: adjust this as needed!
+            $( "#reagent-menu" ).autocomplete({
+              minLength: 0,
+              source: reagentNames,
+              focus: function( event, ui ) {
+                $( "#reagent-menu" ).val( ui.item.name );
+                return false;
+              },
+              select: function( event, ui ) {
+                $( "#reagent-menu" ).val( ui.item.name );
+                $( "#reagent-id" ).val( ui.item.reagent );
+                return false;
+              }
+            })
+            .autocomplete( "instance" )._renderItem = function( ul, item ) {
+              return $( "<li>" )
+                .append( "<a>" + item.name + "<br>" + item.description + "</a>" )
+                .appendTo( ul );
+            };
+
+
 
 
             // When a reagent is added, do this:
             $('.add-reagent').click(function(e) {
                 var menu = $('#reagent-menu');
-                var value = $.trim(menu.val());
-                if (value.length == 0) {
+                var rID = $('#reagent-id').val();
+                var reagentName = $.trim(menu.val());
+                if (reagentName.length == 0) {
                     menu.val(''); //reset the bar in case there were spaces, etc. that got trimmed
                     menu.focus();
                     return;
                 }
 
-                $.ajax({ url:"/api/getValidReagent", data: {"name": value}, success: function(data, st, x) {
-                    var reagent = createSubmittedReagent(data);
-                    $('.submitted-reagents-box').append(reagent);
-                    // $('.submitted-reagent').addEventListener("click", deleteReagent, false);
-
-                    $('.no-reagents').css("display", "none");
-                    $('#valid-reagents').children().remove();
-                    menu.val('');
-                    menu.focus();
-                    
-                }, error: function(x, st, error) {
-                    $('.message').text("No such reagent exists");
-                } });
+                // TODO: All answers are currently valid. Verify whats entered
+                createSubmittedReagent(reagentName);
+                $('.no-reagents').css("display", "none");
+                menu.val('');
+                menu.focus();
 
             });
 
@@ -155,28 +178,23 @@
             });
 
             $('.check').click(function(e) {
-                var tempSolution = solutionReagents.slice(0);
-                var correct = true;
-                $('.submitted-reagent').each(function(ii, ele) {
-                    var rg = $(this).text();
-                    var iSol = tempSolution.indexOf(rg);
-                    if (iSol < 0) {
-                        correct = false; //submitted reagent is not in solutions
-                    } else {
-                        tempSolution.splice(iSol, 1); //remove that reagent
-                    }
+                var submittedReagents = []
+                $('.submitted-reagent').each( function(ii, ele) {
+                    submittedReagents.push($(this).text());
                 });
-                if (tempSolution.length > 0) {
-                    correct = false; //didn't get all the reagents in the solution
-                }
 
-                if (correct) {
-                    $('.message').text("That's right!");
-                } else {
-                    $('.message').text("Not quite");
-                }
+                $.ajax({ url:"/api/isCorrectReagentSet", data:{"submitted_reagents":submittedReagents, "solvent_id":1, "solution_ids":{{reagent_sets|safe}} }, success: function(data,st,x) {
+                    console.log(data);
+                    // TODO: print correct or wrong messages based on if data(correct) is True or False
+                } });
 
-            })
+                // if (correct) {
+                //     $('.message').text("That's right!");
+                // } else {
+                //     $('.message').text("Not quite");
+                // }
+
+            });
 
 
         })
@@ -207,11 +225,9 @@
                 </div>
 
                 <div class="reagent-menu-box">
-                    <input class="menu" id="reagent-menu" type="text" list="valid-reagents" placeholder="Insert reagent or solvent here" autofocus>
+                    <input id="reagent-menu" type="text" placeholder="Insert reagent or solvent here" autofocus>
+                    <input id="reagent-id" type="hidden">
                     <button class="add-reagent">Add</button>
-
-                    <datalist id="valid-reagents" class="menu">
-                    </datalist>
                 </div>
             </div>
 

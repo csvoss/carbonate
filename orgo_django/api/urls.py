@@ -19,9 +19,14 @@ urlpatterns = patterns(
     url(r'^reaction/'+IDREGEX+r'/$', views.get_reaction, name='get_reaction'),
     url(r'^findReactions/$', views.find_reactions, name='find_reactions'),
     url(r'^reagents/$', views.all_reagents, name='all_reagents'),
+    ## /api/allReagentNames/
+    url(r'^allReagentNames/$', views.all_reagent_names, name='all_reagent_names'),
     url(r'^reagent/'+IDREGEX+r'/$', views.get_reagent, name='get_reagent'),
     url(r'^findReagents/$', views.find_reagents, name='find_reagents'),
     url(r'^checkIfEqual/$', views.check_if_equal, name='check_if_equal'),
+    ## /api/isCorrectReagentSet?submitted_reagents=['HBr','HI']&solvent_id=[2]&solution_ids=[2,3]
+    url(r'^isCorrectReagentSet$', views.is_correct_reagent_set, name='is_correct_reagent_set'),
+    ## /api/react?reaction=123&reactants=["SM1","SM2"]
     url(r'^react/$', views.react, name='react'),
     url(r'^reactSVG/$', views.react_then_SVG, name='react_then_SVG'),
     url(r'^renderSVG/$', views.render_SVG, name='render_SVG'),
