@@ -16,6 +16,14 @@ from api.models import Property, ReagentName, Reagent, Reaction, ReagentSet
 import json
 # Create your views here.
 
+##### HELPER FUNCTIONS #####
+def JsonResponse(data):
+    return HttpResponse(json.dumps(data, sort_keys=True, indent=4),
+                        content_type="application/json")
+
+
+##### VIEWS #####
+
 ## url(r'^$', views.index, name='index'),
 def index(request):
     "Default index page"
@@ -121,14 +129,14 @@ def all_reactions(request):
     reaction_data = []
     for reaction in reactions:
         reaction_data.append(get_reaction_data(reaction))
-    return HttpResponse(json.dumps(reaction_data))
+    return JsonResponse(reaction_data)
 
 #List basic info about a single reaction, id#123 in the database [as JSON]
 def get_reaction(request, pk):
     """Creates a JSON object with data for the reaction specified by pk"""
     reaction = Reaction.objects.get(id=pk)
     reaction_data = get_reaction_data(reaction)
-    return HttpResponse(json.dumps(reaction_data))
+    return JsonResponse(reaction_data)
 
 #If the user entered in [list of reagents, by id], what reaction(s) do I get?
 def find_reactions(request):
@@ -146,7 +154,7 @@ def find_reactions(request):
         reaction_data = []
         for reaction in reactions:
             reaction_data.append(get_reaction_data(reaction))
-    return HttpResponse(json.dumps(reaction_data))
+    return JsonResponse(reaction_data)
 
 #List links to all reagents
 def all_reagents(request):
@@ -154,13 +162,13 @@ def all_reagents(request):
     reagent_data = []
     for reagent in reagents:
         reagent_data.append(get_reagent_data(reagent))
-    return HttpResponse(json.dumps(reagent_data))
+    return JsonResponse(reagent_data)
 
 #List basic info about a single reagent, id#123 in the database [as JSON]
 def get_reagent(request, pk):
     reagent = Reagent.objects.get(id=pk)
     reagent_data = get_reagent_data(reagent)
-    return HttpResponse(json.dumps(reagent_data))
+    return JsonResponse(reagent_data)
 
 def all_reagent_names(request):
     reagent_data = []
@@ -212,7 +220,7 @@ def find_reagents(request):
         reagent_data = []
         for reagent in reagents:
             reagent_data.append(get_reagent_data(reagent))
-    return HttpResponse(json.dumps(reagent_data))
+    return JsonResponse(reagent_data)
 
 
 #what if the SMILES are different but represent the same molecule?

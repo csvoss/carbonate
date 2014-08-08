@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.urlresolvers import reverse
 from api.fields import StringListField
 from api.engine.toCanonical import to_canonical
 
@@ -12,7 +13,6 @@ class Property(models.Model):
     def __unicode__(self):
         return self.name
 
-
 class Reagent(models.Model):
     id = models.AutoField(primary_key=True)
     # names = StringListField(help_text='All valid names for this reagent')
@@ -23,6 +23,9 @@ class Reagent(models.Model):
 
     def __unicode__(self):
         return to_canonical(self.smiles)
+
+    def get_absolute_url(self):
+        return reverse('api:get_reagent', args=[self.id])
 
 class ReagentName(models.Model):
     id = models.AutoField(primary_key=True)
@@ -66,4 +69,7 @@ class Reaction(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('api:get_reaction', args=[self.id])
 
