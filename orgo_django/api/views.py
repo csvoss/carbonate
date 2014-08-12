@@ -238,9 +238,11 @@ def check_if_equal(request):
     if mol2 == None:
         return RequiredQueryParamsResponse('mol2')
 
-    mol1 = to_canonical(mol1)
-    mol2 = to_canonical(mol2)
-    return JsonResponse(mol1 == mol2)
+    mol1_can = to_canonical(mol1)
+    mol2_can = to_canonical(mol2)
+    if mol1_can == "" or mol2_can == "":
+        return JsonResponse(mol1 == mol2) ## Invalid SMILES are not equal
+    return JsonResponse(mol1_can == mol2_can)
 
 def react(request):
     """
@@ -322,7 +324,8 @@ def random_smiles(request):
     Return a randomly-generated molecule (output a SMILES)
     """
     mol = random_molecule()
-    return JsonResponse(smilesify(mol))
+    smi = smilesify(mol, canonical=False)
+    return JsonResponse(smi)
 
 def random_SVG(request):
     """
@@ -354,4 +357,4 @@ def is_correct_reagent_set(request):
         if reagent_ids == submitted_reagent_ids and submitted_solvent_id == solvent_id:
             correct = True
 
-    return HTTPResponse(correct)
+    return HttpResponse(correct)

@@ -14,38 +14,53 @@ def register(model):
         return admin_class
     return make_class
 
+
 class ReactionForReagentSetInline(admin.TabularInline):
     model = models.Reaction
     fk_name = 'reagent_set'
-    verbose_name = "Reaction which uses this reagent set"
+    verbose_name = "Reaction"
     verbose_name_plural = "Reactions which use this reagent set"
 
 class ReagentSetForSolventInline(admin.TabularInline):
     model = models.ReagentSet
     fk_name = 'solvent'
-    verbose_name = "Reagent set which uses this as a solvent"
+    verbose_name = "Reagent set"
     verbose_name_plural = "Reagent sets which use this as a solvent"
     raw_id_fields = ('reagents', 'solvent_properties')
+
+class PropertyForReagentInline(admin.TabularInline):
+    model = models.Reagent.properties.through
+    verbose_name = "Property"
+    verbose_name_plural = "Properties of this reagent"
+
+class SolventPropertiesForReagentSetInline(admin.TabularInline):
+    model = models.ReagentSet.solvent_properties.through
+    verbose_name = "Solvent property"
+    verbose_name_plural = "Solvent properties of this reagent set"
+
+class ReagentsForReagentSetInline(admin.TabularInline):
+    model = models.ReagentSet.reagents.through
+    verbose_name = "Reagent"
+    verbose_name_plural = "Reagents of this reagent set"
 
 @register(models.Reagent)
 class ReagentAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Options', {
             'classes': ('wide', 'extrapretty'),
-            'fields': ('name','diagram_name', 'is_solvent', 'smiles', 'properties')
+            'fields': ('diagram_name', 'is_solvent', 'smiles', 'properties')
         }),
     )
     def to_string(self, obj):
         return str(obj)
-    list_display = ('to_string', 'name', 'diagram_name', 'is_solvent', 'smiles')
+    list_display = ('to_string', 'diagram_name', 'is_solvent', 'smiles')
     list_display_links = ('to_string',)
-    list_editable = ('name', 'diagram_name', 'is_solvent', 'smiles')
+    list_editable = ('diagram_name', 'is_solvent', 'smiles')
     list_filter = ('is_solvent',)
-    search_fields = ['name', 'diagram_name', 'smiles']
+    search_fields = ['diagram_name', 'smiles']
+    raw_id_fields = ('properties',)
     view_on_site = True
-
-    inlines = [ReagentSetForSolventInline]
-
+    inlines = [ReagentSetForSolventInline, PropertyForReagentInline]
     
 @register(models.Property)
 class PropertyAdmin(admin.ModelAdmin):
@@ -83,7 +98,11 @@ class ReagentSetAdmin(admin.ModelAdmin):
     # }
     search_fields = ['name', 'reagents__name', 'solvent__name']
 
-    inlines = [ReactionForReagentSetInline]
+    inlines = [
+        ReactionForReagentSetInline,
+        ReagentsForReagentSetInline,
+        SolventPropertiesForReagentSetInline,
+    ]
 
 
 @register(models.Reaction)

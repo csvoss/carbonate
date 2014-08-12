@@ -23,6 +23,8 @@ from toCanonical import to_canonical
 
 
 def smilesify(molecule, canonical=True):
+    for atom in molecule.atoms:
+        print "%s: %s" % (str(atom), str([str(a) for a in atom.neighbors.keys()]))
     """
     molecule :: Molecule or [Molecule]
     (in the latter case, smilesify(mol) is applied for mol in the list)
@@ -107,8 +109,8 @@ def _subsmiles(molecule, start_atom, parent_atom):
 
     #Check if the atom is a chiral center. If so:
     if start_atom.is_chiral:
-        hasP = (parent_atom != 0)
-        hasH = (True in \
+        has_parent = (parent_atom != 0)
+        has_hydrogen = (True in \
                     [a.element.lower() == "h" \
                      for a in list(start_atom.neighbors)]) or \
                (None in \
@@ -121,39 +123,50 @@ def _subsmiles(molecule, start_atom, parent_atom):
         #Then, add the remaining neighbors in the proper order.
         #Implement this by smart rearrangement of to_add.
         #Be mindful of: whether or not there is a parent atom; "" a hydrogen.
-        if hasH:
+        if has_hydrogen:
             # output = "[" + output + "@@H]"
-            if hasP:
+            if has_parent:
                 #to_add should have two elements
                 l = start_atom.chiralCWlist(parent_atom) #list of three atoms
-                if None in l:
-                    x = l.index(None) #index of hydrogen atom in list
-                else:
-                    x = 0
-                    while x < len(l):
-                        if l[x].element == 'H':
-                            break
-                        x += 1
-                to_add = [l[(x+1) %3], l[(x+2) %3]] #correct permutation
+                # if None in l:
+                #     x = l.index(None) #index of hydrogen atom in list
+                # else:
+                #     x = 0
+                #     while x < len(l):
+                #         if l[x].element == 'H':
+                #             break
+                #         x += 1
+                #     if x == len(l):
+                #         raise StandardError("No hydrogen at atom? Shouldn't happen")
+                # to_add = [l[(x+1) %3], l[(x+2) %3]] #correct permutation
+                to_add = l ## TEST. Maybe this will work??? TODO
                 if None in to_add:
                     raise StandardError("%s is chiral, but has two hydrogens." \
                         % start_atom.element)
+                for atom in to_add:
+                    assert atom in start_atom.non_h_neighbors, "%s, %s" % (str([str(i) for i in to_add]), str([str(i) for i in start_atom.non_h_neighbors]))
             else:
                 #to_add should have three elements
                 to_add = start_atom.chiralCWlist(None) #list of three atoms
                 if None in to_add:
                     raise StandardError("%s is chiral, but has two hydrogens." \
                         % start_atom.element)
+                for atom in to_add:
+                    assert atom in start_atom.non_h_neighbors, "%s, %s" % (str(to_add), str(start_atom.non_h_neighbors))
         else:
             # output = "[" + output + "@@]"
-            if hasP:
+            if has_parent:
                 #to_add should have three elements
                 to_add = start_atom.chiralCWlist(parent_atom)
+                for atom in to_add:
+                    assert atom in start_atom.non_h_neighbors
             else:
                 #to_add should have four elements
                 arbitraryRef = list(start_atom.neighbors)[0]
                 l = start_atom.chiralCWlist(arbitraryRef)
                 to_add = [arbitraryRef] + l
+                for atom in to_add:
+                    assert atom in start_atom.non_h_neighbors
 
     
     # Prepare to add new groups for all neighbor atoms which are not the parent
@@ -168,7 +181,19 @@ def _subsmiles(molecule, start_atom, parent_atom):
     for atom in to_add:
         assert isinstance(atom, Atom), "to_add has invalid: %s" % str(atom)
         add = _get_next_subsmiles(atom, start_atom, molecule)
-        output += "("+BOND_SYMBOLS[start_atom.non_h_neighbors[atom]]+add+")"
+        try:
+            key = start_atom.non_h_neighbors[atom]
+        except:
+            raise StandardError("%s, %s, %s, %s" % \
+                (
+                    str(atom),
+                    str(start_atom),
+                    str(start_atom.non_h_neighbors),
+                    str([
+                        (str(k), v) for (k, v) in start_atom.non_h_neighbors.iteritems()
+                    ]),
+                ))
+        output += "("+BOND_SYMBOLS[key]+add+")"
 
     return output
 

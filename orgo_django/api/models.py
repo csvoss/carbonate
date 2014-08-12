@@ -2,6 +2,7 @@ from django.db import models
 from django.core.urlresolvers import reverse
 from api.fields import StringListField
 from api.engine.toCanonical import to_canonical
+from django.utils.html import strip_tags
 
 class Property(models.Model):
     id = models.AutoField(primary_key=True)
@@ -22,7 +23,8 @@ class Reagent(models.Model):
     properties = models.ManyToManyField(Property, blank=True, null=True, help_text="Useful properties of reagent e.g. aprotic")
 
     def __unicode__(self):
-        return to_canonical(self.smiles)
+        # return to_canonical(self.smiles) ## but SMILES is optional
+        return strip_tags(self.diagram_name)
 
     def get_absolute_url(self):
         return reverse('api:get_reagent', args=[self.id])
@@ -47,14 +49,14 @@ class ReagentSet(models.Model):
             return self.name
         reagent_names = ""
         for reagent in self.reagents.all():
-            reagent_names += str(reagent.name) + ", "
+            reagent_names += str(reagent) + ", "
         reagent_names = reagent_names.rstrip(', ')
         solvent_names = ""
         if self.solvent is not None:
-            solvent_names += str(self.solvent.name)
+            solvent_names += str(self.solvent)
         if self.solvent_properties is not None:
             for prop in self.solvent_properties.all().select_related("name"):
-                solvent_names += str(prop.name) + ", "
+                solvent_names += str(prop) + ", "
         solvent_names = solvent_names.rstrip(', ')
 
         display = reagent_names + " Solvent: " + solvent_names

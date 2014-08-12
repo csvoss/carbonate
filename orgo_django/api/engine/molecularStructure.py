@@ -246,11 +246,13 @@ class Atom(object):
 
         output = self.element
 
-        if self.hcount is None and not self.element == 'H' and \
-            not ('H' in [i.element for i in self.neighbors]):
-            brackets = False
-        else:
-            brackets = True
+        brackets = True
+        # if self.hcount is None and not self.element == 'H' and \
+        #     not ('H' in [i.element for i in self.neighbors]):
+        #     brackets = False
+        #     raise StandardError
+        # else:
+        #     brackets = True
 
         if not self.element in ['C','N','O','F','S','P','Cl','Br','I','B']:
             brackets = True
@@ -278,6 +280,12 @@ class Atom(object):
         if self.charge != 0 and self.charge is not None:
             brackets = True
             output = output + self.charge_string()
+
+        ## Class
+        if hasattr(self, 'clss'):
+            brackets = True
+            assert isinstance(self.clss, int)
+            output += ':' + str(self.clss)
 
         if brackets:
             return '[%s]' % output
@@ -359,17 +367,17 @@ class Atom(object):
         if not self.is_chiral:
             if DEBUG:
                 raise StandardError("%s atom is not chiral" % (str(self)))
-        if reference == None:
+        if reference is None:
             hydrogens = [atom for atom in self.neighbors if atom.element == 'H']
             assert len(hydrogens) > 0, "No hydrogen connected to this atom"
             reference = hydrogens[0]
-        if reference == self.chiralA:
+        if reference is self.chiralA:
             return [self.chiralB, self.chiralC, self.chiralD]
-        elif reference == self.chiralB:
+        elif reference is self.chiralB:
             return [self.chiralA, self.chiralD, self.chiralC]
-        elif reference == self.chiralC:
+        elif reference is self.chiralC:
             return [self.chiralA, self.chiralB, self.chiralD]
-        elif reference == self.chiralD:
+        elif reference is self.chiralD:
             return [self.chiralA, self.chiralC, self.chiralB]
         else:
             msg = "Error in chiralCWlist: no such reference atom: %s\n" \
