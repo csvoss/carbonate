@@ -33,4 +33,5 @@ urlpatterns = patterns(
     url(r'^toCanonical/$', views.to_canonical_view, name='to_canonical_view'),
     url(r'^randomSmiles/$', views.random_smiles, name='random_smiles'),
     url(r'^randomSVG/$', views.random_SVG, name='random_SVG'),
+    url(r'^updateReagentNames/$', views.update_reagent_names, name='update_reagent_names'),
 )
