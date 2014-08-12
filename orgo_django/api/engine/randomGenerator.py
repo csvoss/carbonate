@@ -1,7 +1,13 @@
-from helperFunctions import *
-import random
+# import random
+
 from toMolecule import moleculify
 from toSmiles import smilesify
+from molecularStructure import Atom, Molecule
+
+random_random = lambda: 0.8 ## TEST
+random_randint = lambda foo, bar: 1 ## TEST
+
+carbon_counter = 0
 
 def random_molecule(end_prob=0.3, max_length=15, alkyne_prob=0.2,
                     alkeneProb=0.4, br_prob=0.1, cl_prob=0.1, oh_prob=0.1,
@@ -9,34 +15,36 @@ def random_molecule(end_prob=0.3, max_length=15, alkyne_prob=0.2,
     mol, _, _ = random_start(end_prob, max_length, alkyne_prob,
                              alkeneProb, br_prob, cl_prob, oh_prob,
                              branch_prob, force_terminal_alkyne)
-    print "Made the molecule"
     mol.addHydrogens()
-    print "Added hydrogens"
     return mol
 
 def random_start(end_prob=0.3, max_length=15, alkyne_prob=0.2,
                  alkeneProb=0.4, br_prob=0.1, cl_prob=0.1, oh_prob=0.1,
                  branch_prob=0.05, force_terminal_alkyne=False):
+    global carbon_counter
     #Want more alkynes?  You need to make fewer substituents.
-    print "random_start"
-    for prob in (br_prob, cl_prob, oh_prob, branch_prob):
-        prob *= 1 - 2*alkyne_prob
+    # for prob in (br_prob, cl_prob, oh_prob, branch_prob):
+    #     prob *= 1 - 2*alkyne_prob
     last_atom = Atom("C")
+    last_atom.clss = carbon_counter
+    carbon_counter += 1
     front_atom = last_atom
     mol = Molecule(last_atom)
     if force_terminal_alkyne:
         last_atom = Atom("C")
+        last_atom.clss = carbon_counter
+        carbon_counter += 1
         mol.addAtom(last_atom, front_atom, 3)
-    while (random.random() < 1.0-end_prob or len(mol.atoms) < 3) and len(mol.atoms) < max_length:
-        switcher = random.random()
+    while (random_random() < 1.0-end_prob or len(mol.atoms) < 3) and len(mol.atoms) < max_length:
+        switcher = random_random()
         if switcher < 0.8:
-            newMol, atom, nextAtom = randC(br_prob, cl_prob, oh_prob, branch_prob)
+            newMol, atom, nextAtom = rand_carbon(br_prob, cl_prob, oh_prob, branch_prob)
         elif switcher < 0.9:
             newMol, atom, nextAtom = random_ring(5, br_prob, cl_prob, oh_prob)
         else:
             newMol, atom, nextAtom = random_ring(6, br_prob, cl_prob, oh_prob)
 
-        switcher = random.random()
+        switcher = random_random()
         if switcher < alkyne_prob and len(atom.neighbors) == 0\
            and last_atom.totalBondOrder() == 1:
             #Make a triple bond.
@@ -68,66 +76,80 @@ def random_start(end_prob=0.3, max_length=15, alkyne_prob=0.2,
     fix_stereo(mol, Atom("H"), last_atom) #May be slight problem with chirality?
     return mol, front_atom, None
 
-def randC(cl_prob, br_prob, oh_prob, branch_prob):
+def rand_carbon(cl_prob, br_prob, oh_prob, branch_prob):
     '''
     Makes a random carbon atom with some substituents
     '''
-    c = Atom("C")
-    mol = Molecule(c)
-    #Add up to 2 substituents
-    for i in xrange(2):
-        switcher = random.random()
+    global carbon_counter
+    carbon = Atom("C")
+    carbon.clss = carbon_counter
+    carbon_counter += 1
+    mol = Molecule(carbon)
+    #Add up to 3 substituents
+    for _ in xrange(3):
+        switcher = random_random()
         if switcher < cl_prob:
-            newS = Atom("Cl")
-            mol.addAtom(newS, c, 1)
+            next_branch = Atom("Cl")
+            mol.addAtom(next_branch, carbon, 1)
         elif switcher < cl_prob + br_prob:
-            newS = Atom("Br")
-            mol.addAtom(newS, c, 1)
+            next_branch = Atom("Br")
+            mol.addAtom(next_branch, carbon, 1)
         elif switcher < cl_prob + br_prob + oh_prob:
-            newS = Atom("O")
-            mol.addAtom(newS, c, 1)
+            next_branch = Atom("O")
+            mol.addAtom(next_branch, carbon, 1)
         elif switcher < cl_prob + br_prob + oh_prob + branch_prob:
-            print "Branching"
-            newS, front_atom, _ = random_start()
-            mol.addMolecule(newS, front_atom, c, 1)
-    return mol, c, c
+            next_branch, first_atom, _ = random_start()
+            mol.addMolecule(next_branch, first_atom, carbon, 1)
+            mol.addAtom(Atom("Cf"), first_atom, 1) ## TEST
+            mol.addAtom(Atom("Es"), carbon, 1) ## TEST
+        else:
+            # mol.addAtom(Atom("H"), carbon, 1)
+            pass
+    return mol, carbon, carbon
 
 def random_ring(number_of_carbons, br_prob, cl_prob, oh_prob):
     '''
     Makes a random ring
     '''
+    global carbon_counter
     init_atom = Atom("C")
+    init_atom.clss = carbon_counter
+    carbon_counter += 1
     mol = Molecule(init_atom)
     old_atom = init_atom
     for _ in xrange(number_of_carbons - 1):
-        new_atom = Atom('C')
+        new_atom = Atom("C")
+        new_atom.clss = carbon_counter
+        carbon_counter += 1
         mol.addAtom(new_atom, old_atom, 1)
         old_atom = new_atom
     #Now, close the loop!
     mol.addBond(init_atom, old_atom, 1)
-    out_atom = mol.atoms[random.randint(1, len(mol.atoms)-1)]
+    rand_index = random_randint(1, len(mol.atoms)-1)
+    out_atom = mol.atoms[rand_index]
     for atom in mol.atoms:
         #Don't interfere with the larger structure.
-        if atom == init_atom or atom == out_atom:
+        if atom is init_atom or atom is out_atom:
             continue
         #Add some random substituents.
-        switcher = random.random()
+        switcher = random_random()
         if switcher < br_prob:
-            addAtom = Atom("Br")
+            new_atom = Atom("Br")
         elif switcher < br_prob + cl_prob:
-            addAtom = Atom("Cl")
+            new_atom = Atom("Cl")
         elif switcher < br_prob + cl_prob + oh_prob:
-            addAtom = Atom("O")
+            new_atom = Atom("O")
         else:
-            continue
-        if len(atom.neighbors) < 2:
+            new_atom = Atom("H") ## before: was a continue
+        if len(atom.neighbors) < 3:
             continue
         #Do a coin flip to determine chirality.
-        if random.random() < 0.5:
-            atom.newChiralCenter(addAtom, (atom.neighbors.keys()[0], atom.neighbors.keys()[1], Atom("H")))
+        if random_random() < 0.5:
+            atom.newChiralCenter(new_atom, (atom.neighbors.keys()[0], atom.neighbors.keys()[1], Atom("H")))
         else:
-            atom.newChiralCenter(addAtom, (atom.neighbors.keys()[1], atom.neighbors.keys()[0], Atom("H")))
-        mol.addAtom(addAtom, atom, 1)
+            atom.newChiralCenter(new_atom, (atom.neighbors.keys()[1], atom.neighbors.keys()[0], Atom("H")))
+
+        mol.addAtom(new_atom, atom, 1)
     
     return mol, init_atom, out_atom
 
@@ -135,39 +157,39 @@ def fix_stereo(mol, atom, last_atom):
     '''
     Look to see if the *last* piece we added requires stereochem
     '''
-    otherC = last_atom.findAlkeneBond()
+    other_carbon = last_atom.findAlkeneBond()
     if hasattr(last_atom, "makeCTFlag"):
         del last_atom.makeCTFlag
         #Find the last neighbor of last_atom (other than atom
-        #and otherC).  None means Hydrogen.
-        otherN = Atom("H")
+        #and other_carbon).  None means Hydrogen.
+        other_neighbor = Atom("H")
         for neighbor in last_atom.neighbors:
-            if neighbor != otherC and neighbor != atom:
-                otherN = neighbor
+            if neighbor != other_carbon and neighbor != atom:
+                other_neighbor = neighbor
         #Do a coin flip to determine cis or trans.
-        if random.random() < 0.5:
-            last_atom.newCTCenter(otherC, otherN, atom)
+        if random_random() < 0.5:
+            last_atom.newCTCenter(other_carbon, other_neighbor, atom)
         else:
-            last_atom.newCTCenter(otherC, atom, otherN)
-    if probablyChiral(last_atom):
-        tempN = []
+            last_atom.newCTCenter(other_carbon, atom, other_neighbor)
+    
+    elif probably_chiral(last_atom):
+        temp_neighbors = []
         for neighbor in last_atom.neighbors:
-            if neighbor != atom:
-                tempN.append(neighbor)
-        if len(tempN) == 2:
+            if neighbor is not atom:
+                temp_neighbors.append(neighbor)
+        if len(temp_neighbors) == 2:
             new_h = Atom("H")
             mol.addAtom(new_h, last_atom, 1)
-            tempN.append(new_h)
+            mol.addAtom(Atom("Cu"), new_h, 1) ## TEST
+            temp_neighbors.append(new_h)
         #Do a coin flip to determine chirality.
-        if random.random() < 0.5:
-            last_atom.newChiralCenter(atom, (tempN[0], tempN[1], tempN[2]))
+        if random_random() < 0.5:
+            last_atom.newChiralCenter(atom, (temp_neighbors[0], temp_neighbors[1], temp_neighbors[2]))
         else:
-            last_atom.newChiralCenter(atom, (tempN[0], tempN[2], tempN[1]))
-        
-        
-            
+            last_atom.newChiralCenter(atom, (temp_neighbors[0], temp_neighbors[2], temp_neighbors[1]))
 
-def probablyChiral(atom):
+
+def probably_chiral(atom):
     '''
     A rather bootleg heuristic for determining whether an atom is chiral.
     '''
@@ -182,6 +204,3 @@ def probablyChiral(atom):
         if neighbor.element not in element_list:
             element_list.append(neighbor.element)
     return carbon_count >= 2 or len(element_list) >= 3
-
-
-
