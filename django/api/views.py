@@ -323,7 +323,8 @@ def random_smiles(request):
     """
     Return a randomly-generated molecule (output a SMILES)
     """
-    mol = random_molecule()
+    seed = request.GET.get('seed', None)
+    mol = random_molecule(seed=seed)
     smi = smilesify(mol, canonical=False)
     return JsonResponse(smi)
 
@@ -331,8 +332,8 @@ def random_SVG(request):
     """
     Render a randomly-generated molecule (output a SVG)
     """
-    ## TODO: Random molecule is buggy! Issue with radicals.
-    mol = random_molecule()
+    seed = request.GET.get('seed', None)
+    mol = random_molecule(seed=seed)
     return SvgResponse(svg_render(smilesify(mol)))
 
 def to_canonical_view(request):
