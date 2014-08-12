@@ -23,8 +23,6 @@ from toCanonical import to_canonical
 
 
 def smilesify(molecule, canonical=True):
-    for atom in molecule.atoms:
-        print "%s: %s" % (str(atom), str([str(a) for a in atom.neighbors.keys()]))
     """
     molecule :: Molecule or [Molecule]
     (in the latter case, smilesify(mol) is applied for mol in the list)

@@ -331,7 +331,6 @@ def random_SVG(request):
     """
     Render a randomly-generated molecule (output a SVG)
     """
-    ## TODO: Random molecule is buggy! Issue with radicals.
     mol = random_molecule()
     return SvgResponse(svg_render(smilesify(mol)))
 
