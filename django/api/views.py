@@ -32,7 +32,7 @@ def SvgResponse(data):
     data :: SVG string.
     return :: HttpResponse. SVG with proper content-type header.
     """
-    return HttpResponse(data, content_type="image/svg+xml")
+    return HttpResponse(data, content_type="image/svg")
 
 def RequiredQueryParamsResponse(param):
     return HttpResponseBadRequest('Must specify query parameter "%s" in your request.' % str(param))
@@ -325,7 +325,7 @@ def random_smiles(request):
     """
     seed = request.GET.get('seed', None)
     mol = random_molecule(seed=seed)
-    smi = smilesify(mol, canonical=False)
+    smi = smilesify(mol, canonical=True)
     return JsonResponse(smi)
 
 def random_SVG(request):
@@ -337,6 +337,10 @@ def random_SVG(request):
     return SvgResponse(svg_render(smilesify(mol)))
 
 def to_canonical_view(request):
+    """
+    Convert a SMILES string (in the query parameters) to canonical SMILES
+    (returned as a JSON-encoded string).
+    """
     smiles = request.GET.get('molecule', request.GET.get('mol', None))
     if smiles == None:
         return RequiredQueryParamsResponse('mol')

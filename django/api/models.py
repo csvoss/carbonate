@@ -59,7 +59,7 @@ class ReagentSet(models.Model):
                 solvent_names += str(prop) + ", "
         solvent_names = solvent_names.rstrip(', ')
 
-        display = reagent_names + " Solvent: " + solvent_names
+        display = reagent_names + " <br /> dissolved in " + solvent_names
         return unicode(display)
 
 

@@ -11,6 +11,8 @@ import json
 from random import randrange, shuffle
 from api.models import Property, Reagent, ReagentSet, Reaction
 from app.models import Synthesis, SingleStepProblem, SingleStepHardProblem, PredictProductsProblem
+from api.engine.renderSVG import render as svg_render
+
 
 NUM_OPTIONS = 4
 
@@ -123,3 +125,17 @@ def predict_products(request, id):
     ## possibleReactions = findReactions(request)
     ## products = react(request)
     #### TODO: figure out what in the world is going on
+
+
+def reaction_tutorial(request, id):
+    try:
+        reaction = Reaction.objects.get(id=id)
+    except Reaction.DoesNotExist:
+        return HttpResponse("That reaction does not exist.") ## TODO better Django here
+    context = {
+        "name": str(reaction.name),
+        "reagents": str(reaction.reagent_set),
+        "reactant": svg_render("CCCC=C"), ## TODO: A good default molecule
+        "product": svg_render("CCCCCBr"), ## TODO: Make this actually react
+    }
+    return render(request, 'app/reactionTutorial.html', context)
