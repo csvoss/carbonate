@@ -207,6 +207,7 @@ def add_random_chirality(molecule):
 
 def add_random_cistrans(molecule):
     """
+    Add arbitrary cis/trans centers where relevant.
     return :: None.
     """
     for atom in molecule.atoms:

@@ -1,11 +1,10 @@
 *.pyc
 *.pyo
-orgo_django/orgo/OLD_folder_contents
 OLD/
 db.sqlite3
 .vagrant
 *.pickle
-orgo_django/orgo/settings_local.py
-orgo_django/api/migrations
-orgo_django/orgo/migrations
-orgo_django/app/migrations
+django/orgo/settings_local.py
+django/api/migrations
+django/orgo/migrations
+django/app/migrations
