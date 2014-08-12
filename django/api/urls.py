@@ -27,10 +27,12 @@ urlpatterns = patterns(
     ## /api/isCorrectReagentSet?submitted_reagents=['HBr','HI']&solvent_id=[2]&solution_ids=[2,3]
     url(r'^(?i)isCorrectReagentSet$', views.is_correct_reagent_set, name='is_correct_reagent_set'),
     ## /api/react?reaction=123&reactants=["SM1","SM2"]
+
     url(r'^(?i)react/$', views.react, name='react'),
     url(r'^(?i)reactSVG/$', views.react_then_SVG, name='react_then_SVG'),
     url(r'^(?i)renderSVG/$', views.render_SVG, name='render_SVG'),
     url(r'^(?i)toCanonical/$', views.to_canonical_view, name='to_canonical_view'),
     url(r'^(?i)randomSmiles/$', views.random_smiles, name='random_smiles'),
     url(r'^(?i)randomSVG/$', views.random_SVG, name='random_SVG'),
+    url(r'^(?i)updateReagentNames/$', views.update_reagent_names, name='update_reagent_names'),
 )

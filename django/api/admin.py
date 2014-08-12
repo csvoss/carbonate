@@ -61,7 +61,11 @@ class ReagentAdmin(admin.ModelAdmin):
     raw_id_fields = ('properties',)
     view_on_site = True
     inlines = [ReagentSetForSolventInline, PropertyForReagentInline]
-    
+
+@register(models.ReagentName)
+class ReagentNameAdmin(admin.ModelAdmin):
+    pass
+
 @register(models.Property)
 class PropertyAdmin(admin.ModelAdmin):
     fieldsets = (

@@ -18,12 +18,12 @@ class Reagent(models.Model):
     id = models.AutoField(primary_key=True)
     # names = StringListField(help_text='All valid names for this reagent')
     is_solvent = models.BooleanField(default=False)
-    diagram_name = models.CharField(max_length=50, blank=True, help_text="HTML-compatible, human-readable name of this reagent")
+    diagram_name = models.CharField(max_length=50, help_text="HTML-compatible, human-readable name of this reagent")
     smiles = models.CharField(max_length=100, help_text="A SMILES string representation of the molecule (optional)")
     properties = models.ManyToManyField(Property, blank=True, null=True, help_text="Useful properties of reagent e.g. aprotic")
 
     def __unicode__(self):
-        # return to_canonical(self.smiles) ## but SMILES is optional
+        # return to_canonical(self.smiles) ## but SMILES is optional --> Nope, making it necessary, since that basically defines reagent
         return strip_tags(self.diagram_name)
 
     def get_absolute_url(self):

@@ -189,11 +189,11 @@ def all_reagent_names(request):
         other_names = other_names.rstrip(", ")
         name_data = {
             "name": rname.name,
-            "reagent": rname.reagent.id,
+            "id": rname.reagent.id,
             "description": other_names
         }
         reagent_data.append(name_data)
-    return HTTPResponse(json.dumps(reagent_data))
+    return JsonResponse(reagent_data)
 
 #If the user enters in name=input or properties=input, what reagent(s) do I get?
 def find_reagents(request):
@@ -363,3 +363,13 @@ def is_correct_reagent_set(request):
             correct = True
 
     return HttpResponse(correct)
+
+def update_reagent_names(request):
+    reagents = Reagent.objects.all()
+    createdNames = []
+    for rg in reagents:
+        name = unicode(rg)
+        (obj, created) = ReagentName.objects.get_or_create(name=name, reagent=rg)
+        if created:
+            createdNames.append(name)
+    return JsonResponse(createdNames)

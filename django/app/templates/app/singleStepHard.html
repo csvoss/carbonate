@@ -1,8 +1,9 @@
 <html>
 
 <head>
-  <title>Single-Step Problem (Hard Mode)</title>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/jquery-ui.min.js"></script>
+  <title>Single-Step Problem (Hard Mode)</title>
   <meta charset="UTF-8">
 
     <style type="text/css">
@@ -58,19 +59,25 @@
 
         $(document).ready(function() {
 
-            var finalReagents = [];
+            var finalReagents = []; //not being  used right now
             // var solutionReagents = {{ reagents|safe }}; //list of Strings with reagent names
 
-            var reagentNames = []; //list of objects with "name","reagent" = reagent id, "description" = other names 
-            $.ajax({ url:"/api/allReagentNames", success: function(data, st, x) {
-                console.log(data);
-                console.log(JSON.parse(data));
-                reagentNames = JSON.parse(data);
-            } });
+            // var $ = jQuery.noConflict();
 
             function displayMolecule(smiles, location) {
                 $.ajax({ url:"/api/renderSVG", data: {"molecule": smiles}, success: function(data, st, x) {location.append(data);} }); //what is st and x?
             }
+            
+            displayMolecule('{{reactant}}', $('.reactants') );
+            displayMolecule('{{product}}', $('.products') );
+
+            var reagentNames = []; //list of objects with "name","id" = reagent id, "description" = other names 
+            $.ajax({ url:"/api/allReagentNames", async: false, success: function(data, st, x) {
+                console.log("Printing data")
+                console.log(data);
+                // console.log(JSON.parse(data));
+                reagentNames = data;
+            } });
 
             // function updateValidReagents(rgStart) {
             //     $.ajax({ url:"/api/findReagents", data:{"name": rgStart}, success:function(data, st, x) {
@@ -90,17 +97,21 @@
             //     } });
             // }
 
-            function createSubmittedReagent(value) {
-                var reagent = $('<span>', {
+            function createSubmittedReagent(reagent) {
+                var submittedReagent = $('<span>', {
                     class : "submitted-reagent",
-                    'title' : "Remove" 
+                    "title" : "Remove",
+                    "data-rID" : reagent.id
                 });
-                reagent.text(value);
-                $('.submitted-reagents-box').append(reagent);
+                submittedReagent.text(reagent.name);
+                $('.submitted-reagents-box').append(submittedReagent);
+
+                $('.no-reagents').css("display", "none");
+                var menu = $('#reagent-menu');
+                menu.val('');
+                menu.focus();
             }
 
-            displayMolecule('{{reactant}}', $('.reactants') );
-            displayMolecule('{{product}}', $('.products') );
             
 
             //Do different things for certain keys
@@ -128,7 +139,8 @@
 
 
             // TODO: adjust this as needed!
-            $( "#reagent-menu" ).autocomplete({
+            var reagent_menu = $('#reagent-menu');
+            reagent_menu.autocomplete({
               minLength: 0,
               source: reagentNames,
               focus: function( event, ui ) {
@@ -136,38 +148,39 @@
                 return false;
               },
               select: function( event, ui ) {
-                $( "#reagent-menu" ).val( ui.item.name );
-                $( "#reagent-id" ).val( ui.item.reagent );
+                $( "#reagent-menu" ).val( ui.item.name ); //not needed
+                $( "#reagent-id" ).val( ui.item.reagent ); //not needed
+                createSubmittedReagent(ui.item)
                 return false;
               }
-            })
-            .autocomplete( "instance" )._renderItem = function( ul, item ) {
-              return $( "<li>" )
-                .append( "<a>" + item.name + "<br>" + item.description + "</a>" )
-                .appendTo( ul );
-            };
-
-
-
-
-            // When a reagent is added, do this:
-            $('.add-reagent').click(function(e) {
-                var menu = $('#reagent-menu');
-                var rID = $('#reagent-id').val();
-                var reagentName = $.trim(menu.val());
-                if (reagentName.length == 0) {
-                    menu.val(''); //reset the bar in case there were spaces, etc. that got trimmed
-                    menu.focus();
-                    return;
-                }
-
-                // TODO: All answers are currently valid. Verify whats entered
-                createSubmittedReagent(reagentName);
-                $('.no-reagents').css("display", "none");
-                menu.val('');
-                menu.focus();
-
             });
+            // .autocomplete( "instance" )._renderItem = function( ul, item ) {
+            //   return $( "<li>" )
+            //     .append( "<a>" + item.name + "<br>" + item.description + "</a>" )
+            //     .appendTo( ul );
+            // };
+
+
+
+            // This code is no longer used, since the Add button is being removed.
+            // // When a reagent is added, do this:
+            // $('.add-reagent').click(function(e) {
+            //     var menu = $('#reagent-menu');
+            //     var rID = $('#reagent-id').val();
+            //     var reagentName = $.trim(menu.val());
+            //     if (reagentName.length == 0) {
+            //         menu.val(''); //reset the bar in case there were spaces, etc. that got trimmed
+            //         menu.focus();
+            //         return;
+            //     }
+
+            //     // TODO: All answers are currently valid. Verify whats entered
+            //     createSubmittedReagent(reagentName);
+            //     $('.no-reagents').css("display", "none");
+            //     menu.val('');
+            //     menu.focus();
+
+            // });
 
             $('.submitted-reagents-box').on("click", "span", function(e) {
                 $(this).remove();
