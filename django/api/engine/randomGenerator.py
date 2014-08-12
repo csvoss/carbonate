@@ -1,7 +1,5 @@
 import random
 
-from toMolecule import moleculify
-from toSmiles import smilesify
 from molecularStructure import Atom, Molecule
 
 ALKANEPROB = 1.0
@@ -34,13 +32,17 @@ def random_molecule(force_terminal_alkyne=False, seed=None):
         molecule.addAtom(alkyne_atom, start_atom, 3)
         start_atom = alkyne_atom
 
-    global alkeneprob, alkyneprob, brprob, clprob, ohprob, hprob
+    global brprob, clprob, ohprob, hprob, nprob
+    global etherprob, amineprob, alkeneprob, alkyneprob
     alkeneprob = 0.5 * random.random()
     alkyneprob = 0.2 * random.random()
     brprob = 0.1 * random.random()
     clprob = 0.1 * random.random()
-    ohprob = 0.15 * random.random()
+    ohprob = 0.1 * random.random()
+    nprob = 0.1 * random.random()
     hprob = 0.5 * random.random()
+    etherprob = 0.1 * random.random()
+    amineprob = 0.05 * random.random()
 
     tree, end_atom = random_tree()
     molecule.addMolecule(tree, end_atom, start_atom, 1)
@@ -49,28 +51,47 @@ def random_molecule(force_terminal_alkyne=False, seed=None):
 
     add_random_links(molecule)
     add_random_chirality(molecule)
-    add_random_CTcenters(molecule)
+    add_random_cistrans(molecule)
 
     reset_terminate_count()
 
     return molecule
 
-def random_tree():
-    # Precondition: The atom created herein will only have one bond to it
-    # to its parent atom
+def random_tree(ether=True, amine=True):
+    """
+    Precondition: The atom created herein will only have one bond to it
+    to its parent atom.
+    return :: Molecule, Atom.
+    """
+    global etherprob, amineprob
+    rand = random.random()
+    if rand < etherprob and ether:
+        atom = Atom("O")
+        molecule = Molecule(atom)
+        new_molecule, new_atom = random_tree(ether=False, amine=False)
+        molecule.addMolecule(new_molecule, new_atom, atom, 1)
+        return molecule, atom
+    elif rand < etherprob+amineprob and amine:
+        atom = Atom("N")
+        molecule = Molecule(atom)
+        new_molecule, new_atom = random_tree(ether=False, amine=False)
+        molecule.addMolecule(new_molecule, new_atom, atom, 1)
+        new_molecule, new_atom = random_tree(ether=False, amine=False)
+        molecule.addMolecule(new_molecule, new_atom, atom, 1)
+        return molecule, atom
 
     atom = Atom("C")
     molecule = Molecule(atom)
 
-    global alkeneprob, alkyneprob, ALKANEPROB
+    global alkeneprob, alkyneprob
     rand = random.random()
     totalprob = float(alkeneprob + alkyneprob + ALKANEPROB)
     if rand < alkeneprob / totalprob:
-        bond_orders = [2,1]
+        bond_orders = [2, 1]
     elif rand < (alkyneprob + alkeneprob) / totalprob:
         bond_orders = [3]
     else:
-        bond_orders = [1,1,1]
+        bond_orders = [1, 1, 1]
 
     for bond_order in bond_orders:
         new_molecule, new_atom = random_constituent(bond_order)
@@ -102,15 +123,17 @@ def random_terminal():
     Return a random single atom (a "terminal"). No branching.
     return :: Atom
     """
-    global ohprob, brprob, clprob, hprob
+    global ohprob, brprob, clprob, hprob, nprob
     rand = random.random()
-    totalprob = float(ohprob + brprob + clprob + hprob)
+    totalprob = float(ohprob + brprob + clprob + hprob + nprob)
     if rand < ohprob / totalprob:
         return Atom("O")
     elif rand < (ohprob + brprob) / totalprob:
         return Atom("Br")
     elif rand < (ohprob + brprob + clprob) / totalprob:
         return Atom("Cl")
+    elif rand < (ohprob + brprob + clprob + nprob) / totalprob:
+        return Atom("N")
     else:
         return Atom("H")
 
@@ -135,8 +158,7 @@ def add_random_links(molecule):
     Add a ring if one is possible to add.
     return :: None.
     """
-
-    ring_size = random.choice([5,6])
+    ring_size = random.choice([5, 6])
 
     carbons = [i for i in molecule.atoms if i.element is 'C']
     carbons = shuffled(carbons)
@@ -176,13 +198,31 @@ def add_random_links(molecule):
                             return
 
 def add_random_chirality(molecule):
+    """
+    return :: None.
+    """
     ## MUST BE DONE **AFTER** ADDING LINKS
+    ## TODO
     pass
 
-def add_random_CTcenters(molecule):
-    pass
+def add_random_cistrans(molecule):
+    """
+    return :: None.
+    """
+    for atom in molecule.atoms:
+        for other_atom in atom.neighbors:
+            if atom.neighbors[other_atom] == 2:
+                atoms = [a for a in atom.neighbors if a is not other_atom]
+                if len(atoms) == 2:
+                    atom.newCTCenter(other_atom, atoms[0], atoms[1])
+                atoms = [a for a in other_atom.neighbors if a is not atom]
+                if len(atoms) == 2:
+                    other_atom.newCTCenter(atom, atoms[0], atoms[1])
 
 def shuffled(l):
+    """
+    return :: list.
+    """
     new_l = [i for i in l]
     if len(new_l) > 1:
         random.shuffle(new_l)
