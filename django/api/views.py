@@ -40,6 +40,9 @@ def RequiredQueryParamsResponse(param):
 def ModelNotFoundResponse(model, pk):
     return HttpResponseNotFound('No %s found by that identifier: %s' % (model, str(pk)))
 
+def InvalidSmilesResponse(smiles_list):
+    return HttpResponseBadRequest("Invalid SMILESes: %s" % str(smiles_list))
+
 def get_reaction_data(reaction):
     """
     Helper function that extracts data from a Reaction query object.
@@ -241,8 +244,11 @@ def check_if_equal(request):
     if mol2 == None:
         return RequiredQueryParamsResponse('mol2')
 
-    mol1_can = to_canonical(mol1)
-    mol2_can = to_canonical(mol2)
+    try:
+        mol1_can = to_canonical(mol1)
+        mol2_can = to_canonical(mol2)
+    except:
+        return InvalidSmilesResponse([mol1, mol2])
     if mol1_can == "" or mol2_can == "":
         return JsonResponse(mol1 == mol2) ## Invalid SMILES are not equal
     return JsonResponse(mol1_can == mol2_can)
@@ -269,7 +275,10 @@ def react(request):
     except ValueError:
         return JsonResponse("")
 
-    reactants = moleculify(reactant_smi_list)
+    try:
+        reactants = moleculify(reactant_smi_list)
+    except:
+        return InvalidSmilesResponse(reactant_smi_list)
     
     try:
         reaction = Reaction.objects.get(id=reactionID)
@@ -278,7 +287,10 @@ def react(request):
     
     function_name = reaction.process_function
     reaction_function = getattr(api.engine.reaction_functions, function_name)
-    products = reaction_function(reactants)
+    try:
+        products = reaction_function(reactants)
+    except:
+        return InvalidSmilesResponse(reactant_smi_list)
     return JsonResponse(smilesify(products))
 
 def react_then_SVG(request):
@@ -298,7 +310,10 @@ def react_then_SVG(request):
     except ValueError:
         return JsonResponse("")
 
-    reactants = moleculify(reactant_smi_list)
+    try:
+        reactants = moleculify(reactant_smi_list)
+    except:
+        return InvalidSmilesResponse(reactant_smi_list)
     
     try:
         reaction = Reaction.objects.get(id=reactionID)
@@ -307,7 +322,10 @@ def react_then_SVG(request):
     
     function_name = reaction.process_function
     reaction_function = getattr(api.engine.reaction_functions, function_name)
-    products = reaction_function(reactants)
+    try:
+        products = reaction_function(reactants)
+    except:
+        return InvalidSmilesResponse(reactant_smi_list)
     return HttpResponse("<br/".join([
         reaction.name,
         svg_render(to_canonical('.'.join(reactant_smi_list))),
@@ -349,8 +367,11 @@ def to_canonical_view(request):
     smiles = request.GET.get('molecule', request.GET.get('mol', None))
     if smiles == None:
         return RequiredQueryParamsResponse('mol')
-    return JsonResponse(to_canonical(smiles))
-
+    try:
+        return JsonResponse(to_canonical(smiles))
+    except:
+        return InvalidSmilesResponse(reactant_smi_list)
+        
 def is_correct_reagent_set(request):
     submitted_reagent_names = request.GET.get('submitted_reagents', [])
     submitted_solvent_id = request.GET.get('solvent_id', None)

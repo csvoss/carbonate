@@ -20,7 +20,7 @@
             padding: 10px;
             margin: 5px;
             width: 200px;
-            height: 240px;
+            height: 250px;
             float: left;
         }
         p.reagent {
@@ -34,6 +34,11 @@
         .col1, .col3 {
             background-color:#EEEEEE;
             border-radius:10px;
+            position: relative;
+        }
+        products, reactants {
+            width:200px;
+            height:200px;
         }
         svg text {
             stroke: black;
@@ -43,6 +48,9 @@
         .reagent-menu-box {
             width: 230px;
             margin: 5px;
+            clear: both;
+            top: 80%;
+            position: absolute;
         }
         button {
             width: 40px;
@@ -50,9 +58,6 @@
         input {
             width: 145px;
         }
-	input {
-	    width: 150px;
-	}
         .link {
           color:#556677;
           text-decoration: underline;
@@ -61,6 +66,9 @@
         #suggestions {
             border: 1px solid transparent;
             width: 400px;
+        }
+        #errorbox {
+            color: grey;
         }
 
     </style>
@@ -161,7 +169,7 @@
             <div class="reagent-menu-box">
                 <input id="reactant-menu" type="text" placeholder="Type a SMILES" autofocus>
                 <button class="add-reactant">Go</button>
-                <div id="errorbox"></div>
+                <small><div id="errorbox"></div></small>
             </div>
             <div style="clear:both;"></div>
         </div>
@@ -183,11 +191,7 @@
         <p><small>What is a SMILES? <span id="show" class="link">[show]</span><span id="hide" class="link">[hide]</span></b><br></small></p>
         <div id="suggestions">
             <small>
-                Help text will go here eventually. In the meantime, I recommend trying some of the following:<br/>
-C=CCCCCCC<br/>
-C1C=CCC1<br />
-C=C<br/>
-CCCCC<br/>
+                Help text will go here eventually. In the meantime, I recommend trying some of the following:<br/>C=CCCCCCC<br/>C1C=CCC1<br />C=C<br/>CCCCC
             </small>
         </div>
 
