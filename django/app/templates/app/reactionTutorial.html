@@ -19,8 +19,8 @@
             border: 0px solid;
             padding: 10px;
             margin: 5px;
-            height: 200px;
             width: 200px;
+            height: 240px;
             float: left;
         }
         p.reagent {
@@ -31,16 +31,24 @@
         img.arrow {
             margin-left: 20px;
         }
-        .reactants, .products {
+        .col1, .col3 {
             background-color:#EEEEEE;
             border-radius:10px;
+        }
+        svg text {
+            stroke: black;
+            stroke-width: 1px;
+            stroke-opacity: 0.2;
         }
         .reagent-menu-box {
             width: 230px;
             margin: 5px;
         }
         button {
-            width: 65px;
+            width: 40px;
+        }
+        input {
+            width: 145px;
         }
 	input {
 	    width: 150px;
@@ -64,6 +72,7 @@
 
             reactant_box = $('.reactants');
             product_box = $('.products');
+            errorbox = $('#errorbox');
 
             function displayMolecule(smiles, location) {
                 $.ajax({
@@ -91,8 +100,6 @@
                     return;
                 }
 
-                reactant_box.empty();
-                displayMolecule(reactant_smiles, reactant_box);
 
                 $.ajax({
                     url: "/api/react",
@@ -101,8 +108,15 @@
                         "reaction": {{reaction_id | safe}},
                     },
                     success: function(data, st, x) {
+                        reactant_box.empty();
+                        displayMolecule(reactant_smiles, reactant_box);
                         product_box.empty();
                         displayMolecule(data, product_box);
+                        errorbox.empty();
+                    },
+                    error: function(data, st, x) {
+                        errorbox.empty();
+                        errorbox.append("Not a valid SMILES: "+reactant_smiles);
                     }
                 })
 
@@ -139,26 +153,32 @@
     <div class="main">
         <h2>{{name | safe}} &ndash; <small>Reaction Tutor</small></h2>
 
-        <div class="reactants column">
-            {{reactant_svg | safe}}
+        <div class="column col1">
+            <div class="reactants">
+                {{reactant_svg | safe}}
+            </div>
+
+            <div class="reagent-menu-box">
+                <input id="reactant-menu" type="text" placeholder="Type a SMILES" autofocus>
+                <button class="add-reactant">Go</button>
+                <div id="errorbox"></div>
+            </div>
+            <div style="clear:both;"></div>
         </div>
 
-        <div class="reaction column">
+        <div class="reaction column col2">
             <p class="reagent">{{reagents | safe}}</p>
             <img class="arrow" src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"></img>
             <p class="reagent">{{solvents | safe}}</p>
         </div>
 
-        <div class="products column">
+        <div class="products column col3">
             {{product_svg | safe}}
         </div>
 
         <div style="clear: both;"></div>
 
-        <div class="reagent-menu-box">
-            <input id="reactant-menu" type="text" placeholder="Type a SMILES" autofocus>
-            <button class="add-reactant">React!</button>
-        </div>
+
 
         <p><small>What is a SMILES? <span id="show" class="link">[show]</span><span id="hide" class="link">[hide]</span></b><br></small></p>
         <div id="suggestions">
