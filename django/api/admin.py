@@ -60,7 +60,7 @@ class ReagentAdmin(admin.ModelAdmin):
     search_fields = ['diagram_name', 'smiles']
     raw_id_fields = ('properties',)
     view_on_site = True
-    inlines = [ReagentSetForSolventInline, PropertyForReagentInline]
+    # inlines = [ReagentSetForSolventInline, PropertyForReagentInline]
 
 @register(models.ReagentName)
 class ReagentNameAdmin(admin.ModelAdmin):
@@ -102,11 +102,11 @@ class ReagentSetAdmin(admin.ModelAdmin):
     # }
     search_fields = ['name', 'reagents__name', 'solvent__name']
 
-    inlines = [
-        ReactionForReagentSetInline,
-        ReagentsForReagentSetInline,
-        SolventPropertiesForReagentSetInline,
-    ]
+    # inlines = [
+    #     ReactionForReagentSetInline,
+    #     ReagentsForReagentSetInline,
+    #     SolventPropertiesForReagentSetInline,
+    # ]
 
 
 @register(models.Reaction)
