@@ -9,7 +9,7 @@
 
     <style type="text/css">
         .singleStepHardProblem {
-            width: 800px;
+            width: 700px;
         }
         body {
             font-family:Arial,Verdana,sans-serif;
@@ -45,8 +45,18 @@
             font-size: 0.6em;
             /*vertical-align: middle;*/
         }
+        .solvent {
+            margin-bottom: 10px;
+            margin-left: 30px;
+        }
         img {
-            margin-bottom:50px;
+            margin:10px;
+        }
+        .submitted-reagents-box {
+
+        }
+        .no-reagents {
+            margin: 30px;
         }
 
     </style>
@@ -219,8 +229,14 @@
                 var solventID = $('.solvent .submitted-reagent').data('rID');
 
                 $.ajax({ url:"/api/isCorrectReagentSet", data:{"submitted_reagents":submittedReagents, "solvent_id":solventID, "solution_ids":{{reagent_sets|safe}} }, success: function(data,st,x) {
-                    console.log(data);
-                    // TODO: print correct or wrong messages based on if data(correct) is True or False
+                    $('.message').empty();
+                    if (data == "False") {
+                        $('.message').append("Not quite. Try again!");
+                    }
+                    else if (data == "True") {
+                        $('.message').append("Good job!");
+                    }
+                    // $('.message').append(data);
                 } });
 
                 // if (correct) {
