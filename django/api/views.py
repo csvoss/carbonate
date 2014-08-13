@@ -254,6 +254,8 @@ def react(request):
     reactionID = request.GET.get('reaction', None)
     reactant_smi_list = request.GET.get('reactants', None)
 
+    print reactant_smi_list
+
     if reactionID == None:
         return RequiredQueryParamsResponse('reaction')
     if reactant_smi_list == None:
