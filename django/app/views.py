@@ -5,19 +5,30 @@ into responses to return to the user.
 """
 
 from django.shortcuts import get_object_or_404, render
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, HttpResponseNotFound
 from django.core.urlresolvers import reverse
 import json
 from random import randrange, shuffle
 from api.models import Property, Reagent, ReagentSet, Reaction
 from app.models import Synthesis, SingleStepProblem, SingleStepHardProblem, PredictProductsProblem
 from api.engine.renderSVG import render as svg_render
+import api.engine.reaction_functions
+from api.engine.toSmiles import smilesify, to_canonical
+from api.engine.toMolecule import moleculify
 
 
 NUM_OPTIONS = 4
 
-# Create your views here.
-## url(r'^$', views.index, name='index'),
+
+####### HELPER FUNCTIONS ########
+
+def ModelNotFoundResponse(model, pk):
+    return HttpResponseNotFound('No %s found by that identifier: %s' % (model, str(pk)))
+
+
+
+############ VIEWS #############
+
 def index(request):
     """
     Return a page for /app.
@@ -131,11 +142,20 @@ def reaction_tutorial(request, id):
     try:
         reaction = Reaction.objects.get(id=id)
     except Reaction.DoesNotExist:
-        return HttpResponse("That reaction does not exist.") ## TODO better Django here
+        return ModelNotFoundResponse("reaction", str(id))
+    reactant_smiles = "CCCC=C"
+    function_name = reaction.process_function
+    reaction_function = getattr(api.engine.reaction_functions, function_name)
+    product_molecule = reaction_function(moleculify(reactant_smiles))
+    product_smiles = smilesify(product_molecule)
     context = {
         "name": str(reaction.name),
-        "reagents": str(reaction.reagent_set),
-        "reactant": svg_render("CCCC=C"), ## TODO: A good default molecule
-        "product": svg_render("CCCCCBr"), ## TODO: Make this actually react
+        "reagents": reaction.reagent_set.get_html(),
+        "solvents": reaction.reagent_set.get_solvent_html(),
+        "reactant_svg": svg_render(reactant_smiles),
+        "product_svg": svg_render(product_smiles),
+        "reactant_smiles": to_canonical(reactant_smiles),
+        "product_smiles": to_canonical(product_smiles),
+        "reaction_id": str(reaction.id),
     }
     return render(request, 'app/reactionTutorial.html', context)

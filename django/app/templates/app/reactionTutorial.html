@@ -8,24 +8,41 @@
     <style type="text/css">
         .main {
             width: 800px;
-        }
-        div {
-            margin: 5px;
+            border: 2px solid black;
+            padding: 10px;
         }
         body {
-            font-family:Arial,Verdana,sans-serif;
+            font-family: sans-serif;
         }
         .column {
             display: inline-block;
             border: 0px solid;
             padding: 10px;
+            margin: 5px;
+            height: 200px;
+            width: 200px;
+            float: left;
+        }
+        p {
+            margin-left: auto;
+            margin-right: auto;
+            width: 70%;
+        }
+        img.arrow {
+            margin-left: 25px;
         }
         .reactants, .products {
             background-color:#EEEEEE;
             border-radius:10px;
         }
-        img {
-            margin-bottom:50px;
+
+        .reagent-menu-box {
+            width: 230px;
+            margin: 5px;
+        }
+
+        button {
+            width: 65px;
         }
 
     </style>
@@ -35,49 +52,12 @@
 
         $(document).ready(function() {
 
-            var finalReagents = [];
-            // var solutionReagents = {{ reagents|safe }}; //list of Strings with reagent names
-
-            var reagentNames = []; //list of objects with "name","reagent" = reagent id, "description" = other names 
-            $.ajax({ url:"/api/allReagentNames", success: function(data, st, x) {
-                console.log(data);
-                console.log(JSON.parse(data));
-                reagentNames = JSON.parse(data);
-            } });
-
             function displayMolecule(smiles, location) {
                 $.ajax({ url:"/api/renderSVG", data: {"molecule": smiles}, success: function(data, st, x) {location.append(data);} }); //what is st and x?
             }
 
-            // function updateValidReagents(rgStart) {
-            //     $.ajax({ url:"/api/findReagents", data:{"name": rgStart}, success:function(data, st, x) {
-            //         var menu = $('#valid-reagents');
-            //         menu.children().remove();
-            //         data = JSON.parse(data);
-            //         for (iRg = 0; iRg < data.length; iRg++) {
-            //             var new_reagent = $('<option>', {
-            //                 "value": data[iRg]["name"]
-            //             });
-            //             if (data[iRg]["is_solvent"]) {
-            //                 new_reagent.text("Solvent");
-            //             }
-            //             menu.append(new_reagent);
-            //         }
-
-            //     } });
-            // }
-
-            function createSubmittedReagent(value) {
-                var reagent = $('<span>', {
-                    class : "submitted-reagent",
-                    'title' : "Remove" 
-                });
-                reagent.text(value);
-                $('.submitted-reagents-box').append(reagent);
-            }
-
-            displayMolecule('{{reactant}}', $('.reactants') );
-            displayMolecule('{{product}}', $('.products') );
+            displayMolecule('{{reactant_smiles}}', $('.reactants') );
+            displayMolecule('{{product_smiles}}', $('.products') );
             
 
             //Do different things for certain keys
@@ -87,21 +67,7 @@
                     e.preventDefault();
                     $('.add-reagent').click();
                 }
-               /* if (e.which == 32) {
-                    return false; //prevents space bar from working
-                }*/
             });
-
-            // // Update dropdown when value is entered
-            // $('#reagent-menu').keyup(function(e) {
-
-            //     var rgStart = this.value;
-            //     if (rgStart.length > 0) {
-            //         updateValidReagents(rgStart);
-            //     } else {
-            //         $('#valid-reagents').children().remove();
-            //     }
-            // });
 
 
             // TODO: adjust this as needed!
@@ -146,7 +112,7 @@
 
             });
 
-            $('.submitted-reagents-box').on("click", "span", function(e) {
+            $('.reagents-box').on("click", "span", function(e) {
                 $(this).remove();
 
                 if ($('.submitted-reagent').length == 0) {
@@ -165,12 +131,6 @@
                     // TODO: print correct or wrong messages based on if data(correct) is True or False
                 } });
 
-                // if (correct) {
-                //     $('.message').text("That's right!");
-                // } else {
-                //     $('.message').text("Not quite");
-                // }
-
             });
 
 
@@ -184,26 +144,22 @@
 
     <div class="main">
         <h1>{{name | safe}} &ndash; <small>Reaction Tutor</small></h1>
+
         <div class="reactants column">
-            {{reactant | safe}}
+            {{reactant_svg | safe}}
         </div>
 
         <div class="reaction column">
-            <div class="submitted-reagents-box">
-                {{reagents | safe}}
-            </div>
-            <div class="arrow">
-                <img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"></img> <!-- Use a legit arrow later -->
-            </div>
+            <p>{{reagents | safe}}</p>
+            <img class="arrow" src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"></img>
+            <p>{{solvents | safe}}</p>
         </div>
 
         <div class="products column">
-            {{product | safe}}
+            {{product_svg | safe}}
         </div>
 
-        <div class="solvent">
-            <!--Reactant?-->
-        </div>
+        <div style="clear: both;"></div>
 
         <div class="reagent-menu-box">
             <input id="reagent-menu" type="text" placeholder="Type a SMILES" autofocus>
@@ -211,11 +167,9 @@
             <button class="add-reagent">React!</button>
         </div>
 
-    <span class="message"></span>
+        <span class="message"></span>
 
     </div>
-
-
 
 </body>
 

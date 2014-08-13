@@ -59,7 +59,27 @@ class ReagentSet(models.Model):
                 solvent_names += str(prop) + ", "
         solvent_names = solvent_names.rstrip(', ')
 
-        display = reagent_names + " <br /> dissolved in " + solvent_names
+        display = reagent_names + " Solvent: " + solvent_names
+        return unicode(display)
+
+    def get_html(self):
+        if len(self.name) > 1:
+            return self.name
+        reagent_names = ""
+        for reagent in self.reagents.all():
+            reagent_names += str(reagent.diagram_name) + "<br />"
+        reagent_names = reagent_names.rstrip('<br />')
+        return unicode(reagent_names)
+
+    def get_solvent_html(self):
+        solvent_names = ""
+        if self.solvent is not None:
+            solvent_names += str(self.solvent.diagram_name)
+        if self.solvent_properties is not None:
+            for prop in self.solvent_properties.all().select_related("name"):
+                solvent_names += str(prop) + "<br />"
+        solvent_names = solvent_names.rstrip('<br />')
+        display = "dissolved in %s" % solvent_names
         return unicode(display)
 
 
