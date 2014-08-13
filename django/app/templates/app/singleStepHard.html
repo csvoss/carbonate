@@ -39,7 +39,7 @@
             float: right;
             margin: 10px;
         }
-        .solvent {
+        .solvent-menu {
             float: right;
             color: gray;
             font-size: 0.6em;
@@ -116,9 +116,15 @@
                     "data-rID" : reagent.rID
                 });
                 submittedReagent.text(reagent.label);
-                $('.submitted-reagents-box').append(submittedReagent);
-
-                $('.no-reagents').css("display", "none");
+                if (reagent.isSolvent) {
+                    $('.solvent').children('.submitted-reagent').remove();
+                    $('.solvent').append(submittedReagent);
+                    $('.no-solvent').css("display", "none");
+                }
+                else {
+                    $('.submitted-reagents-box').append(submittedReagent);
+                    $('.no-reagents').css("display", "none");
+                }
                 var menu = $('#reagent-menu');
                 menu.val('');
                 menu.focus();
@@ -156,10 +162,10 @@
               }
             })
             .autocomplete( "instance" )._renderItem = function( ul, item ) {
-                var otherNames = $("<div>").append(' <font size="2"><i>' + item.description + "</i></font>").css("display", "none");
+                var otherNames = $("<div>").append(' <font size="2"><i>' + item.description + "</i></font>").css("display", "block");
                 var newItem = $("<a>").append(item.label);
-                if (item.solvent) {
-                    newItem.append('<span class="solvent">Solvent</span>');
+                if (item.isSolvent) {
+                    newItem.append('<span class="solvent-menu">Solvent</span>');
                 }
                 newItem.append(otherNames);
                 var menuItem = $( "<li>" ).append( newItem );
@@ -194,9 +200,15 @@
             $('.submitted-reagents-box').on("click", "span", function(e) {
                 $(this).remove();
 
-                if ($('.submitted-reagent').length == 0) {
+                if ($('.submitted-reagents-box .submitted-reagent').length == 0) {
                     $('.no-reagents').css("display","inline");
                 }
+            });
+
+            $('.solvent').on("click", "span", function(e) {
+                $(this).remove();
+                $('.no-solvent').css("display","inline");
+                
             });
 
             $('.check').click(function(e) {
@@ -204,8 +216,9 @@
                 $('.submitted-reagent').each( function(ii, ele) {
                     submittedReagents.push($(this).text());
                 });
+                var solventID = $('.solvent .submitted-reagent').data('rID');
 
-                $.ajax({ url:"/api/isCorrectReagentSet", data:{"submitted_reagents":submittedReagents, "solvent_id":1, "solution_ids":{{reagent_sets|safe}} }, success: function(data,st,x) {
+                $.ajax({ url:"/api/isCorrectReagentSet", data:{"submitted_reagents":submittedReagents, "solvent_id":solventID, "solution_ids":{{reagent_sets|safe}} }, success: function(data,st,x) {
                     console.log(data);
                     // TODO: print correct or wrong messages based on if data(correct) is True or False
                 } });
@@ -235,7 +248,7 @@
 
             <div class="reaction column">
                 <div class="submitted-reagents-box">
-                    <span class="no-reagents">? ?</span>
+                    <span class="no-reagents">Reagents?</span>
                 </div>
 
                 <div class="arrow">
@@ -243,7 +256,7 @@
                 </div>
 
                 <div class="solvent">
-                    Reagents?
+                    <span class="no-solvent">Solvent?</span>
                 </div>
 
                 <div class="reagent-menu-box">
@@ -258,7 +271,7 @@
 
         <div class="controls">
             <button class="check">Submit</button>
-            <span class="message"> Test message </span>
+            <span class="message"> </span>
 
         </div>
     </div>

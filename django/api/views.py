@@ -193,7 +193,7 @@ def all_reagent_names(request):
             "label": rname.name,
             "rID": rname.reagent.id,
             "description": other_names,
-            "solvent": rname.reagent.is_solvent,
+            "isSolvent": rname.reagent.is_solvent,
         }
         reagent_data.append(name_data)
     return JsonResponse(reagent_data)
