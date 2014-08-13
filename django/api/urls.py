@@ -27,7 +27,6 @@ urlpatterns = patterns(
     ## /api/isCorrectReagentSet?submitted_reagents=['HBr','HI']&solvent_id=[2]&solution_ids=[2,3]
     url(r'^(?i)isCorrectReagentSet$', views.is_correct_reagent_set, name='is_correct_reagent_set'),
     ## /api/react?reaction=123&reactants=["SM1","SM2"]
-
     url(r'^(?i)react/$', views.react, name='react'),
     url(r'^(?i)reactSVG/$', views.react_then_SVG, name='react_then_SVG'),
     url(r'^(?i)renderSVG/$', views.render_SVG, name='render_SVG'),

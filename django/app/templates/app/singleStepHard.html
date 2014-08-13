@@ -1,10 +1,11 @@
 <html>
 
 <head>
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/jquery-ui.min.js"></script>
-  <title>Single-Step Problem (Hard Mode)</title>
-  <meta charset="UTF-8">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css" />
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/jquery-ui.min.js"></script>
+    <title>Single-Step Problem (Hard Mode)</title>
+<meta charset="UTF-8">
 
     <style type="text/css">
         .singleStepHardProblem {
@@ -22,6 +23,9 @@
             background-color:#EEEEEE;
             border-radius:10px;
         }
+        .reaction input {
+            width: 200px;
+        }
         .submitted-reagent {
             padding: 2px;
             border: dashed;
@@ -34,6 +38,12 @@
         .controls * {
             float: right;
             margin: 10px;
+        }
+        .solvent {
+            float: right;
+            color: gray;
+            font-size: 0.6em;
+            /*vertical-align: middle;*/
         }
         img {
             margin-bottom:50px;
@@ -65,7 +75,9 @@
             // var $ = jQuery.noConflict();
 
             function displayMolecule(smiles, location) {
-                $.ajax({ url:"/api/renderSVG", data: {"molecule": smiles}, success: function(data, st, x) {location.append(data);} }); //what is st and x?
+                $.ajax({ url:"/api/renderSVG", data: {"molecule": smiles}, success: function(data, st, x) {
+                    location.append(data);
+                } });
             }
             
             displayMolecule('{{reactant}}', $('.reactants') );
@@ -101,9 +113,9 @@
                 var submittedReagent = $('<span>', {
                     class : "submitted-reagent",
                     "title" : "Remove",
-                    "data-rID" : reagent.id
+                    "data-rID" : reagent.rID
                 });
-                submittedReagent.text(reagent.name);
+                submittedReagent.text(reagent.label);
                 $('.submitted-reagents-box').append(submittedReagent);
 
                 $('.no-reagents').css("display", "none");
@@ -119,46 +131,43 @@
                 if (e.which == 13) {
                     // The enter key was pressed
                     e.preventDefault();
-                    $('.add-reagent').click();
+                    // $('.add-reagent').click(); //no longer using Add button
                 }
                /* if (e.which == 32) {
                     return false; //prevents space bar from working
                 }*/
             });
 
-            // // Update dropdown when value is entered
-            // $('#reagent-menu').keyup(function(e) {
-
-            //     var rgStart = this.value;
-            //     if (rgStart.length > 0) {
-            //         updateValidReagents(rgStart);
-            //     } else {
-            //         $('#valid-reagents').children().remove();
-            //     }
-            // });
-
-
             // TODO: adjust this as needed!
             var reagent_menu = $('#reagent-menu');
             reagent_menu.autocomplete({
-              minLength: 0,
+              minLength: 1, //min number of chars to be typed before searching for results
               source: reagentNames,
               focus: function( event, ui ) {
-                $( "#reagent-menu" ).val( ui.item.name );
+                // $( "#reagent-menu" ).val( ui.item.label );
+                // console.log(ui.item);
                 return false;
               },
               select: function( event, ui ) {
-                $( "#reagent-menu" ).val( ui.item.name ); //not needed
-                $( "#reagent-id" ).val( ui.item.reagent ); //not needed
+                $( "#reagent-menu" ).val( ui.item.label ); //not needed
+                $( "#reagent-id" ).val( ui.item.rID ); //not needed
                 createSubmittedReagent(ui.item)
                 return false;
               }
-            });
-            // .autocomplete( "instance" )._renderItem = function( ul, item ) {
-            //   return $( "<li>" )
-            //     .append( "<a>" + item.name + "<br>" + item.description + "</a>" )
-            //     .appendTo( ul );
-            // };
+            })
+            .autocomplete( "instance" )._renderItem = function( ul, item ) {
+                var otherNames = $("<div>").append(' <font size="2"><i>' + item.description + "</i></font>").css("display", "none");
+                var newItem = $("<a>").append(item.label);
+                if (item.solvent) {
+                    newItem.append('<span class="solvent">Solvent</span>');
+                }
+                newItem.append(otherNames);
+                var menuItem = $( "<li>" ).append( newItem );
+                // .on("autocompletefocus", function (event, ui) {
+                //     $(this).find('div').css("display", "block");
+                // });
+                return menuItem.appendTo( ul );
+            };
 
 
 
@@ -240,7 +249,6 @@
                 <div class="reagent-menu-box">
                     <input id="reagent-menu" type="text" placeholder="Insert reagent or solvent here" autofocus>
                     <input id="reagent-id" type="hidden">
-                    <button class="add-reagent">Add</button>
                 </div>
             </div>
 

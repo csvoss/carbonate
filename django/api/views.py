@@ -182,15 +182,18 @@ def get_reagent(request, pk):
 def all_reagent_names(request):
     reagent_data = []
     for rname in ReagentName.objects.all():
-        other_names = "Aka: "
+        other_names = ""
         for rn in rname.reagent.names.all():
             if rn.name != rname.name:
                 other_names += rn.name + ", "
         other_names = other_names.rstrip(", ")
+        if len(other_names) > 0:
+            other_names = "Aka: " + other_names
         name_data = {
-            "name": rname.name,
-            "id": rname.reagent.id,
-            "description": other_names
+            "label": rname.name,
+            "rID": rname.reagent.id,
+            "description": other_names,
+            "solvent": rname.reagent.is_solvent,
         }
         reagent_data.append(name_data)
     return JsonResponse(reagent_data)
@@ -370,7 +373,7 @@ def update_reagent_names(request):
     reagents = Reagent.objects.all()
     createdNames = []
     for rg in reagents:
-        name = unicode(rg)
+        name = rg.diagram_name
         (obj, created) = ReagentName.objects.get_or_create(name=name, reagent=rg)
         if created:
             createdNames.append(name)
