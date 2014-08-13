@@ -103,7 +103,7 @@ def single_step_hard(request, id):
         'product' : problem.product_smiles,
         'reagent_sets': json.dumps([reagent_set.id for reagent_set in problem.answers.all()]),
     }
-    return render(request, 'app/SingleStepHard.html', context)
+    return render(request, 'app/singleStepHard.html', context)
 
 def predict_products(request, id):
     """

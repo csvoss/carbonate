@@ -26,10 +26,10 @@
         p.reagent {
             margin-left: auto;
             margin-right: auto;
-            width: 70%;
+            width: 80%;
         }
         img.arrow {
-            margin-left: 25px;
+            margin-left: 20px;
         }
         .reactants, .products {
             background-color:#EEEEEE;
@@ -42,6 +42,9 @@
         button {
             width: 65px;
         }
+	input {
+	    width: 150px;
+	}
         .link {
           color:#556677;
           text-decoration: underline;
@@ -49,7 +52,7 @@
         }
         #suggestions {
             border: 1px solid transparent;
-            width: 200px;
+            width: 400px;
         }
 
     </style>
@@ -160,7 +163,11 @@
         <p><small>What is a SMILES? <span id="show" class="link">[show]</span><span id="hide" class="link">[hide]</span></b><br></small></p>
         <div id="suggestions">
             <small>
-                help text goes here
+                Help text will go here eventually. In the meantime, I recommend trying some of the following:<br/>
+C=CCCCCCC<br/>
+C1C=CCC1<br />
+C=C<br/>
+CCCCC<br/>
             </small>
         </div>
 
