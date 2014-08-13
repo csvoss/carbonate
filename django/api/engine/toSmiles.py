@@ -50,7 +50,7 @@ def smilesify(molecule, canonical=True):
     if len(molecule.atoms) == 0:
         return ""
 
-    _initialize_nonHNeighbors(molecule)
+    _initialize_non_h_neighbors(molecule)
     _flag_rings(molecule)
     
     output = _get_generated_smiles(molecule)
@@ -100,11 +100,6 @@ def _subsmiles(molecule, start_atom, parent_atom):
     if start_atom.is_cistrans:
         return _get_subsmiles_ct(output, molecule, start_atom, parent_atom)
     
-
-    ###Put a ring marker on the atom, if its ring partner is not flagged yet.
-    ##if (start_atom.rflag != 0) and (start_atom.rAtom.flag != 2):
-    ##    output += str(start_atom.rflag)
-
     #Check if the atom is a chiral center. If so:
     if start_atom.is_chiral:
         has_parent = (parent_atom != 0)
@@ -126,21 +121,11 @@ def _subsmiles(molecule, start_atom, parent_atom):
             if has_parent:
                 #to_add should have two elements
                 l = start_atom.chiralCWlist(parent_atom) #list of three atoms
-                # if None in l:
-                #     x = l.index(None) #index of hydrogen atom in list
-                # else:
-                #     x = 0
-                #     while x < len(l):
-                #         if l[x].element == 'H':
-                #             break
-                #         x += 1
-                #     if x == len(l):
-                #         raise StandardError("No hydrogen at atom? Shouldn't happen")
-                # to_add = [l[(x+1) %3], l[(x+2) %3]] #correct permutation
-                to_add = l ## TEST. Maybe this will work??? TODO
+                to_add = l
                 if None in to_add:
                     raise StandardError("%s is chiral, but has two hydrogens." \
                         % start_atom.element)
+                sort_atoms(to_add)
                 for atom in to_add:
                     assert atom in start_atom.non_h_neighbors, "%s, %s" % (str([str(i) for i in to_add]), str([str(i) for i in start_atom.non_h_neighbors]))
             else:
@@ -149,6 +134,7 @@ def _subsmiles(molecule, start_atom, parent_atom):
                 if None in to_add:
                     raise StandardError("%s is chiral, but has two hydrogens." \
                         % start_atom.element)
+                sort_atoms(to_add)
                 for atom in to_add:
                     assert atom in start_atom.non_h_neighbors, "%s, %s" % (str(to_add), str(start_atom.non_h_neighbors))
         else:
@@ -156,6 +142,7 @@ def _subsmiles(molecule, start_atom, parent_atom):
             if has_parent:
                 #to_add should have three elements
                 to_add = start_atom.chiralCWlist(parent_atom)
+                sort_atoms(to_add)
                 for atom in to_add:
                     assert atom in start_atom.non_h_neighbors
             else:
@@ -163,19 +150,19 @@ def _subsmiles(molecule, start_atom, parent_atom):
                 arbitraryRef = list(start_atom.neighbors)[0]
                 l = start_atom.chiralCWlist(arbitraryRef)
                 to_add = [arbitraryRef] + l
+                sort_atoms(to_add)
                 for atom in to_add:
                     assert atom in start_atom.non_h_neighbors
 
-    
     # Prepare to add new groups for all neighbor atoms which are not the parent
     # atom and not the rAtom.
     else:
         to_add = [atom for atom in list(start_atom.non_h_neighbors) if not \
             (atom == parent_atom or atom == None)]
+        sort_atoms(to_add)
 
-    # if to_add == None:
-    #     to_add = [atom for atom in list(start_atom.non_h_neighbors) if not \
-    #           (atom==parent_atom or atom==None)]
+    added = ""
+    sort_atoms(to_add)
     for atom in to_add:
         assert isinstance(atom, Atom), "to_add has invalid: %s" % str(atom)
         add = _get_next_subsmiles(atom, start_atom, molecule)
@@ -191,18 +178,18 @@ def _subsmiles(molecule, start_atom, parent_atom):
                         (str(k), v) for (k, v) in start_atom.non_h_neighbors.iteritems()
                     ]),
                 ))
-        output += "("+BOND_SYMBOLS[key]+add+")"
+        try:
+            int(add)
+            added = BOND_SYMBOLS[key]+add + added
+        except:
+            added = added + "("+BOND_SYMBOLS[key]+add+")"
 
-    return output
+    return output + added
 
-
-
-def _initialize_nonHNeighbors(molecule):
-    "Create the dictionary nonHNeighbors for each atom."
+def _initialize_non_h_neighbors(molecule):
+    "Create the dictionary non_h_neighbors for each atom."
+    sort_atoms(molecule.atoms)
     for atom in molecule.atoms:
-        # atom.non_h_neighbors=dict((a,b) for (a,b)
-        #       in atom.neighbors.items() if a.element.lower()!="h")
-        ## TODO? Ignoring hydrogens is lame.
         atom.non_h_neighbors = copy.copy(atom.neighbors)
 
 def _flag_rings(molecule):
@@ -265,11 +252,9 @@ def _flag_rings(molecule):
 def _get_generated_smiles(molecule):
     """Precondition: Molecule has been flagged for rings already,
     using _flag_rings. Traverses a second time to generate SMILES."""
-    start_atom = molecule.atoms[0]
-    ## TODO: This is for debugging, and is temporary
-    for atom in molecule.atoms:
-        if atom.element == 'N':
-            start_atom = atom
+    atoms = [i for i in molecule.atoms]
+    sort_atoms(atoms)
+    start_atom = atoms[0]
     return _subsmiles(molecule, start_atom, 0)
 
 def _resetflags(molecule):
@@ -306,13 +291,14 @@ def _get_subsmiles_ct(output, molecule, start_atom, parent_atom):
     Remember to worry about whether or not an atom has a parent atom.
     Adds ring labels.
     """
+    # raise StandardError(output)
     atomsToLink = [start_atom.CTotherC, start_atom.CTa, start_atom.CTb]
     begin = ["", "/", "\\"]
     if start_atom.CTotherC.flag == 2:
         begin = ["", "\\", "/"]
     if start_atom.CTa == parent_atom:
         output = begin[2] + output
-    if start_atom.CTb == parent_atom:
+    elif start_atom.CTb == parent_atom:
         output = begin[1] + output
     for ind in range(3):
         atom = atomsToLink[ind]
@@ -358,3 +344,12 @@ def _assertMolecule(molecule):
     except AssertionError:
         raise StandardError("Not a molecule: %s is a %s, not %s" % \
             (repr(molecule), type(molecule), Molecule))
+
+
+def sort_atoms(atoms):
+    """
+    In-place sort atoms.
+    atoms :: list<Atom>.
+    return :: None.
+    """
+    atoms.sort(key=lambda x: x.sort_by())

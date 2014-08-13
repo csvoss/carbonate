@@ -143,10 +143,6 @@ class Molecule(object):
                 H = Atom(HYDROGEN)
                 self.addAtom(H, atom, 1)
 
-
-            # if atom.element != "U":
-            #     self.addAtom(Atom("U"), atom, 1)
-
             ## TODO: If the atom is chiral, replace its chiral None with
             ## the relevant hydrogen
 
@@ -221,6 +217,11 @@ class Atom(object):
         self.nonHNeighbors = [Atom].
     """
 
+    def sort_by(self):
+        stuff = [str(k) + str(v) for k,v in self.neighbors.iteritems()]
+        list.sort(stuff)
+        return str(self) + str(stuff)
+
     def __str__(self):
 
         # Atoms are represented by the standard abbreviation of the chemical 
@@ -271,8 +272,7 @@ class Atom(object):
                 output += 'H'
 
         ## Hydrogens
-        ## TODO ~~ ~~
-        ## Hm. If we represent hydrogens explicitly, as atoms OUTSIDE of this
+        ## Since we represent hydrogens explicitly, as atoms OUTSIDE of this
         ## bracket structure -- which is valid -- we would never need to put
         ## them here.
 

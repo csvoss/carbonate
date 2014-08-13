@@ -60,7 +60,7 @@ def reduceChirality(molList):
                 molList.remove(b)
                 nonMatchingCenter.eliminateChiral()
                 return reduceChirality(molList)
-        return molList
+    return molList
 
 
 def react(molecules, findPlace, reactAtPlace):

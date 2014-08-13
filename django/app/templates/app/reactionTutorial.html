@@ -1,0 +1,176 @@
+<html>
+
+<head>
+  <title>Reaction Tutor</title>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <meta charset="UTF-8">
+
+    <style type="text/css">
+        .main {
+            width: 800px;
+            border: 2px solid black;
+            padding: 10px;
+        }
+        body {
+            font-family: sans-serif;
+        }
+        .column {
+            display: inline-block;
+            border: 0px solid;
+            padding: 10px;
+            margin: 5px;
+            height: 200px;
+            width: 200px;
+            float: left;
+        }
+        p {
+            margin-left: auto;
+            margin-right: auto;
+            width: 70%;
+        }
+        img.arrow {
+            margin-left: 25px;
+        }
+        .reactants, .products {
+            background-color:#EEEEEE;
+            border-radius:10px;
+        }
+
+        .reagent-menu-box {
+            width: 230px;
+            margin: 5px;
+        }
+
+        button {
+            width: 65px;
+        }
+
+    </style>
+
+
+    <script>
+
+        $(document).ready(function() {
+
+            function displayMolecule(smiles, location) {
+                $.ajax({ url:"/api/renderSVG", data: {"molecule": smiles}, success: function(data, st, x) {location.append(data);} }); //what is st and x?
+            }
+
+            displayMolecule('{{reactant_smiles}}', $('.reactants') );
+            displayMolecule('{{product_smiles}}', $('.products') );
+            
+
+            //Do different things for certain keys
+            $('#reagent-menu').keydown(function(e) {
+                if (e.which == 13) {
+                    // The enter key was pressed
+                    e.preventDefault();
+                    $('.add-reagent').click();
+                }
+            });
+
+
+            // TODO: adjust this as needed!
+            $( "#reagent-menu" ).autocomplete({
+              minLength: 0,
+              source: reagentNames,
+              focus: function( event, ui ) {
+                $( "#reagent-menu" ).val( ui.item.name );
+                return false;
+              },
+              select: function( event, ui ) {
+                $( "#reagent-menu" ).val( ui.item.name );
+                $( "#reagent-id" ).val( ui.item.reagent );
+                return false;
+              }
+            })
+            .autocomplete( "instance" )._renderItem = function( ul, item ) {
+              return $( "<li>" )
+                .append( "<a>" + item.name + "<br>" + item.description + "</a>" )
+                .appendTo( ul );
+            };
+
+
+
+
+            // When a reagent is added, do this:
+            $('.add-reagent').click(function(e) {
+                var menu = $('#reagent-menu');
+                var rID = $('#reagent-id').val();
+                var reagentName = $.trim(menu.val());
+                if (reagentName.length == 0) {
+                    menu.val(''); //reset the bar in case there were spaces, etc. that got trimmed
+                    menu.focus();
+                    return;
+                }
+
+                // TODO: All answers are currently valid. Verify whats entered
+                createSubmittedReagent(reagentName);
+                $('.no-reagents').css("display", "none");
+                menu.val('');
+                menu.focus();
+
+            });
+
+            $('.reagents-box').on("click", "span", function(e) {
+                $(this).remove();
+
+                if ($('.submitted-reagent').length == 0) {
+                    $('.no-reagents').css("display","inline");
+                }
+            });
+
+            $('.check').click(function(e) {
+                var submittedReagents = []
+                $('.submitted-reagent').each( function(ii, ele) {
+                    submittedReagents.push($(this).text());
+                });
+
+                $.ajax({ url:"/api/isCorrectReagentSet", data:{"submitted_reagents":submittedReagents, "solvent_id":1, "solution_ids":{{reagent_sets|safe}} }, success: function(data,st,x) {
+                    console.log(data);
+                    // TODO: print correct or wrong messages based on if data(correct) is True or False
+                } });
+
+            });
+
+
+        })
+    </script>
+
+
+</head>
+
+<body>
+
+    <div class="main">
+        <h1>{{name | safe}} &ndash; <small>Reaction Tutor</small></h1>
+
+        <div class="reactants column">
+            {{reactant_svg | safe}}
+        </div>
+
+        <div class="reaction column">
+            <p>{{reagents | safe}}</p>
+            <img class="arrow" src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"></img>
+            <p>{{solvents | safe}}</p>
+        </div>
+
+        <div class="products column">
+            {{product_svg | safe}}
+        </div>
+
+        <div style="clear: both;"></div>
+
+        <div class="reagent-menu-box">
+            <input id="reagent-menu" type="text" placeholder="Type a SMILES" autofocus>
+            <input id="reagent-id" type="hidden">
+            <button class="add-reagent">React!</button>
+        </div>
+
+        <span class="message"></span>
+
+    </div>
+
+</body>
+
+</html>

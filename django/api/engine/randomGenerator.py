@@ -21,14 +21,23 @@ def get_terminate_count():
 
 def random_molecule(force_terminal_alkyne=False, seed=None):
 
-    if seed is not None:
-        random.seed(seed)
+    # Only use seed for debugging
+    # if seed is not None:
+    #     random.seed(seed)
+
+    global carboncount
+    carboncount = 0
 
     start_atom = Atom("C")
+    start_atom.clss = carboncount
+    carboncount += 1
+
     molecule = Molecule(start_atom)
 
     if force_terminal_alkyne:
         alkyne_atom = Atom("C")
+        alkyne_atom.clss = carboncount
+        carboncount += 1
         molecule.addAtom(alkyne_atom, start_atom, 3)
         start_atom = alkyne_atom
 
@@ -63,7 +72,7 @@ def random_tree(ether=True, amine=True):
     to its parent atom.
     return :: Molecule, Atom.
     """
-    global etherprob, amineprob
+    global etherprob, amineprob, carboncount
     rand = random.random()
     if rand < etherprob and ether:
         atom = Atom("O")
@@ -81,6 +90,8 @@ def random_tree(ether=True, amine=True):
         return molecule, atom
 
     atom = Atom("C")
+    atom.clss = carboncount
+    carboncount += 1
     molecule = Molecule(atom)
 
     global alkeneprob, alkyneprob
@@ -105,6 +116,7 @@ def random_constituent(n):
     Compatible with the bond to parent atom being of order n.
     return :: Molecule, Atom
     """
+    global carboncount
     update_terminate_count()
     rand = random.random()
     if rand < get_terminate_count():
@@ -112,8 +124,10 @@ def random_constituent(n):
             atom = random_terminal()
         elif n == 2 or n == 3:
             atom = Atom("C")
+            atom.clss = carboncount
+            carboncount += 1
         else:
-            raise StandardError()
+            raise StandardError("Invalid number of constituents to add")
         return Molecule(atom), atom
     else:
         return random_tree_safe()
@@ -145,9 +159,14 @@ def random_tree_safe():
           allow a greater diversity of substituents attached to alkenes.
     return :: Molecule, Atom.
     """
+    global carboncount
     atom = Atom("C")
+    atom.clss = carboncount
+    carboncount += 1
     molecule = Molecule(atom)
     atom2 = Atom("C")
+    atom2.clss = carboncount
+    carboncount += 1
     molecule.addAtom(atom2, atom, 1)
     new_molecule, new_atom = random_tree()
     molecule.addMolecule(new_molecule, new_atom, atom2, 1)
@@ -216,9 +235,13 @@ def add_random_cistrans(molecule):
                 atoms = [a for a in atom.neighbors if a is not other_atom]
                 if len(atoms) == 2:
                     atom.newCTCenter(other_atom, atoms[0], atoms[1])
+                else:
+                    raise StandardError("Too many constituents on = carbon")
                 atoms = [a for a in other_atom.neighbors if a is not atom]
                 if len(atoms) == 2:
                     other_atom.newCTCenter(atom, atoms[0], atoms[1])
+                else:
+                    raise StandardError("Too many constituents on = carbon")
 
 def shuffled(l):
     """
