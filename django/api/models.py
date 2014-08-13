@@ -3,6 +3,7 @@ from django.core.urlresolvers import reverse
 from api.fields import StringListField
 from api.engine.toCanonical import to_canonical
 from django.utils.html import strip_tags
+import re
 
 class Property(models.Model):
     id = models.AutoField(primary_key=True)
@@ -69,6 +70,7 @@ class ReagentSet(models.Model):
         for reagent in self.reagents.all():
             reagent_names += str(reagent.diagram_name) + "<br />"
         reagent_names = reagent_names.rstrip('<br />')
+        reagent_names = re.sub('<br />$', '', reagent_names)
         return unicode(reagent_names)
 
     def get_solvent_html(self):
@@ -78,7 +80,7 @@ class ReagentSet(models.Model):
         if self.solvent_properties is not None:
             for prop in self.solvent_properties.all().select_related("name"):
                 solvent_names += str(prop) + "<br />"
-        solvent_names = solvent_names.rstrip('<br />')
+        solvent_names = re.sub('<br />$', '', solvent_names)
         display = "dissolved in %s" % solvent_names
         return unicode(display)
 
