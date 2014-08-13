@@ -64,25 +64,23 @@
 
     <script>
 
-        function student_answer_for_edx() {
-            var solList = [];
-            $('.submitted-reagent').each( function(ii, ele) {
-                solList.push($(this).text());
-            });
-            return solList.sort(); //order makes list unique
-        }
+        // function student_answer_for_edx() {
+        //     var solList = [];
+        //     $('.submitted-reagent').each( function(ii, ele) {
+        //         solList.push($(this).text());
+        //     });
+        //     return solList.sort(); //order makes list unique
+        // }
 
-        function right_answer_for_edx() {
-            var solList = {{reagent_sets|safe}};
-            return solList.sort(); //order makes list unique
-        }
+        // function right_answer_for_edx() {
+        //     var solList = {{reagent_sets|safe}};
+        //     return solList.sort(); //order makes list unique
+        // }
 
         $(document).ready(function() {
 
-            var finalReagents = []; //not being  used right now
-            // var solutionReagents = {{ reagents|safe }}; //list of Strings with reagent names
-
-            // var $ = jQuery.noConflict();
+            var finalReagentIDs = []; //stores the reagent IDs as they are added/removed
+            var finalSolventID = -1;
 
             function displayMolecule(smiles, location) {
                 $.ajax({ url:"/api/renderSVG", data: {"molecule": smiles}, success: function(data, st, x) {
@@ -93,48 +91,37 @@
             displayMolecule('{{reactant}}', $('.reactants') );
             displayMolecule('{{product}}', $('.products') );
 
-            var reagentNames = []; //list of objects with "name","id" = reagent id, "description" = other names 
+            var reagentNames = []; //list of objects with "label" = name,"rID" = reagent id, "description" = other names, "isSolvent" = true/false
             $.ajax({ url:"/api/allReagentNames", async: false, success: function(data, st, x) {
-                console.log("Printing data")
-                console.log(data);
-                // console.log(JSON.parse(data));
+                // console.log(data);
                 reagentNames = data;
             } });
 
-            // function updateValidReagents(rgStart) {
-            //     $.ajax({ url:"/api/findReagents", data:{"name": rgStart}, success:function(data, st, x) {
-            //         var menu = $('#valid-reagents');
-            //         menu.children().remove();
-            //         data = JSON.parse(data);
-            //         for (iRg = 0; iRg < data.length; iRg++) {
-            //             var new_reagent = $('<option>', {
-            //                 "value": data[iRg]["name"]
-            //             });
-            //             if (data[iRg]["is_solvent"]) {
-            //                 new_reagent.text("Solvent");
-            //             }
-            //             menu.append(new_reagent);
-            //         }
-
-            //     } });
-            // }
-
+            //called when user chooses a reagent from the dropdown menu
             function createSubmittedReagent(reagent) {
                 var submittedReagent = $('<span>', {
                     class : "submitted-reagent",
                     "title" : "Remove",
-                    "data-rID" : reagent.rID
-                });
-                submittedReagent.text(reagent.label);
+                }).data("rID", reagent.rID);
+                submittedReagent.html(reagent.label);
                 if (reagent.isSolvent) {
                     $('.solvent').children('.submitted-reagent').remove();
                     $('.solvent').append(submittedReagent);
                     $('.no-solvent').css("display", "none");
+                    finalSolventID = reagent.rID;
                 }
                 else {
-                    $('.submitted-reagents-box').append(submittedReagent);
-                    $('.no-reagents').css("display", "none");
-                }
+                    var reagentIndex = finalReagentIDs.indexOf(reagent.rID);
+                    if ( reagentIndex < 0 ) { //reagent not already submitted
+                        $('.submitted-reagents-box').append(submittedReagent);
+                        $('.no-reagents').css("display", "none");
+                        finalReagentIDs.push(reagent.rID);
+                        console.log(finalReagentIDs);
+                    }
+                    else {
+                        $('.message').html(reagent.label + " was already added.")
+                    }
+;                }
                 var menu = $('#reagent-menu');
                 menu.val('');
                 menu.focus();
@@ -149,9 +136,6 @@
                     e.preventDefault();
                     // $('.add-reagent').click(); //no longer using Add button
                 }
-               /* if (e.which == 32) {
-                    return false; //prevents space bar from working
-                }*/
             });
 
             // TODO: adjust this as needed!
@@ -185,56 +169,56 @@
                 return menuItem.appendTo( ul );
             };
 
+            $('.submitted-reagents-box').on("click", ".submitted-reagent", function(e) {
+                var reagentIndex = finalReagentIDs.indexOf( $(this).data("rID") );
+                if (reagentIndex > -1) {
+                    finalReagentIDs.splice(reagentIndex, 1); //removes that reagent ID from list
+                }
 
-
-            // This code is no longer used, since the Add button is being removed.
-            // // When a reagent is added, do this:
-            // $('.add-reagent').click(function(e) {
-            //     var menu = $('#reagent-menu');
-            //     var rID = $('#reagent-id').val();
-            //     var reagentName = $.trim(menu.val());
-            //     if (reagentName.length == 0) {
-            //         menu.val(''); //reset the bar in case there were spaces, etc. that got trimmed
-            //         menu.focus();
-            //         return;
-            //     }
-
-            //     // TODO: All answers are currently valid. Verify whats entered
-            //     createSubmittedReagent(reagentName);
-            //     $('.no-reagents').css("display", "none");
-            //     menu.val('');
-            //     menu.focus();
-
-            // });
-
-            $('.submitted-reagents-box').on("click", "span", function(e) {
-                $(this).remove();
+                $(this).remove(); //remove the UI-side reagent box
 
                 if ($('.submitted-reagents-box .submitted-reagent').length == 0) {
                     $('.no-reagents').css("display","inline");
                 }
             });
 
-            $('.solvent').on("click", "span", function(e) {
+            $('.solvent').on("click", ".submitted-reagent", function(e) {
                 $(this).remove();
+                finalSolventID = -1;
                 $('.no-solvent').css("display","inline");
                 
             });
 
+
+            //Called when the SUBMIT button is clicked!
             $('.check').click(function(e) {
                 var submittedReagents = []
                 $('.submitted-reagent').each( function(ii, ele) {
-                    submittedReagents.push($(this).text());
+                    submittedReagents.push($(this).data("rID"));
                 });
                 var solventID = $('.solvent .submitted-reagent').data('rID');
+                console.log("Passing to ajax request...");
+                console.log(JSON.stringify( {{reagent_sets|safe}} ) );
+                console.log(JSON.stringify(finalReagentIDs));
+                console.log("Ajax request starting...")
 
-                $.ajax({ url:"/api/isCorrectReagentSet", data:{"submitted_reagents":submittedReagents, "solvent_id":solventID, "solution_ids":{{reagent_sets|safe}} }, success: function(data,st,x) {
-                    $('.message').empty();
-                    if (data == "False") {
-                        $('.message').append("Not quite. Try again!");
-                    }
-                    else if (data == "True") {
-                        $('.message').append("Good job!");
+                $.ajax({ 
+                    url: "/api/isCorrectReagentSet", 
+                    data: {
+                        "submitted_reagents":JSON.stringify(finalReagentIDs),
+                        "solvent_id":finalSolventID,
+                        "solution_ids": JSON.stringify({{reagent_sets|safe}}) 
+                    },
+                    success: function(data,st,x) {
+                        $('.message').empty();
+                        console.log(data);
+                        var correct = data.answer; //data.answer should be a boolean
+                        console.log(correct);
+                        if (correct) {
+                            $('.message').append("Good job!");
+                        }
+                        else {
+                            $('.message').append("Not quite. Try again!");
                     }
                     // $('.message').append(data);
                 } });
@@ -286,7 +270,7 @@
         </div>
 
         <div class="controls">
-            <button class="check">Submit</button>
+            <button class="check">Check</button>
             <span class="message"> </span>
 
         </div>

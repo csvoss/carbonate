@@ -352,22 +352,27 @@ def to_canonical_view(request):
     return JsonResponse(to_canonical(smiles))
 
 def is_correct_reagent_set(request):
-    submitted_reagent_names = request.GET.get('submitted_reagents', [])
-    submitted_solvent_id = request.GET.get('solvent_id', None)
-    solution_set_ids = request.GET.get('solution_ids', [])
+    submitted_reagent_ids = sorted( json.loads( request.GET.get('submitted_reagents', '[]') ))
+    # submitted_reagent_names = request.GET.get('submitted_reagents', []) //old implementation
+    submitted_solvent_id = int( request.GET.get('solvent_id', None) )
+    solution_set_ids = json.loads( request.GET.get('solution_ids', []) )
 
-    submitted_reagent_ids = sorted( [ReagentName.objects.get(name=rname).reagent.id for rname in submitted_reagent_names] )
-
-    correct = False
+    # submitted_reagent_ids = sorted( [ReagentName.objects.get(name=rname).reagent.id for rname in submitted_reagent_names] )
+    data = {"answer":False}
+    data["submittedReagents"] = submitted_reagent_ids #debug
+    data["submittedSolvent"] = submitted_solvent_id #debug
     for set_id in solution_set_ids:
         valid_set = ReagentSet.objects.get(id=set_id)
         reagent_ids = sorted( [r.id for r in valid_set.reagents.all()] )
 
-        solvent_id = valid_set.solvent.id
-        if reagent_ids == submitted_reagent_ids and submitted_solvent_id == solvent_id:
-            correct = True
+        data[set_id] = reagent_ids; #debug
 
-    return HttpResponse(correct)
+        solvent_id = valid_set.solvent.id
+        data["solvent"] = solvent_id #debug
+        if reagent_ids == submitted_reagent_ids and submitted_solvent_id == solvent_id:
+            data["answer"] = True
+
+    return JsonResponse(data)
 
 def update_reagent_names(request):
     reagents = Reagent.objects.all()
