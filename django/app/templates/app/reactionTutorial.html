@@ -3,201 +3,235 @@
 <head>
   <title>Reaction Tutor</title>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
   <meta charset="UTF-8">
 
-    <style type="text/css">
-        .main {
-            width: 800px;
-            padding: 10px;
-            padding-bottom:0px;
+  <style type="text/css">
+    .main {
+      width: 700px;
+      height:600px;
+      padding: 10px;
+      padding-bottom:0px;
+    }
+    body {
+      font-family: sans-serif;
+    }
+    .column {
+      display: inline-block;
+      border: 0px solid;
+      padding: 10px;
+      margin: 5px;
+      width: 200px;
+      height: 250px;
+      float: left;
+    }
+    p.reagent {
+      margin-left: auto;
+      margin-right: auto;
+      width: 80%;
+    }
+    img.arrow {
+      margin-left: 20px;
+    }
+    .col1, .col3 {
+      background-color:#EEEEEE;
+      border-radius:10px;
+      position: relative;
+    }
+    products, reactants {
+      width:200px;
+      height:200px;
+    }
+    svg text {
+      stroke: black;
+      stroke-width: 1px;
+      stroke-opacity: 0.2;
+    }
+    .input_area {
+      width: 230px;
+      margin: 5px;
+      clear: both;
+      top: 70%;
+      position: absolute;
+    }
+    button {
+      width: 40px;
+    }
+    input, #error_box {
+      width: 145px;
+    }
+    .link, .click_smiles {
+      color:#556677;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    #help_slider {
+      border: 1px solid transparent;
+      height: 200px;
+      overflow: auto;
+      overflow-x: hidden;
+    }
+    #error_box {
+      font-size: 80%;
+      color: grey;
+      overflow: hidden;
+    }
+
+    .click_smiles {
+      font-family:"Courier New", "Lucida Console", monospace;
+    }
+
+
+  </style>
+
+
+  <script>
+
+    $(document).ready(function() {
+      smiles_input = $('#smiles_input');
+      smiles_button = $('#smiles_button');
+      reactant_box = $('.reactants');
+      product_box = $('.products');
+      error_box = $('#error_box');
+
+      smiles_input.val('');
+      smiles_input.focus();
+
+
+      function displayMolecule(smiles, location) {
+        $.ajax({
+          url: "/api/renderSVG",
+          data: {"molecule": smiles},
+          success: function(data, st, x) {
+            location.append(data);
+          }
+        });
+      }
+
+      smiles_input.keyup(function(event){
+        if(event.keyCode == 13){
+          smiles_button.click();
         }
-        body {
-            font-family: sans-serif;
-        }
-        .column {
-            display: inline-block;
-            border: 0px solid;
-            padding: 10px;
-            margin: 5px;
-            width: 200px;
-            height: 250px;
-            float: left;
-        }
-        p.reagent {
-            margin-left: auto;
-            margin-right: auto;
-            width: 80%;
-        }
-        img.arrow {
-            margin-left: 20px;
-        }
-        .col1, .col3 {
-            background-color:#EEEEEE;
-            border-radius:10px;
-            position: relative;
-        }
-        products, reactants {
-            width:200px;
-            height:200px;
-        }
-        svg text {
-            stroke: black;
-            stroke-width: 1px;
-            stroke-opacity: 0.2;
-        }
-        .reagent-menu-box {
-            width: 230px;
-            margin: 5px;
-            clear: both;
-            top: 80%;
-            position: absolute;
-        }
-        button {
-            width: 40px;
-        }
-        input {
-            width: 145px;
-        }
-        .link {
-          color:#556677;
-          text-decoration: underline;
-          cursor: pointer;
-        }
-        #suggestions {
-            border: 1px solid transparent;
-            width: 400px;
-        }
-        #errorbox {
-            color: grey;
+      });
+
+      // When a reactant is added, do this:
+      smiles_button.click(function(e) {
+        var reactant_smiles = $.trim(smiles_input.val());
+
+        if (reactant_smiles.length == 0) {
+          smiles_input.val('');
+          smiles_input.focus();
+          return;
         }
 
-    </style>
-
-
-    <script>
-
-        $(document).ready(function() {
-
-            reactant_box = $('.reactants');
-            product_box = $('.products');
-            errorbox = $('#errorbox');
-
-            function displayMolecule(smiles, location) {
-                $.ajax({
-                    url: "/api/renderSVG",
-                    data: {"molecule": smiles},
-                    success: function(data, st, x) {
-                        location.append(data);
-                    }
-                });
+        function updateReactant(smiles) {
+          $.ajax({
+            url: "/api/react",
+            data: {
+              "reactants": JSON.stringify([reactant_smiles]),
+              "reaction": {{reaction_id | safe}},
+            },
+            success: function(data, st, x) {
+              reactant_box.empty();
+              displayMolecule(reactant_smiles, reactant_box);
+              product_box.empty();
+              displayMolecule(data, product_box);
+              error_box.empty();
+            },
+            error: function(data, st, x) {
+              error_box.empty();
+              error_box.append(data.responseText);
             }
-            $("#reactant-menu").keyup(function(event){
-                if(event.keyCode == 13){
-                    $(".add-reactant").click();
-                }
-            });
+          });
+        };
 
-            // When a reagent is added, do this:
-            $('.add-reactant').click(function(e) {
-                var menu = $('#reactant-menu');
-                var reactant_smiles = $.trim(menu.val());
+        updateReactant(reactant_smiles);
 
-                if (reactant_smiles.length == 0) {
-                    menu.val(''); //reset the bar in case there were spaces, etc. that got trimmed
-                    menu.focus();
-                    return;
-                }
+        smiles_input.focus();
+
+      });
 
 
-                $.ajax({
-                    url: "/api/react",
-                    data: {
-                        "reactants": JSON.stringify([reactant_smiles]),
-                        "reaction": {{reaction_id | safe}},
-                    },
-                    success: function(data, st, x) {
-                        reactant_box.empty();
-                        displayMolecule(reactant_smiles, reactant_box);
-                        product_box.empty();
-                        displayMolecule(data, product_box);
-                        errorbox.empty();
-                    },
-                    error: function(data, st, x) {
-                        errorbox.empty();
-                        errorbox.append("Not a valid SMILES: "+reactant_smiles);
-                    }
-                })
+      $("#help_slider").hide();
+      $("#hide").hide();
 
-                menu.val('');
-                menu.focus();
+      $("#hide").click(function(){
+        $("#show").show();
+        $("#hide").hide();
+        $("#help_slider").hide("blind");
+      });
 
-            });
+      $("#show").click(function(){
+        $("#help_slider").show("blind");
+        $("#show").hide();
+        $("#hide").show();
+      });
 
 
-            $("#suggestions").hide();
-            $("#hide").hide();
+      $(".click_smiles").click(function(eventobject) {
+        smiles_input.val($(this).attr("smiles"));
+        smiles_button.click();
+      });
 
-            $("#hide").click(function(){
-                $("#show").show();
-                $("#hide").hide();
-                $("#suggestions").hide("blind");
-            });
-
-            $("#show").click(function(){
-                $("#suggestions").show("blind");
-                $("#show").hide();
-                $("#hide").show();
-            });
+    })
 
 
-        })
-    </script>
+
+  </script>
 
 
 </head>
 
 <body>
 
-    <div class="main">
-        <h2>{{name | safe}} &ndash; <small>Reaction Tutor</small></h2>
+  <div class="main">
+    <h2>{{name | safe}} &ndash; <small>Reaction Tutor</small></h2>
 
-        <div class="column col1">
-            <div class="reactants">
-                {{reactant_svg | safe}}
-            </div>
+    <div class="column col1">
+      <div class="reactants">
+        {{reactant_svg | safe}}
+      </div>
 
-            <div class="reagent-menu-box">
-                <input id="reactant-menu" type="text" placeholder="Type a SMILES" autofocus>
-                <button class="add-reactant">Go</button>
-                <small><div id="errorbox"></div></small>
-            </div>
-            <div style="clear:both;"></div>
-        </div>
-
-        <div class="reaction column col2">
-            <p class="reagent">{{reagents | safe}}</p>
-            <img class="arrow" src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"></img>
-            <p class="reagent">{{solvents | safe}}</p>
-        </div>
-
-        <div class="products column col3">
-            {{product_svg | safe}}
-        </div>
-
-        <div style="clear: both;"></div>
-
-
-
-        <p><small>What is a SMILES? <span id="show" class="link">[show]</span><span id="hide" class="link">[hide]</span></b><br></small></p>
-        <div id="suggestions">
-            <small>
-                Help text will go here eventually. In the meantime, I recommend trying some of the following:<br/>C=CCCCCCC<br/>C1C=CCC1<br />C=C<br/>CCCCC
-            </small>
-        </div>
-
-        <span class="message"></span>
-
+      <div class="input_area">
+        <input id="smiles_input" type="text" placeholder="Type a SMILES" autofocus>
+        <button id="smiles_button">Go</button>
+        <small><div id="error_box"></div></small>
+      </div>
+      <div style="clear:both;"></div>
     </div>
+
+    <div class="reaction column col2">
+      <p class="reagent">{{reagents | safe}}</p>
+      <img class="arrow" src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"></img>
+      <p class="reagent">{{solvents | safe}}</p>
+    </div>
+
+    <div class="products column col3">
+      {{product_svg | safe}}
+    </div>
+
+    <div style="clear: both;"></div>
+
+    <small>
+      <p>Help <span id="show" class="link">[show]</span><span id="hide" class="link">[hide]</span></b></p>
+      <div id="help_slider">
+        <p>A <a href="http://en.wikipedia.org/wiki/SMILES">SMILES</a> string is a way of representing a molecule.</p>
+
+        <p><b>Option 1:</b> Enter strings by hand. Examples SMILES for you to try include:</p>
+        <ul>
+          <li><span class="click_smiles" smiles="C=CCCCC">C=CCCCC</span></li>
+          <li><span class="click_smiles" smiles="C1C=CCC1">C1C=CCC1</span></li>
+          <li><span class="click_smiles" smiles="ClC=CBr">ClC=CBr</span></li>
+          <li><span class="click_smiles" smiles="CC(CO)CC(=O)C">CC(CO)CC(=O)C</span></li>
+        </ul>
+        <p><b>Option 2:</b> Download and launch <a href="https://github.com/downloads/JChemPaint/jchempaint/jchempaint-3.3-1210.jar">JChemPaint</a>, draw a molecule, and go to <i>Tools > Create SMILES</i>. Then, paste that SMILES here.</p>
+        <p><b>Option 3:</b> Download and launch <a href="/orgo/static/MarvinSketch/msketch.jnlp">MarvinSketch</a>, draw a molecule, and go to <i>Edit > Source > View (in popup) > SMILES > SMILES</i>. Then, paste that SMILES here.</p>
+      </div>
+    </small>
+
+    <span class="message"></span>
+
+  </div>
 
 </body>
 
