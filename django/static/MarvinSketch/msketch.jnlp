@@ -140,7 +140,6 @@
 	<jar href="http://www.chemaxon.com/marvin/lib/xmlrpc-common-3.1.3.jar" />
 	<jar href="http://www.chemaxon.com/marvin/lib/xz-1.0.jar" />
 </resources>
-
 <resources os="Windows">
 	<jar href="http://www.chemaxon.com/marvin/lib/cxnregistry-native-x64-1.0.jar" />
 	<jar href="http://www.chemaxon.com/marvin/lib/cxnregistry-native-x86-1.0.jar" />
@@ -151,13 +150,11 @@
 	<jar href="http://www.chemaxon.com/marvin/lib/tesseract-windows-3.01.jar" />
 	<property name="sun.java2d.nodraw" value="true" />
 </resources>
-
 <resources os="Mac OS">
 	<jar href="http://www.chemaxon.com/marvin/lib/inchi-native-macosx-1.3.jar" />
 	<jar href="http://www.chemaxon.com/marvin/lib/macosx-application-bundle-1.0.jar" />
 	<jar href="http://www.chemaxon.com/marvin/lib/tesseract-macosx-3.01.jar" />
 </resources>
-
 <resources os="Linux">
 	<jar href="http://www.chemaxon.com/marvin/lib/inchi-native-linux-1.3.jar" />
 	<jar href="http://www.chemaxon.com/marvin/lib/inchi-native-linux64-1.3.jar" />
@@ -165,8 +162,5 @@
 	<jar href="http://www.chemaxon.com/marvin/lib/tesseract-linux-x32-3.01.jar" />
 	<jar href="http://www.chemaxon.com/marvin/lib/tesseract-linux-x64-3.01.jar" />
 </resources>
-
-
-
     <application-desc main-class="chemaxon.marvin.Sketch"/>
 </jnlp>

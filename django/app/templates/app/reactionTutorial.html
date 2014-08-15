@@ -67,9 +67,10 @@
     }
     #help_slider {
       border: 1px solid transparent;
-      height: 200px;
+      height: 150px;
       overflow: auto;
       overflow-x: hidden;
+      font-size: 80%;
     }
     #error_box {
       font-size: 80%;
@@ -202,7 +203,7 @@
 
     <div class="reaction column col2">
       <p class="reagent">{{reagents | safe}}</p>
-      <img class="arrow" src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"></img>
+      <img class="arrow" src="/orgo/static/arrow.png"></img>
       <p class="reagent">{{solvents | safe}}</p>
     </div>
 
@@ -212,23 +213,20 @@
 
     <div style="clear: both;"></div>
 
-    <small>
-      <p>Help <span id="show" class="link">[show]</span><span id="hide" class="link">[hide]</span></b></p>
+ 
+      <p><span id="show">Help <b><span class="link">[show]</span></b></span><span id="hide">Help <b><span class="link">[hide]</span></b></span></p>
       <div id="help_slider">
-        <p>A <a href="http://en.wikipedia.org/wiki/SMILES">SMILES</a> string is a way of representing a molecule.</p>
-
-        <p><b>Option 1:</b> Enter strings by hand. Examples SMILES for you to try include:</p>
+        <p>A <a href="http://en.wikipedia.org/wiki/SMILES">SMILES</a> string is a way to represent a molecule.</p>
+        <p><b>Option 1:</b> Enter strings by hand. Consult <a href="http://en.wikipedia.org/wiki/SMILES">Wikipedia</a> for guidelines. Examples SMILES for you to try include:</p>
         <ul>
           <li><span class="click_smiles" smiles="C=CCCCC">C=CCCCC</span></li>
           <li><span class="click_smiles" smiles="C1C=CCC1">C1C=CCC1</span></li>
           <li><span class="click_smiles" smiles="ClC=CBr">ClC=CBr</span></li>
           <li><span class="click_smiles" smiles="CC(CO)CC(=O)C">CC(CO)CC(=O)C</span></li>
         </ul>
-        <p><b>Option 2:</b> Download and launch <a href="/orgo/static/JChemPaint/jchempaint.jar">JChemPaint</a>, draw a molecule, and go to <i>Tools > Create SMILES</i>. Then, paste that SMILES here.</p>
-        <p><b>Option 3:</b> Download and launch <a href="/orgo/static/MarvinSketch/msketch.jnlp">MarvinSketch</a>, draw a molecule, and go to <i>Edit > Source > View (in popup) > SMILES > SMILES</i>. Then, paste that SMILES here.</p>
+        <p><b>Option 2:</b> Open <a href="/orgo/static/MarvinSketch/msketch.jnlp">MarvinSketch</a>, draw a molecule, and go to <i>Edit > Source > View (in popup) > SMILES > SMILES</i>. Then, paste that SMILES here.</p>
+        <p><b>Option 3:</b> Download and launch <a href="/orgo/static/JChemPaint/jchempaint.jar">JChemPaint</a>, draw a molecule, and go to <i>Edit > Copy as SMILES</i>. Then, paste that SMILES here.</p>
       </div>
-    </small>
-
     <span class="message"></span>
 
   </div>
