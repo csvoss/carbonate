@@ -41,7 +41,7 @@ def ModelNotFoundResponse(model, pk):
     return HttpResponseNotFound('No %s found by that identifier: %s' % (model, str(pk)))
 
 def InvalidSmilesResponse(smiles_list):
-    return HttpResponseBadRequest("Invalid SMILESes: %s" % str(smiles_list))
+    return HttpResponseBadRequest("Can't parse that SMILES: %s" % (' '.join(smiles_list)))
 
 def get_reaction_data(reaction):
     """
