@@ -8,3 +8,4 @@ sudo apt-get install
 ====================
 python-django-south
 python-openbabel
+sqlite3
